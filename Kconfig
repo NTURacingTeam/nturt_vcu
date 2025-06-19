@@ -1,0 +1,17 @@
+menu "Zephyr"
+source "Kconfig.zephyr"
+endmenu # "Zephyr"
+
+menuconfig VCU
+    bool "NTURT VCU"
+    default y
+    select NTURT
+
+if VCU
+
+rsource "Kconfig.hardware"
+
+rsource "src/ctrl/Kconfig"
+rsource "src/sys/Kconfig"
+
+endif # VCU

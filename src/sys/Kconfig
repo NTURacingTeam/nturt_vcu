@@ -1,0 +1,15 @@
+menuconfig VCU_SYS
+    bool "VCU basic system functionalities"
+    select LOG
+    select SETTINGS
+    select NTURT_SYS
+    select NTURT_FS
+
+if VCU_SYS
+
+config VCU_SHELL
+    bool "Shell support"
+    select SETTINGS_SHELL
+    select NTURT_SHELL
+
+endif # VCU_SYS

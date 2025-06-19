@@ -1,0 +1,47 @@
+DT_CHOSEN_NTURT_IMU := nturt,imu
+
+config VCU_HAS_IMU
+    bool
+    depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_IMU))
+    default y
+
+DT_CHOSEN_NTURT_GNSS := nturt,gnss
+
+config VCU_HAS_GNSS
+    bool
+    depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_GNSS))
+    default y
+
+DT_CHOSEN_NTURT_SUSP_FL := nturt,susp_fl
+
+config VCU_HAS_SUSP_FL
+    bool
+    depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_FL))
+    default y
+
+DT_CHOSEN_NTURT_SUSP_FR := nturt,susp_fr
+
+config VCU_HAS_SUSP_FR
+    bool
+    depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_FR))
+    default y
+
+DT_CHOSEN_NTURT_SUSP_RL := nturt,susp_rl
+
+config VCU_HAS_SUSP_RL
+    bool
+    depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_RL))
+    default y
+
+DT_CHOSEN_NTURT_SUSP_RR := nturt,susp_rr
+
+config VCU_HAS_SUSP_RR
+    bool
+    depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_RR))
+    default y
+
+config VCU_HAS_SUSP
+    bool
+    depends on VCU_HAS_SUSP_FL || VCU_HAS_SUSP_FR || \
+        VCU_HAS_SUSP_RL || VCU_HAS_SUSP_RR
+    default y
