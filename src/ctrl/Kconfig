@@ -1,56 +1,9 @@
 menuconfig VCU_CTRL
     bool "VCU control system"
-    select EVENTS
-    select SMF
-    select SMF_ANCESTOR_SUPPORT
-    select SMF_INITIAL_TRANSITION
-    # select NTURT_ERR
+    select VCU_STATES
 
 if VCU_CTRL
 
-config VCU_STATES_INIT_PRIORITY
-    int "State machine init priority"
-    default 50
-
-choice VCU_STATES_TRANS_MODE
-    prompt "State transition process mode"
-    default VCU_STATES_TRANS_THREAD
-
-config VCU_STATES_TRANS_SYNC
-    bool "Process state transition synchronously"
-    help
-      State transitions and their cooresponding trnasition actions are processed
-      synchronously in the context of the code that requests state transitions.
-
-config VCU_STATES_TRANS_THREAD
-    bool "Process state transition in a dedicated thread"
-    help
-      State transitions are reported to a dedicated thread where state
-      transitions and their cooresponding transition callbacks are processed
-      asynchronously.
-
-endchoice
-
-config VCU_CTRL_SHELL
-    bool "VCU control system shell support"
-    default y
-    depends on VCU_SHELL
-
-if VCU_STATES_TRANS_THREAD
-
-config VCU_STATES_THREAD_STACK_SIZE
-    int "State machine module thread stack size"
-    default 512
-    help
-      Stack size of the thread processing state machine transitions, must be big
-      enough to execute the registered callbacks.
-
-config VCU_STATES_THREAD_PRIORITY
-    int "State machine module thread priority"
-    default 0
-    help
-      Priority of the thread processing state machine transitions.
-
-endif # VCU_STATES_TRANS_THREAD
+rsource "states/Kconfig"
 
 endif # VCU_CTRL

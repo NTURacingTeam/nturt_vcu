@@ -3,22 +3,16 @@
 // libc includes
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
-#include <string.h>
 
 // zephyr includes
 #include <zephyr/init.h>
 #include <zephyr/logging/log.h>
-#include <zephyr/shell/shell.h>
 #include <zephyr/smf.h>
 #include <zephyr/sys/__assert.h>
 #include <zephyr/sys/iterable_sections.h>
 #include <zephyr/sys/util.h>
 
-// nturt includes
-#include <nturt/err.h>
-
-LOG_MODULE_DECLARE(ctrl);
+LOG_MODULE_REGISTER(vcu_states);
 
 BUILD_ASSERT(NUM_STATE <= 32, "Number of states must not exceed 32");
 
@@ -31,7 +25,7 @@ BUILD_ASSERT(NUM_STATE <= 32, "Number of states must not exceed 32");
   static void CONCAT(__, _state, _, entry)(void *obj) { \
     struct states_ctx *ctx = obj;                       \
                                                         \
-    ctx->states |= BIT(_state);                         \
+    ctx->states |= _state;                              \
                                                         \
     states_process_trans(ctx, _state, true);            \
   }                                                     \
@@ -45,7 +39,7 @@ BUILD_ASSERT(NUM_STATE <= 32, "Number of states must not exceed 32");
   static void CONCAT(__, _state, _, exit)(void *obj) {  \
     struct states_ctx *ctx = obj;                       \
                                                         \
-    ctx->states &= ~BIT(_state);                        \
+    ctx->states &= ~_state;                             \
                                                         \
     states_process_trans(ctx, _state, false);           \
   }
@@ -53,28 +47,27 @@ BUILD_ASSERT(NUM_STATE <= 32, "Number of states must not exceed 32");
 #define _SMF_STATE_FUNCTIONS_DEFINE(args) \
   __SMF_STATE_FUNCTIONS_DEFINE(GET_ARG_N(1, __DEBRACKET args))
 
-#define __SMF_STATE(name, state, parent, initial)                    \
-  [state] = SMF_CREATE_STATE(                                        \
-      CONCAT(__, state, _, entry), CONCAT(__, state, _, run),        \
-      CONCAT(__, state, _, exit),                                    \
-      COND_CODE_0(IS_EQ(parent, NO_STATE), (&name[parent]), (NULL)), \
-      COND_CODE_0(IS_EQ(initial, NO_STATE), (&name[initial]), (NULL)))
+#define __SMF_STATE(name, state, parent, initial)                          \
+  [LOG2(state)] = SMF_CREATE_STATE(                                        \
+      CONCAT(__, state, _, entry), CONCAT(__, state, _, run),              \
+      CONCAT(__, state, _, exit),                                          \
+      COND_CODE_0(IS_EQ(parent, NO_STATE), (&name[LOG2(parent)]), (NULL)), \
+      COND_CODE_0(IS_EQ(initial, NO_STATE), (&name[LOG2(initial)]), (NULL)))
 
 #define _SMF_STATE(args, name)                      \
   __SMF_STATE(name, GET_ARG_N(1, __DEBRACKET args), \
               GET_ARG_N(2, __DEBRACKET args), GET_ARG_N(3, __DEBRACKET args))
 
-#define __STATE_STR(state) [state] = #state
+#define __STATE_STR(state) [LOG2(state)] = STRINGIFY(state)
 
 #define _STATE_STR(args) __STATE_STR(GET_ARG_N(1, __DEBRACKET args))
 
 /**
- * @brief Define state machine framework states and its name for the control
- * system.
+ * @brief Define state machine framework states and its string representation.
  *
  * @param name Name of the state machine framework states.
- * @param str_name Name of the state as strings.
- * @param ... List of states in the format (state, parent state, initial
+ * @param str_name Name of the states' string representations.
+ * @param ... List of states in the format of (state, parent state, initial
  * transition). If the parent state or the initial transition is not defined,
  * @ref NO_STATE should be used.
  */
@@ -87,17 +80,19 @@ BUILD_ASSERT(NUM_STATE <= 32, "Number of states must not exceed 32");
   static const char *str_name[] = {FOR_EACH(_STATE_STR, (, ), __VA_ARGS__)}
 
 /**
- * @brief Define a state transition table entry.
+ * @brief Define a state transition command info.
  *
- * @param _cmd Transition command.
+ * @param _cmd State transition command.
  * @param _src Source state to transition from.
  * @param _dst Destination state to transition to.
+ * @param _desc Description of the command.
  */
-#define TRANS_TBL_ENTRY(_cmd, _src, _dst) \
-  [_cmd] = {                              \
-      .name = #_cmd,                      \
-      .src = _src,                        \
-      .dst = _dst,                        \
+#define TRANS_CMD_INFO(_cmd, _src, _dst, _desc) \
+  [_cmd] = {                                    \
+      .src = _src,                              \
+      .dst = _dst,                              \
+      .name = STRINGIFY(_cmd),                  \
+      .desc = _desc,                            \
   }
 
 /* type ----------------------------------------------------------------------*/
@@ -119,18 +114,6 @@ struct states_ctx {
   enum states_trans_cmd cmd;
 };
 
-/// @brief State transition table entry.
-struct state_trans_tbl_entry {
-  /** Name of the transition. */
-  const char *name;
-
-  /** Source state to transition from. */
-  enum states_state src;
-
-  /** Destination state to transition to. */
-  enum states_state dst;
-};
-
 /* static function declaration -----------------------------------------------*/
 static void states_init(struct states_ctx *ctx);
 static void states_process_cmd(struct states_ctx *ctx, enum states_state state);
@@ -140,15 +123,23 @@ static void states_process_trans(struct states_ctx *ctx,
 static int init();
 
 /* static varaible -----------------------------------------------------------*/
-/// @brief State transition table.
-static const struct state_trans_tbl_entry g_trans_tbl[] = {
-    TRANS_TBL_ENTRY(TRANS_CMD_ERR, STATE_ERR_FREE, STATE_ERROR),
-    TRANS_TBL_ENTRY(TRANS_CMD_ERR_CLEAR, STATE_ERROR, STATE_ERR_FREE),
-    TRANS_TBL_ENTRY(TRANS_CMD_PEDAL, STATE_RTD_BLINK, STATE_RTD_STEADY),
-    TRANS_TBL_ENTRY(TRANS_CMD_PEDAL_CLEAR, STATE_RTD_STEADY, STATE_RTD_BLINK),
-    TRANS_TBL_ENTRY(TRANS_CMD_RTD, STATE_RTD_STEADY, STATE_RTD_SOUND),
-    TRANS_TBL_ENTRY(TRANS_CMD_RTD_FINISH, STATE_RTD_SOUND, STATE_RUNNING),
-    TRANS_TBL_ENTRY(TRANS_CMD_DISABLE, STATE_RUNNING, STATE_READY),
+/// @brief State transition informations.
+static const struct states_trans_cmd_info g_trans_cmd_infos[] = {
+    TRANS_CMD_INFO(TRANS_CMD_INVALID, STATE_INVALID, STATE_INVALID,
+                   "Invalid state stransition command, internal use only."),
+    TRANS_CMD_INFO(TRANS_CMD_ERR, STATE_ERR_FREE, STATE_ERR, "Error happened."),
+    TRANS_CMD_INFO(TRANS_CMD_ERR_CLEAR, STATE_ERR, STATE_ERR_FREE,
+                   "Error cleared."),
+    TRANS_CMD_INFO(TRANS_CMD_PEDAL, STATE_RTD_BLINK, STATE_RTD_STEADY,
+                   "Brake pressed and accelerator released."),
+    TRANS_CMD_INFO(TRANS_CMD_PEDAL_CLEAR, STATE_RTD_STEADY, STATE_RTD_BLINK,
+                   "Brake released or accelerator pressed."),
+    TRANS_CMD_INFO(TRANS_CMD_RTD, STATE_RTD_STEADY, STATE_RTD_SOUND,
+                   "Start RTD sound."),
+    TRANS_CMD_INFO(TRANS_CMD_RTD_FINISH, STATE_RTD_SOUND, STATE_RUNNING,
+                   "RTD sound finished."),
+    TRANS_CMD_INFO(TRANS_CMD_DISABLE, STATE_RUNNING, STATE_READY,
+                   "Disable system."),
 };
 
 /// @brief State machine framework states and their names.
@@ -160,7 +151,7 @@ SMF_STATES_DEFINE(g_smf_states, g_state_names,
                   (STATE_RTD_READY, STATE_RTD_STEADY, NO_STATE),
                   (STATE_RTD_SOUND, STATE_RTD_STEADY, NO_STATE),
                   (STATE_RUNNING, STATE_ERR_FREE, NO_STATE),
-                  (STATE_ERROR, NO_STATE, NO_STATE));
+                  (STATE_ERR, NO_STATE, NO_STATE));
 
 /// @brief State module context.
 static struct states_ctx g_ctx = {
@@ -179,7 +170,7 @@ bool states_valid_transition(enum states_trans_cmd cmd) {
     return false;
   }
 
-  return g_ctx.states & BIT(g_trans_tbl[cmd].src);
+  return g_ctx.states & g_trans_cmd_infos[cmd].src;
 }
 
 void states_transition(enum states_trans_cmd cmd) {
@@ -188,7 +179,7 @@ void states_transition(enum states_trans_cmd cmd) {
   k_sem_take(&g_ctx.sem, K_FOREVER);
 
   if (!states_valid_transition(cmd)) {
-    LOG_ERR("Invalid transition");
+    LOG_ERR("Invalid command: %s", states_trans_cmd_info(cmd)->name);
     k_sem_give(&g_ctx.sem);
     return;
   }
@@ -205,19 +196,31 @@ void states_transition(enum states_trans_cmd cmd) {
 }
 
 const char *states_state_str(enum states_state state) {
-  if (state == STATE_ALL || state >= NUM_STATE) {
-    return "";
-  }
+  __ASSERT(IS_POWER_OF_TWO(state) && LOG2(state) < NUM_STATE,
+           "Invalid state: %d", state);
 
-  return g_state_names[state];
+  return g_state_names[LOG2(state)];
 }
 
-const char *states_trans_cmd_str(enum states_trans_cmd cmd) {
-  if (cmd == TRANS_CMD_INVALID || cmd >= NUM_TRANS_CMD) {
-    return "";
+int states_states_str(char *buf, size_t size, states_t states) {
+  char *p = buf;
+  int n = 0;
+  for (int i = find_lsb_set(states) - 1; i >= 0;
+       i = find_lsb_set(states & ~BIT_MASK(i + 1)) - 1) {
+    enum states_state state = BIT(i);
+    n += snprintf(p, size - (p - buf), "%s%s", p == buf ? "" : ", ",
+                  states_state_str(state));
+    p += strlen(p);
   }
 
-  return g_trans_tbl[cmd].name;
+  return n;
+}
+
+const struct states_trans_cmd_info *states_trans_cmd_info(
+    enum states_trans_cmd cmd) {
+  __ASSERT(cmd < NUM_TRANS_CMD, "Invalid transition command: %d", cmd);
+
+  return &g_trans_cmd_infos[cmd];
 }
 
 /* static function definition ------------------------------------------------*/
@@ -237,8 +240,9 @@ static void states_process_cmd(struct states_ctx *ctx,
     return;
   }
 
-  if (g_trans_tbl[ctx->cmd].src == state) {
-    smf_set_state(&ctx->smf_ctx, &g_smf_states[g_trans_tbl[ctx->cmd].dst]);
+  if (g_trans_cmd_infos[ctx->cmd].src == state) {
+    smf_set_state(&ctx->smf_ctx,
+                  &g_smf_states[LOG2(g_trans_cmd_infos[ctx->cmd].dst)]);
     ctx->cmd = TRANS_CMD_INVALID;
   }
 }
@@ -246,7 +250,7 @@ static void states_process_cmd(struct states_ctx *ctx,
 static void states_process_trans(struct states_ctx *ctx,
                                  enum states_state state, bool is_entry) {
   STRUCT_SECTION_FOREACH(states_callback, callback) {
-    if (callback->state == STATE_ALL || callback->state == state) {
+    if (callback->states & state) {
       callback->handler(state, is_entry, callback->user_data);
     }
   }
@@ -269,7 +273,30 @@ static void thread(void *arg1, void *arg2, void *arg3) {
   while (true) {
     k_event_wait(&ctx->event, true, true, K_FOREVER);
 
+    states_t pre = ctx->states;
+    enum states_trans_cmd cmd = ctx->cmd;
+
     smf_run_state(&ctx->smf_ctx);
+
+    states_t post = ctx->states;
+
+    LOG_INF("Processed transition command %s:",
+            states_trans_cmd_info(cmd)->name);
+
+    char buf[100];
+    states_states_str(buf, sizeof(buf), pre & ~post);
+    LOG_INF("\tFrom: 0x%X (%s)", pre & ~post, buf);
+
+    states_states_str(buf, sizeof(buf), post & ~pre);
+    LOG_INF("\tTo:   0x%X (%s)", post & ~pre, buf);
+
+    if (pre & post) {
+      states_states_str(buf, sizeof(buf), pre & post);
+    } else {
+      buf[0] = '\0';
+    }
+    LOG_INF("\tSame: 0x%X (%s)", pre & post, buf);
+
     k_sem_give(&ctx->sem);
   }
 }
@@ -278,94 +305,3 @@ K_THREAD_DEFINE(states, CONFIG_VCU_STATES_THREAD_STACK_SIZE, thread, &g_ctx,
                 NULL, NULL, CONFIG_VCU_STATES_THREAD_PRIORITY, 0, 0);
 
 #endif  // CONFIG_VCU_STATE_TRANS_THREAD
-
-#if CONFIG_VCU_CTRL_SHELL
-
-static void states_trans_get_handler(size_t idx,
-                                     struct shell_static_entry *entry) {
-  for (enum states_trans_cmd cmd = 0; cmd < NUM_TRANS_CMD; cmd++) {
-    if (states_valid_transition(cmd)) {
-      if (idx == 0) {
-        entry->syntax = states_trans_cmd_str(cmd);
-        entry->handler = NULL;
-        entry->subcmd = NULL;
-        entry->help = NULL;
-        return;
-
-      } else {
-        idx--;
-      }
-    }
-  }
-
-  entry->syntax = NULL;
-}
-
-static int states_get_cmd_handler(const struct shell *sh, size_t argc,
-                                  char **argv, void *data) {
-  (void)argc;
-  (void)argv;
-  (void)data;
-
-  states_t states = states_get();
-  shell_fprintf(sh, SHELL_INFO, "Current states: 0x%X (", states);
-
-  while (states != 0) {
-    enum states_state state = find_lsb_set(states) - 1;
-    states &= ~BIT(state);
-
-    shell_fprintf(sh, SHELL_INFO, "%s", states_state_str(state));
-    if (states != 0) {
-      shell_fprintf(sh, SHELL_INFO, ", ");
-    }
-  }
-
-  shell_fprintf(sh, SHELL_INFO, ")\n");
-
-  return 0;
-}
-
-static int states_trans_cmd_handler(const struct shell *sh, size_t argc,
-                                    char **argv, void *data) {
-  (void)argc;
-
-  enum states_trans_cmd cmd = TRANS_CMD_INVALID;
-  for (enum states_trans_cmd i = 0; i < NUM_TRANS_CMD; i++) {
-    if (!strcmp(states_trans_cmd_str(i), argv[1])) {
-      cmd = i;
-      break;
-    }
-  }
-
-  if (cmd == TRANS_CMD_INVALID) {
-    shell_error(sh, "Unknown command: %s", argv[1]);
-    return -ENOENT;
-
-  } else if (!states_valid_transition(cmd)) {
-    shell_error(sh, "Transition %s requires state %s, which is not satisfied.",
-                states_trans_cmd_str(cmd),
-                states_state_str(g_trans_tbl[cmd].src));
-
-    shell_fprintf(sh, SHELL_INFO, "Note: ");
-    states_get_cmd_handler(sh, 0, NULL, data);
-
-    return -EINVAL;
-  }
-
-  states_transition(cmd);
-  return 0;
-}
-
-SHELL_DYNAMIC_CMD_CREATE(states_trans_subcmd, states_trans_get_handler);
-
-SHELL_STATIC_SUBCMD_SET_CREATE(states_cmd,
-                               SHELL_CMD_ARG(get, NULL,
-                                             "Get the current state.",
-                                             states_get_cmd_handler, 1, 0),
-                               SHELL_CMD_ARG(trans, &states_trans_subcmd,
-                                             "Transition to a new state.",
-                                             states_trans_cmd_handler, 2, 0),
-                               SHELL_SUBCMD_SET_END);
-SHELL_CMD_REGISTER(states, &states_cmd, "Control system states.", NULL);
-
-#endif  // CONFIG_VCU_CTRL_SHELL

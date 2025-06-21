@@ -26,33 +26,32 @@
  */
 
 /* macro ---------------------------------------------------------------------*/
-
 /**
- * @brief Define a callback for state transition with custom name.
- *
- * Same as @ref STATES_CALLBACK_DEFINE, but with a custom name for the callback.
+ * @brief Same as @ref STATES_CALLBACK_DEFINE, but with a custom name for the
+ * callback.
  */
-#define STATES_CALLBACK_DEFINE_NAMED(_name, _state, _handler, _user_data) \
-  const STRUCT_SECTION_ITERABLE(states_callback, _name) = {               \
-      .state = _state,                                                    \
-      .handler = _handler,                                                \
-      .user_data = _user_data,                                            \
+#define STATES_CALLBACK_DEFINE_NAMED(_name, _states, _handler, _user_data) \
+  const STRUCT_SECTION_ITERABLE(states_callback, _name) = {                \
+      .states = _states,                                                   \
+      .handler = _handler,                                                 \
+      .user_data = _user_data,                                             \
   }
 
 /**
  * @brief Define a callback for state transition.
  *
- * @param[in] state State at which to call the callback or @ref STATE_ALL to
- * always call the callback.
+ * @param[in] states When transition from/to what states to call the callback.
+ * Multiple @ref states_state can be specified using bitwise OR operator (|).
  * @param[in] handler Handler of the state transition.
  * @param[in] user_data Pointer to custom data for the callback.
  *
- * @note Since the name of the callback is derived from @p handler , if the same
- * handler is used for multiple callbacks, @ref STATES_CALLBACK_DEFINE_NAMED can
- * be used instead to prevent linker errors.
+ * @note Since the name of the callback is derived from the name of @p handler ,
+ * if handlers with the same name are used for multiple callbacks,
+ * @ref STATES_CALLBACK_DEFINE_NAMED can be used instead to prevent linker
+ * errors.
  */
-#define STATES_CALLBACK_DEFINE(state, handler, user_data)                 \
-  STATES_CALLBACK_DEFINE_NAMED(CONCAT(__states_handler_, handler), state, \
+#define STATES_CALLBACK_DEFINE(states, handler, user_data)                 \
+  STATES_CALLBACK_DEFINE_NAMED(CONCAT(__states_handler_, handler), states, \
                                handler, user_data)
 
 /* type ----------------------------------------------------------------------*/
@@ -62,23 +61,34 @@ enum states_state;
 /// in @ref states_state.
 typedef uint32_t states_t;
 
-/// @brief State transition handler type.
+/**
+ * @brief State transition handler type.
+ *
+ * @param[in] State to transition from/to.
+ * @param[in] is_entry True when transitioning to the state. False when
+ * transition from.
+ * @param[in,out] user_data Pointer to custom data for the callback provided by
+ * @ref STATES_CALLBACK_DEFINE.
+ */
 typedef void (*states_handler_t)(enum states_state state, bool is_entry,
                                  void *user_data);
 
 /// @brief State machine states.
 enum states_state {
-  STATE_ALL = 0,
-  STATE_ERR_FREE,
-  STATE_READY,
-  STATE_RTD_BLINK,
-  STATE_RTD_STEADY,
-  STATE_RTD_READY,
-  STATE_RTD_SOUND,
-  STATE_RUNNING,
-  STATE_ERROR,
+  STATE_INVALID = 0,
 
-  NUM_STATE,
+  STATE_ERR_FREE = BIT(0),
+  STATE_READY = BIT(1),
+  STATE_RTD_BLINK = BIT(2),
+  STATE_RTD_STEADY = BIT(3),
+  STATE_RTD_READY = BIT(4),
+  STATE_RTD_SOUND = BIT(5),
+  STATE_RUNNING = BIT(6),
+  STATE_ERR = BIT(7),
+
+  STATE_ALL = UINT32_MAX,
+
+  NUM_STATE = 8,
 };
 
 /// @brief State transition commands.
@@ -95,13 +105,25 @@ enum states_trans_cmd {
   NUM_TRANS_CMD,
 };
 
+/// @brief State transition command information.
+struct states_trans_cmd_info {
+  /** Source state to transition from. */
+  enum states_state src;
+
+  /** Destination state to transition to. */
+  enum states_state dst;
+
+  /** String representation of the command. */
+  const char *name;
+
+  /** Description of the command. */
+  const char *desc;
+};
+
 /// @brief State transition callback.
 struct states_callback {
-  /**
-   * At what state transition to call the callback or @ref STATE_ALL to always
-   * call the callback.
-   */
-  enum states_state state;
+  /** When transition from/to what states to call the callback. */
+  states_t states;
 
   /** State transition handler. */
   states_handler_t handler;
@@ -121,34 +143,48 @@ states_t states_get();
 /**
  * @brief Test if a state transition command is valid.
  *
- * @param cmd Transition command to test.
- * @retval true If the transition command can be executed.
- * @retval false If the transition command cannot be executed.
+ * @param[in] cmd State transition command.
+ * @retval true If the command can be executed.
+ * @retval false If the command cannot be executed.
  */
 bool states_valid_transition(enum states_trans_cmd cmd);
 
 /**
- * @brief Transition to a new state.
+ * @brief Execute a state transition command to transition to a new state.
  *
- * @param cmd Transition command to execute.
+ * @param[in] cmd State transition command.
  */
 void states_transition(enum states_trans_cmd cmd);
 
 /**
  * @brief Get the string representation of a state.
  *
- * @param state State to get the string representation for.
- * @return const char* String representation of the state.
+ * @param[in] state State.
+ * @return const char* String representation.
  */
 const char *states_state_str(enum states_state state);
 
 /**
- * @brief Get the string representation of a state transition command.
+ * @brief Get the string representation of states separated by commas in the
+ * same semantic as snprintf
  *
- * @param cmd State transition command to get the string representation for.
- * @return const char* String representation of the state transition command.
+ * @param[out] buf Buffer to store the string representation.
+ * @param[in] size Size of the buffer.
+ * @param[in] states States.
+ * @return int Number of bytes written to the buffer, excluding the null
+ * terminator which would be written if the buffer is large enough.
  */
-const char *states_trans_cmd_str(enum states_trans_cmd cmd);
+int states_states_str(char *buf, size_t size, states_t states);
+
+/**
+ * @brief Get the information of a state transition command.
+ *
+ * @param[in] cmd State transition command.
+ * @return const struct states_trans_cmd_info* Pointer to the state transition
+ * command information.
+ */
+const struct states_trans_cmd_info *states_trans_cmd_info(
+    enum states_trans_cmd cmd);
 
 /**
  * @} // States

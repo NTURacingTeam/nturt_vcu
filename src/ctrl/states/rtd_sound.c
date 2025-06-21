@@ -13,7 +13,7 @@
 // project includes
 #include "vcu/ctrl/states.h"
 
-LOG_MODULE_REGISTER(rtd_sound);
+LOG_MODULE_REGISTER(vcu_rtd_sound);
 
 /* type ----------------------------------------------------------------------*/
 /// @brief RTD sound module context.
