@@ -11,6 +11,10 @@
 #include <zephyr/sys/__assert.h>
 #include <zephyr/sys/iterable_sections.h>
 #include <zephyr/sys/util.h>
+#include <zephyr/zbus/zbus.h>
+
+// nturt includes
+#include "nturt/msg/msg.h"
 
 LOG_MODULE_REGISTER(vcu_states);
 
@@ -270,26 +274,34 @@ static void states_process_trans(struct states_ctx *ctx,
 }
 
 static void states_run_state(struct states_ctx *ctx) {
-  states_t pre = ctx->states;
+  states_t before = ctx->states;
   enum states_trans_cmd cmd = ctx->cmd;
 
   ctx->transitiong_thread = k_current_get();
   smf_run_state(&ctx->smf_ctx);
 
-  states_t post = ctx->states;
+  states_t after = ctx->states;
+
+  struct msg_states msg = {
+      .header = MSG_HEADER_INITIALIZER(),
+      .cmd = cmd,
+      .before = before,
+      .after = after,
+  };
+  zbus_chan_pub(&msg_states_chan, &msg, K_FOREVER);
 
   LOG_INF("Processed transition command %s: 0x%X -> 0x%X",
-          states_trans_cmd_info(cmd)->name, pre, post);
+          states_trans_cmd_info(cmd)->name, before, after);
 
   char buf[100];
-  states_states_str(buf, sizeof(buf), pre & ~post);
-  LOG_INF("\tFrom: 0x%X (%s)", pre & ~post, buf);
+  states_states_str(buf, sizeof(buf), before & ~after);
+  LOG_INF("\tFrom: 0x%X (%s)", before & ~after, buf);
 
-  states_states_str(buf, sizeof(buf), post & ~pre);
-  LOG_INF("\tTo:   0x%X (%s)", post & ~pre, buf);
+  states_states_str(buf, sizeof(buf), after & ~before);
+  LOG_INF("\tTo:   0x%X (%s)", after & ~before, buf);
 
-  states_states_str(buf, sizeof(buf), pre & post);
-  LOG_INF("\tSame: 0x%X (%s)", pre & post, buf);
+  states_states_str(buf, sizeof(buf), before & after);
+  LOG_INF("\tSame: 0x%X (%s)", before & after, buf);
 
   ctx->transitiong_thread = NULL;
   k_sem_give(&ctx->sem);
