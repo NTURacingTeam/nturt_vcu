@@ -144,6 +144,7 @@ states_t states_get();
  * @brief Test if a state transition command is valid.
  *
  * @param[in] cmd State transition command.
+ *
  * @retval true If the command can be executed.
  * @retval false If the command cannot be executed.
  */
@@ -153,6 +154,9 @@ bool states_valid_transition(enum states_trans_cmd cmd);
  * @brief Execute a state transition command to transition to a new state.
  *
  * @param[in] cmd State transition command.
+ *
+ * @warning Must not be called from an ISR or within a state transition
+ * callback.
  */
 void states_transition(enum states_trans_cmd cmd);
 

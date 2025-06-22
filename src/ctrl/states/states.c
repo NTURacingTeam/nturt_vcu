@@ -103,6 +103,12 @@ struct states_ctx {
 
   bool initialized;
 
+  /**
+   * Thread ID currently processing transition command. Used to prevent
+   * transition callbacks from requesting state transitions.
+   */
+  k_tid_t transitiong_thread;
+
   struct k_sem sem;
 
   struct k_event event;
@@ -119,6 +125,7 @@ static void states_init(struct states_ctx *ctx);
 static void states_process_cmd(struct states_ctx *ctx, enum states_state state);
 static void states_process_trans(struct states_ctx *ctx,
                                  enum states_state state, bool is_entry);
+static void states_run_state(struct states_ctx *ctx);
 
 static int init();
 
@@ -156,6 +163,7 @@ SMF_STATES_DEFINE(g_smf_states, g_state_names,
 /// @brief State module context.
 static struct states_ctx g_ctx = {
     .initialized = false,
+    .transitiong_thread = NULL,
     .states = 0,
     .cmd = TRANS_CMD_INVALID,
 };
@@ -175,6 +183,10 @@ bool states_valid_transition(enum states_trans_cmd cmd) {
 
 void states_transition(enum states_trans_cmd cmd) {
   __ASSERT(!k_is_in_isr(), "Must not be called from ISR");
+  __ASSERT(g_ctx.initialized, "States module not yet initialized");
+  __ASSERT(
+      !g_ctx.transitiong_thread || k_current_get() != g_ctx.transitiong_thread,
+      "Transition must not be requested wthin state transition callbacks");
 
   k_sem_take(&g_ctx.sem, K_FOREVER);
 
@@ -187,8 +199,7 @@ void states_transition(enum states_trans_cmd cmd) {
   g_ctx.cmd = cmd;
 
   if (IS_ENABLED(CONFIG_VCU_STATES_TRANS_SYNC)) {
-    smf_run_state(&g_ctx.smf_ctx);
-    k_sem_give(&g_ctx.sem);
+    states_run_state(&g_ctx);
 
   } else if (IS_ENABLED(CONFIG_VCU_STATES_TRANS_THREAD)) {
     k_event_set(&g_ctx.event, true);
@@ -203,6 +214,8 @@ const char *states_state_str(enum states_state state) {
 }
 
 int states_states_str(char *buf, size_t size, states_t states) {
+  buf[0] = '\0';
+
   char *p = buf;
   int n = 0;
   for (int i = find_lsb_set(states) - 1; i >= 0;
@@ -256,6 +269,32 @@ static void states_process_trans(struct states_ctx *ctx,
   }
 }
 
+static void states_run_state(struct states_ctx *ctx) {
+  states_t pre = ctx->states;
+  enum states_trans_cmd cmd = ctx->cmd;
+
+  ctx->transitiong_thread = k_current_get();
+  smf_run_state(&ctx->smf_ctx);
+
+  states_t post = ctx->states;
+
+  LOG_INF("Processed transition command %s: 0x%X -> 0x%X",
+          states_trans_cmd_info(cmd)->name, pre, post);
+
+  char buf[100];
+  states_states_str(buf, sizeof(buf), pre & ~post);
+  LOG_INF("\tFrom: 0x%X (%s)", pre & ~post, buf);
+
+  states_states_str(buf, sizeof(buf), post & ~pre);
+  LOG_INF("\tTo:   0x%X (%s)", post & ~pre, buf);
+
+  states_states_str(buf, sizeof(buf), pre & post);
+  LOG_INF("\tSame: 0x%X (%s)", pre & post, buf);
+
+  ctx->transitiong_thread = NULL;
+  k_sem_give(&ctx->sem);
+}
+
 static int init() {
   states_init(&g_ctx);
 
@@ -273,35 +312,11 @@ static void thread(void *arg1, void *arg2, void *arg3) {
   while (true) {
     k_event_wait(&ctx->event, true, true, K_FOREVER);
 
-    states_t pre = ctx->states;
-    enum states_trans_cmd cmd = ctx->cmd;
-
-    smf_run_state(&ctx->smf_ctx);
-
-    states_t post = ctx->states;
-
-    LOG_INF("Processed transition command %s:",
-            states_trans_cmd_info(cmd)->name);
-
-    char buf[100];
-    states_states_str(buf, sizeof(buf), pre & ~post);
-    LOG_INF("\tFrom: 0x%X (%s)", pre & ~post, buf);
-
-    states_states_str(buf, sizeof(buf), post & ~pre);
-    LOG_INF("\tTo:   0x%X (%s)", post & ~pre, buf);
-
-    if (pre & post) {
-      states_states_str(buf, sizeof(buf), pre & post);
-    } else {
-      buf[0] = '\0';
-    }
-    LOG_INF("\tSame: 0x%X (%s)", pre & post, buf);
-
-    k_sem_give(&ctx->sem);
+    states_run_state(ctx);
   }
 }
 
-K_THREAD_DEFINE(states, CONFIG_VCU_STATES_THREAD_STACK_SIZE, thread, &g_ctx,
-                NULL, NULL, CONFIG_VCU_STATES_THREAD_PRIORITY, 0, 0);
+K_THREAD_DEFINE(states_thread, CONFIG_VCU_STATES_THREAD_STACK_SIZE, thread,
+                &g_ctx, NULL, NULL, CONFIG_VCU_STATES_THREAD_PRIORITY, 0, 0);
 
 #endif  // CONFIG_VCU_STATE_TRANS_THREAD
