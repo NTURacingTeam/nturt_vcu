@@ -1,58 +1,60 @@
 menuconfig VCU_STATES
-    bool "VCU control system state machine"
-    select EVENTS
-    select SMF
-    select SMF_ANCESTOR_SUPPORT
-    select SMF_INITIAL_TRANSITION
-    select NTURT_ERR
-    select NTURT_MSG
+	bool "VCU control system state machine"
+	select EVENTS
+	select SMF
+	select SMF_ANCESTOR_SUPPORT
+	select SMF_INITIAL_TRANSITION
+	select NTURT_ERR
+	select NTURT_MSG
 
 if VCU_STATES
 
 config VCU_STATES_INIT_PRIORITY
-    int "VCU control system state machine init priority"
-    default 50
+	int "Init priority"
+	default 50
+	help
+	  VCU control system state machine initialization priority.
 
 choice VCU_STATES_TRANS_MODE
-    prompt "VCU control system state transition process mode"
-    default VCU_STATES_TRANS_THREAD
+	prompt "VCU control system state transition process mode"
+	default VCU_STATES_TRANS_THREAD
 
 config VCU_STATES_TRANS_SYNC
-    bool "Process VCU control system state transition synchronously"
-    help
-      State transitions and their cooresponding trnasition callbacks are
-      processed synchronously in the context of the code that requests state
-      transitions.
+	bool "Process VCU control system state transition synchronously"
+	help
+	  State transitions and their cooresponding trnasition callbacks are
+	  processed synchronously in the context of the code that requests state
+	  transitions.
 
 config VCU_STATES_TRANS_THREAD
-    bool "Process VCU control system state transition in a dedicated thread"
-    help
-      State transitions are reported to a dedicated thread where state
-      transitions and their cooresponding transition callbacks are processed
-      asynchronously.
+	bool "Process VCU control system state transition in a dedicated thread"
+	help
+	  State transitions are reported to a dedicated thread where state
+	  transitions and their cooresponding transition callbacks are processed
+	  asynchronously.
 
 endchoice
 
 if VCU_STATES_TRANS_THREAD
 
 config VCU_STATES_THREAD_STACK_SIZE
-    int "VCU control system state machine thread stack size"
-    default 1024
-    help
-      Stack size of the thread processing state machine transitions, must be big
-      enough to execute the registered transition callbacks.
+	int "VCU control system state machine thread stack size"
+	default 1024
+	help
+	  Stack size of the thread processing state machine transitions, must be big
+	  enough to execute the registered transition callbacks.
 
 config VCU_STATES_THREAD_PRIORITY
-    int "VCU control system State machine thread priority"
-    default 0
-    help
-      Priority of the thread processing state machine transitions.
+	int "VCU control system State machine thread priority"
+	default 0
+	help
+	  Priority of the thread processing state machine transitions.
 
 endif # VCU_STATES_TRANS_THREAD
 
 config VCU_STATES_SHELL
-    bool "VCU control system state machine shell support"
-    default y
-    depends on VCU_SHELL
+	bool "VCU control system state machine shell support"
+	default y
+	depends on VCU_SHELL
 
 endif # VCU_STATES

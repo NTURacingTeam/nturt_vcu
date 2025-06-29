@@ -3,9 +3,9 @@ source "Kconfig.zephyr"
 endmenu # "Zephyr"
 
 menuconfig VCU
-    bool "NTURT VCU"
-    default y
-    select NTURT
+	bool "NTURT VCU"
+	default y
+	select NTURT
 
 if VCU
 
