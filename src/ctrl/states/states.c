@@ -3,6 +3,7 @@
 // libc includes
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 // zephyr includes
 #include <zephyr/init.h>
@@ -283,11 +284,12 @@ static void states_run_state(struct states_ctx *ctx) {
   states_t after = ctx->states;
 
   struct msg_states msg = {
-      .header = MSG_HEADER_INITIALIZER(),
       .cmd = cmd,
       .before = before,
       .after = after,
   };
+  msg_header_init(&msg.header);
+
   zbus_chan_pub(&msg_states_chan, &msg, K_FOREVER);
 
   LOG_INF("Processed transition command %s: 0x%X -> 0x%X",

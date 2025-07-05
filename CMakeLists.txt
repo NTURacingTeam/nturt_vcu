@@ -9,6 +9,7 @@ zephyr_include_directories(
     include
 )
 
+add_subdirectory(src/canopen)
 add_subdirectory(src/ctrl)
 
 target_sources(app PRIVATE

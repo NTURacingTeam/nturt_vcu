@@ -1,0 +1,7 @@
+menuconfig VCU_CANOPEN
+	bool "CANopen support"
+	select NTURT_CANOPEN
+
+if VCU_CANOPEN
+
+endif # VCU_CANOPEN

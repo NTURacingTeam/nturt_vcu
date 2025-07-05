@@ -1,5 +1,5 @@
 menuconfig VCU_CTRL
-	bool "VCU control system"
+	bool "Control system"
 	select VCU_STATES
 
 if VCU_CTRL

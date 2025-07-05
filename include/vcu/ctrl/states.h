@@ -1,6 +1,6 @@
 /**
  * @file
- * @brief State machine.
+ * @brief Control system state machine.
  *
  * @author quantumspawner
  * @version 0.0.1
@@ -20,8 +20,10 @@
 #include <zephyr/sys/util.h>
 
 /**
- * @addtogroup States States
- * @ingroup Ctrl
+ * @addtogroup stat States
+ * @brief Control system state machine.
+ *
+ * @ingroup ctrl
  * @{
  */
 
@@ -191,7 +193,7 @@ const struct states_trans_cmd_info *states_trans_cmd_info(
     enum states_trans_cmd cmd);
 
 /**
- * @} // States
+ * @} // stat
  */
 
 #endif  // VCU_CTRL_STATES_H_

@@ -1,5 +1,5 @@
 menuconfig VCU_STATES
-	bool "VCU control system state machine"
+	bool "Control system state machine"
 	select EVENTS
 	select SMF
 	select SMF_ANCESTOR_SUPPORT
@@ -13,21 +13,21 @@ config VCU_STATES_INIT_PRIORITY
 	int "Init priority"
 	default 50
 	help
-	  VCU control system state machine initialization priority.
+	  Control system state machine initialization priority.
 
 choice VCU_STATES_TRANS_MODE
-	prompt "VCU control system state transition process mode"
+	prompt "Control system state transition process mode"
 	default VCU_STATES_TRANS_THREAD
 
 config VCU_STATES_TRANS_SYNC
-	bool "Process VCU control system state transition synchronously"
+	bool "Process control system state transition synchronously"
 	help
 	  State transitions and their cooresponding trnasition callbacks are
 	  processed synchronously in the context of the code that requests state
 	  transitions.
 
 config VCU_STATES_TRANS_THREAD
-	bool "Process VCU control system state transition in a dedicated thread"
+	bool "Process control system state transition in a dedicated thread"
 	help
 	  State transitions are reported to a dedicated thread where state
 	  transitions and their cooresponding transition callbacks are processed
@@ -38,14 +38,14 @@ endchoice
 if VCU_STATES_TRANS_THREAD
 
 config VCU_STATES_THREAD_STACK_SIZE
-	int "VCU control system state machine thread stack size"
+	int "Control system state machine thread stack size"
 	default 1024
 	help
 	  Stack size of the thread processing state machine transitions, must be big
 	  enough to execute the registered transition callbacks.
 
 config VCU_STATES_THREAD_PRIORITY
-	int "VCU control system State machine thread priority"
+	int "Control system state machine thread priority"
 	default 0
 	help
 	  Priority of the thread processing state machine transitions.
@@ -53,7 +53,7 @@ config VCU_STATES_THREAD_PRIORITY
 endif # VCU_STATES_TRANS_THREAD
 
 config VCU_STATES_SHELL
-	bool "VCU control system state machine shell support"
+	bool "Control system state machine shell support"
 	default y
 	depends on VCU_SHELL
 

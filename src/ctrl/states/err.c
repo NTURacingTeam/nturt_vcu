@@ -1,5 +1,5 @@
 // nturt includes
-#include <nturt/err.h>
+#include <nturt/err/err.h>
 
 // project includes
 #include "vcu/ctrl/states.h"
