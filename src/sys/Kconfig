@@ -1,5 +1,5 @@
 menuconfig VCU_SYS
-	bool "VCU basic system functionalities"
+	bool "Basic system support"
 	select LOG
 	select SETTINGS
 	select NTURT_SYS

@@ -1,0 +1,7 @@
+menuconfig VCU_TM
+	bool "Telemetry support"
+	select NTURT_TM
+
+if VCU_TM
+
+endif # VCU_TM

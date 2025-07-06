@@ -56,11 +56,7 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2102_accumulatorCurrent = 0,
     .x2103_accumulatorTemperature = 0,
     .x2104_accumulatorStateOfCharge = 0x00,
-    .x2105_accumulatorCapacity = 0x0000,
-    .x2106_accumulatorCellVoltage_sub0 = 0x00,
-    .x2106_accumulatorCellVoltage = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-    .x2107_accumulatorRawTemperature_sub0 = 0x00,
-    .x2107_accumulatorRawTemperature = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    .x2105_accumulatorCapacity = 0,
     .x2130_invRLControlWord = 0x0000,
     .x2131_invRLStatusWord = 0x0000,
     .x2132_invRLTargetTorque = 0,
@@ -619,8 +615,6 @@ typedef struct {
     OD_obj_var_t o_2103_accumulatorTemperature;
     OD_obj_var_t o_2104_accumulatorStateOfCharge;
     OD_obj_var_t o_2105_accumulatorCapacity;
-    OD_obj_array_t o_2106_accumulatorCellVoltage;
-    OD_obj_array_t o_2107_accumulatorRawTemperature;
     OD_obj_var_t o_2130_invRLControlWord;
     OD_obj_var_t o_2131_invRLStatusWord;
     OD_obj_var_t o_2132_invRLTargetTorque;
@@ -2694,22 +2688,6 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         .attribute = ODA_RPDO | ODA_MB,
         .dataLength = 2
     },
-    .o_2106_accumulatorCellVoltage = {
-        .dataOrig0 = &OD_RAM.x2106_accumulatorCellVoltage_sub0,
-        .dataOrig = &OD_RAM.x2106_accumulatorCellVoltage[0],
-        .attribute0 = ODA_SDO_RW | ODA_RPDO,
-        .attribute = ODA_RPDO,
-        .dataElementLength = 1,
-        .dataElementSizeof = sizeof(uint8_t)
-    },
-    .o_2107_accumulatorRawTemperature = {
-        .dataOrig0 = &OD_RAM.x2107_accumulatorRawTemperature_sub0,
-        .dataOrig = &OD_RAM.x2107_accumulatorRawTemperature[0],
-        .attribute0 = ODA_RPDO,
-        .attribute = ODA_RPDO,
-        .dataElementLength = 1,
-        .dataElementSizeof = sizeof(uint8_t)
-    },
     .o_2130_invRLControlWord = {
         .dataOrig = &OD_RAM.x2130_invRLControlWord,
         .attribute = ODA_TPDO | ODA_MB,
@@ -3146,8 +3124,6 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x2103, 0x01, ODT_VAR, &ODObjs.o_2103_accumulatorTemperature, NULL},
     {0x2104, 0x01, ODT_VAR, &ODObjs.o_2104_accumulatorStateOfCharge, NULL},
     {0x2105, 0x01, ODT_VAR, &ODObjs.o_2105_accumulatorCapacity, NULL},
-    {0x2106, 0x08, ODT_ARR, &ODObjs.o_2106_accumulatorCellVoltage, NULL},
-    {0x2107, 0x08, ODT_ARR, &ODObjs.o_2107_accumulatorRawTemperature, NULL},
     {0x2130, 0x01, ODT_VAR, &ODObjs.o_2130_invRLControlWord, NULL},
     {0x2131, 0x01, ODT_VAR, &ODObjs.o_2131_invRLStatusWord, NULL},
     {0x2132, 0x01, ODT_VAR, &ODObjs.o_2132_invRLTargetTorque, NULL},

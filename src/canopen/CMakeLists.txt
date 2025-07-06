@@ -11,6 +11,7 @@ file(GLOB OBJDICT_FILES
 target_sources(app PRIVATE
     ${OBJDICT_FILES}
     msg.c
+    telemetry.c
 )
 
 endif()

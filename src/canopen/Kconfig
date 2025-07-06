@@ -1,6 +1,8 @@
 menuconfig VCU_CANOPEN
 	bool "CANopen support"
 	select NTURT_CANOPEN
+	select VCU_TM
+	select VCU_MSG
 
 if VCU_CANOPEN
 

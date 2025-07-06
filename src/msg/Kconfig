@@ -1,0 +1,7 @@
+menuconfig VCU_MSG
+	bool "VCU inter-thread communication system"
+	select NTURT_MSG
+
+if VCU_MSG
+
+endif # VCU_MSG

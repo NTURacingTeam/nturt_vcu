@@ -3,7 +3,6 @@
 
 // zephyr includes
 #include <zephyr/kernel.h>
-#include <zephyr/logging/log.h>
 
 // canopennode includes
 #include <canopennode.h>
@@ -11,9 +10,6 @@
 // nturt includes
 #include <nturt/canbus/canopen.h>
 #include <nturt/canbus/convert.h>
-#include <nturt/msg/msg.h>
-
-LOG_MODULE_REGISTER(vcu_canopen);
 
 // clang-format off
 
@@ -85,19 +81,3 @@ CANOPEN_OD_AGG_TO_MSG_DEFINE(msg_inv,
 );
 
 // clang-format on
-
-static void imu_data_cb(const struct zbus_channel *chan) {
-  const struct msg_imu_data *msg = zbus_chan_const_msg(chan);
-
-  printk(
-      "IMU data:\n\tTimestamp: %llu ns\n\tAccel: [%.2f, %.2f, %.2f] "
-      "m/s^2\n\tGyro: [%.2f, %.2f, %.2f] rad/s\n\tOrient: [%.2f, %.2f, %.2f] "
-      "deg\n",
-      msg->header.timestamp_ns, (double)msg->accel.x, (double)msg->accel.y,
-      (double)msg->accel.z, (double)msg->gyro.x, (double)msg->gyro.y,
-      (double)msg->gyro.z, (double)msg->orient.x, (double)msg->orient.y,
-      (double)msg->orient.z);
-}
-
-ZBUS_LISTENER_DEFINE(imu_data_listener, imu_data_cb);
-ZBUS_CHAN_ADD_OBS(msg_imu_data_chan, imu_data_listener, 0);

@@ -16,7 +16,7 @@
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2025/7/5 下午 03:24:57
+        Modified:     2025/7/5 下午 08:08:22
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
@@ -56,8 +56,6 @@
 #define OD_CNT_ARR_1011 4
 #define OD_CNT_ARR_1016 8
 #define OD_CNT_ARR_2001 16
-#define OD_CNT_ARR_2106 7
-#define OD_CNT_ARR_2107 7
 #define OD_CNT_ARR_2240 3
 #define OD_CNT_ARR_2241 3
 #define OD_CNT_ARR_2243 3
@@ -102,11 +100,7 @@ typedef struct {
     int16_t x2102_accumulatorCurrent;
     int16_t x2103_accumulatorTemperature;
     uint8_t x2104_accumulatorStateOfCharge;
-    uint16_t x2105_accumulatorCapacity;
-    uint8_t x2106_accumulatorCellVoltage_sub0;
-    uint8_t x2106_accumulatorCellVoltage[OD_CNT_ARR_2106];
-    uint8_t x2107_accumulatorRawTemperature_sub0;
-    uint8_t x2107_accumulatorRawTemperature[OD_CNT_ARR_2107];
+    int16_t x2105_accumulatorCapacity;
     uint16_t x2130_invRLControlWord;
     uint16_t x2131_invRLStatusWord;
     int16_t x2132_invRLTargetTorque;
@@ -683,30 +677,28 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H2103 &OD->list[70]
 #define OD_ENTRY_H2104 &OD->list[71]
 #define OD_ENTRY_H2105 &OD->list[72]
-#define OD_ENTRY_H2106 &OD->list[73]
-#define OD_ENTRY_H2107 &OD->list[74]
-#define OD_ENTRY_H2130 &OD->list[75]
-#define OD_ENTRY_H2131 &OD->list[76]
-#define OD_ENTRY_H2132 &OD->list[77]
-#define OD_ENTRY_H2133 &OD->list[78]
-#define OD_ENTRY_H2134 &OD->list[79]
-#define OD_ENTRY_H2135 &OD->list[80]
-#define OD_ENTRY_H2140 &OD->list[81]
-#define OD_ENTRY_H2141 &OD->list[82]
-#define OD_ENTRY_H2142 &OD->list[83]
-#define OD_ENTRY_H2143 &OD->list[84]
-#define OD_ENTRY_H2144 &OD->list[85]
-#define OD_ENTRY_H2145 &OD->list[86]
-#define OD_ENTRY_H2200 &OD->list[87]
-#define OD_ENTRY_H2212 &OD->list[88]
-#define OD_ENTRY_H2213 &OD->list[89]
-#define OD_ENTRY_H2220 &OD->list[90]
-#define OD_ENTRY_H2221 &OD->list[91]
-#define OD_ENTRY_H2240 &OD->list[92]
-#define OD_ENTRY_H2241 &OD->list[93]
-#define OD_ENTRY_H2243 &OD->list[94]
-#define OD_ENTRY_H2250 &OD->list[95]
-#define OD_ENTRY_H2251 &OD->list[96]
+#define OD_ENTRY_H2130 &OD->list[73]
+#define OD_ENTRY_H2131 &OD->list[74]
+#define OD_ENTRY_H2132 &OD->list[75]
+#define OD_ENTRY_H2133 &OD->list[76]
+#define OD_ENTRY_H2134 &OD->list[77]
+#define OD_ENTRY_H2135 &OD->list[78]
+#define OD_ENTRY_H2140 &OD->list[79]
+#define OD_ENTRY_H2141 &OD->list[80]
+#define OD_ENTRY_H2142 &OD->list[81]
+#define OD_ENTRY_H2143 &OD->list[82]
+#define OD_ENTRY_H2144 &OD->list[83]
+#define OD_ENTRY_H2145 &OD->list[84]
+#define OD_ENTRY_H2200 &OD->list[85]
+#define OD_ENTRY_H2212 &OD->list[86]
+#define OD_ENTRY_H2213 &OD->list[87]
+#define OD_ENTRY_H2220 &OD->list[88]
+#define OD_ENTRY_H2221 &OD->list[89]
+#define OD_ENTRY_H2240 &OD->list[90]
+#define OD_ENTRY_H2241 &OD->list[91]
+#define OD_ENTRY_H2243 &OD->list[92]
+#define OD_ENTRY_H2250 &OD->list[93]
+#define OD_ENTRY_H2251 &OD->list[94]
 
 
 /*******************************************************************************
@@ -785,30 +777,28 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H2103_accumulatorTemperature &OD->list[70]
 #define OD_ENTRY_H2104_accumulatorStateOfCharge &OD->list[71]
 #define OD_ENTRY_H2105_accumulatorCapacity &OD->list[72]
-#define OD_ENTRY_H2106_accumulatorCellVoltage &OD->list[73]
-#define OD_ENTRY_H2107_accumulatorRawTemperature &OD->list[74]
-#define OD_ENTRY_H2130_invRLControlWord &OD->list[75]
-#define OD_ENTRY_H2131_invRLStatusWord &OD->list[76]
-#define OD_ENTRY_H2132_invRLTargetTorque &OD->list[77]
-#define OD_ENTRY_H2133_invRL_Motor &OD->list[78]
-#define OD_ENTRY_H2134_invRL_DCBus &OD->list[79]
-#define OD_ENTRY_H2135_invRLTemperature &OD->list[80]
-#define OD_ENTRY_H2140_invRRControlWord &OD->list[81]
-#define OD_ENTRY_H2141_invRRStatusWord &OD->list[82]
-#define OD_ENTRY_H2142_invRRTargetTorque &OD->list[83]
-#define OD_ENTRY_H2143_invRR_Motor &OD->list[84]
-#define OD_ENTRY_H2144_invRR_DCBus &OD->list[85]
-#define OD_ENTRY_H2145_invRRTemperature &OD->list[86]
-#define OD_ENTRY_H2200_power &OD->list[87]
-#define OD_ENTRY_H2212_wheelRL &OD->list[88]
-#define OD_ENTRY_H2213_wheelRR &OD->list[89]
-#define OD_ENTRY_H2220_suspensionF &OD->list[90]
-#define OD_ENTRY_H2221_suspensionR &OD->list[91]
-#define OD_ENTRY_H2240_IMUAcceleration &OD->list[92]
-#define OD_ENTRY_H2241_IMUGyration &OD->list[93]
-#define OD_ENTRY_H2243_IMUEuler &OD->list[94]
-#define OD_ENTRY_H2250_GPSPosition &OD->list[95]
-#define OD_ENTRY_H2251_GPSVelocity &OD->list[96]
+#define OD_ENTRY_H2130_invRLControlWord &OD->list[73]
+#define OD_ENTRY_H2131_invRLStatusWord &OD->list[74]
+#define OD_ENTRY_H2132_invRLTargetTorque &OD->list[75]
+#define OD_ENTRY_H2133_invRL_Motor &OD->list[76]
+#define OD_ENTRY_H2134_invRL_DCBus &OD->list[77]
+#define OD_ENTRY_H2135_invRLTemperature &OD->list[78]
+#define OD_ENTRY_H2140_invRRControlWord &OD->list[79]
+#define OD_ENTRY_H2141_invRRStatusWord &OD->list[80]
+#define OD_ENTRY_H2142_invRRTargetTorque &OD->list[81]
+#define OD_ENTRY_H2143_invRR_Motor &OD->list[82]
+#define OD_ENTRY_H2144_invRR_DCBus &OD->list[83]
+#define OD_ENTRY_H2145_invRRTemperature &OD->list[84]
+#define OD_ENTRY_H2200_power &OD->list[85]
+#define OD_ENTRY_H2212_wheelRL &OD->list[86]
+#define OD_ENTRY_H2213_wheelRR &OD->list[87]
+#define OD_ENTRY_H2220_suspensionF &OD->list[88]
+#define OD_ENTRY_H2221_suspensionR &OD->list[89]
+#define OD_ENTRY_H2240_IMUAcceleration &OD->list[90]
+#define OD_ENTRY_H2241_IMUGyration &OD->list[91]
+#define OD_ENTRY_H2243_IMUEuler &OD->list[92]
+#define OD_ENTRY_H2250_GPSPosition &OD->list[93]
+#define OD_ENTRY_H2251_GPSVelocity &OD->list[94]
 
 
 /*******************************************************************************

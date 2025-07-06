@@ -13,6 +13,8 @@ rsource "Kconfig.hardware"
 
 rsource "src/canopen/Kconfig"
 rsource "src/ctrl/Kconfig"
+rsource "src/msg/Kconfig"
 rsource "src/sys/Kconfig"
+rsource "src/telemetry/Kconfig"
 
 endif # VCU
