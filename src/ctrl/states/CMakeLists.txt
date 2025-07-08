@@ -1,6 +1,5 @@
 target_sources(app PRIVATE
     err.c
-    rtd_sound.c
     states.c
 )
 

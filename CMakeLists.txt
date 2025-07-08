@@ -11,7 +11,9 @@ zephyr_include_directories(
 
 add_subdirectory(src/canopen)
 add_subdirectory(src/ctrl)
+add_subdirectory(src/dashboard)
 add_subdirectory(src/msg)
+add_subdirectory(src/perception)
 add_subdirectory(src/telemetry)
 
 target_sources(app PRIVATE

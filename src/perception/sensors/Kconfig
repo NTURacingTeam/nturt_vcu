@@ -1,0 +1,23 @@
+menuconfig VCU_SENSORS
+	bool "Sensor and input system"
+	default y
+	select SENSOR
+	select INPUT
+
+if VCU_SENSORS
+
+config VCU_SENSORS_INIT_PRIORITY
+	int "Init priority"
+	default 60
+	help
+	  Sensor and input system initialization priority.
+
+config VCU_SENSORS_SHELL
+	bool "Sensor and input shell"
+	depends on VCU_SHELL
+	default y
+	select SENSOR_SHELL
+	select INPUT_SHELL
+	select INPUT_EVENT_DUMP
+
+endif # VCU_SENSORS

@@ -33,7 +33,7 @@
  * callback.
  */
 #define STATES_CALLBACK_DEFINE_NAMED(_name, _states, _handler, _user_data) \
-  const STRUCT_SECTION_ITERABLE(states_callback, _name) = {                \
+  static const STRUCT_SECTION_ITERABLE(states_callback, _name) = {         \
       .states = _states,                                                   \
       .handler = _handler,                                                 \
       .user_data = _user_data,                                             \
@@ -48,7 +48,7 @@
  * @param[in] user_data Pointer to custom data for the callback.
  *
  * @note Since the name of the callback is derived from the name of @p handler ,
- * if handlers with the same name are used for multiple callbacks,
+ * if the same handler is used for multiple callbacks,
  * @ref STATES_CALLBACK_DEFINE_NAMED can be used instead to prevent linker
  * errors.
  */

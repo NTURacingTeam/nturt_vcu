@@ -3,12 +3,6 @@
 #include <zephyr/dt-bindings/input/sensor-axis.h>
 
 / {
-    chosen {
-        nturt,accel = &accel_pedal_plaus;
-        nturt,brake = &brake;
-        nturt,steer = &steer;
-    };
-
     // sensing: sensing-node {
     //     compatible = "zephyr,sensing";
         
@@ -25,6 +19,21 @@
         compatible = "sensor-axis";
         poll-period = <10>;
 
+        steer: steer {
+            zephyr,axis = <INPUT_ABS_WHEEL>;
+            out-min = <(-127)>;
+            out-max = <127>;
+            noise = <1000>; // 1%
+
+            steer_encoder {
+                sensor = <&steer_encoder>;
+                zephyr,channel = <SENSOR_CHAN_ROTATION>;
+                in-min = <(-180) 0>;
+                in-max = <180 0>;
+                range-tolerance = <10>; // 10%
+            };
+        };
+
         accel: accel {
             zephyr,axis = <INPUT_ABS_THROTTLE>;
             deadzone-mode = <INPUT_DEADZONE_MODE_EDGE>;
@@ -34,7 +43,7 @@
             time-tolerance = <100>; // 100ms
             time-tolerance-decay = <20>; // 20%
 
-            apps1 {
+            apps1_sensor_axis: apps1 {
                 sensor = <&apps1>;
                 zephyr,channel = <SENSOR_CHAN_ROTATION>;
                 in-min = <0 0>;
@@ -42,7 +51,7 @@
                 range-tolerance = <10>; // 10%
             };
 
-            apps2 {
+            apps2_sensor_axis: apps2 {
                 sensor = <&apps2>;
                 zephyr,channel = <SENSOR_CHAN_ROTATION>;
                 in-min = <0 0>;
@@ -59,7 +68,7 @@
             time-tolerance = <100>; // 100ms
             time-tolerance-decay = <20>; // 20%
 
-            bse1 {
+            bse1_sensor_axis: bse1 {
                 sensor = <&bse1>;
                 zephyr,channel = <SENSOR_CHAN_PRESS>;
                 in-min = <0 0>;
@@ -67,26 +76,11 @@
                 range-tolerance = <10>; // 10%
             };
 
-            bse2 {
+            bse2_sensor_axis: bse2 {
                 sensor = <&bse2>;
                 zephyr,channel = <SENSOR_CHAN_PRESS>;
                 in-min = <0 0>;
                 in-max = <100 0>;
-                range-tolerance = <10>; // 10%
-            };
-        };
-
-        steer: steer {
-            zephyr,axis = <INPUT_ABS_WHEEL>;
-            out-min = <(-127)>;
-            out-max = <127>;
-            noise = <1000>; // 1%
-
-            steer_encoder {
-                sensor = <&steer_encoder>;
-                zephyr,channel = <SENSOR_CHAN_ROTATION>;
-                in-min = <(-180) 0>;
-                in-max = <180 0>;
                 range-tolerance = <10>; // 10%
             };
         };
@@ -96,5 +90,24 @@
         compatible = "nturt,accel";
         accel = <&accel>;
         brake = <&brake>;
+    };
+
+    double-tap {
+        input = <&buttons>;
+        compatible = "zephyr,input-double-tap";
+        input-codes = <INPUT_BTN_1>;
+        double-tap-codes = <INPUT_BTN_1>;
+        double-tap-delay-ms = <300>;
+        status = "disabled";
+    };
+
+    longpress {
+        input = <&buttons>;
+        compatible = "zephyr,input-longpress";
+        input-codes = <INPUT_BTN_1>;
+        short-codes = <INPUT_BTN_1>;
+        long-codes = <INPUT_BTN_1>;
+        long-delay-ms = <1000>;
+        status = "disabled";
     };
 };

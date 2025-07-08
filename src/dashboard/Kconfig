@@ -1,0 +1,27 @@
+menuconfig VCU_DASHBOARD
+	bool "Dashboard and display system"
+	select LED
+	select LED_STRIP
+	select AUXDISPLAY
+	select DISPLAY
+
+if VCU_DASHBOARD
+
+config VCU_DASHBOARD_INIT_PRIORITY
+	int "Init priority"
+	default 50
+	help
+	  Dashboard and display system initialization priority.
+
+config VCU_DASHBOARD_SHELL
+	bool "Dashboard and display shell support"
+	depends on VCU_SHELL
+	default y
+	select LED_SHELL
+
+config VCU_DASHBOARD_SETTINGS
+	bool "Dashboard and display settings support"
+	depends on SETTINGS
+	default y
+
+endif # VCU_DASHBOARD

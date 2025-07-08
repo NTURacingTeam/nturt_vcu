@@ -1,0 +1,13 @@
+menuconfig VCU_PERCEPTION
+	bool "Perception system"
+	# select SENSING
+	select NTURT_MSG
+	select VCU_SENSORS
+	# select VCU_KALMAN
+
+if VCU_PERCEPTION
+
+rsource "kalman/Kconfig"
+rsource "sensors/Kconfig"
+
+endif # VCU_PERCEPTION
