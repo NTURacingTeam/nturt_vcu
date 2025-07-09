@@ -38,11 +38,10 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2001_VCUErrors = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
     .x2080_steerAngle = 0,
     .x2081_accelerator = {
-        .highestSub_indexSupported = 0x04,
+        .highestSub_indexSupported = 0x03,
         .travel = 0x00,
         .raw1 = 0,
-        .raw2 = 0,
-        .micro = 0x00
+        .raw2 = 0
     },
     .x2082_brake = {
         .highestSub_indexSupported = 0x03,
@@ -150,8 +149,8 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1012_COB_IDTimeStampObject = 0x80000100,
     .x1014_COB_ID_EMCY = 0x00000080,
     .x1015_inhibitTimeEMCY = 0x0000,
-    .x1016_consumerHeartbeatTime_sub0 = 0x08,
-    .x1016_consumerHeartbeatTime = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
+    .x1016_consumerHeartbeatTime_sub0 = 0x03,
+    .x1016_consumerHeartbeatTime = {0x001001F4, 0x001301F4, 0x001401F4},
     .x1017_producerHeartbeatTime = 0x0064,
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1200_SDOServerParameter = {
@@ -469,14 +468,14 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .SYNCStartValue = 0x00
     },
     .x1A00_TPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x00,
-        .applicationObject1 = 0x00000000,
-        .applicationObject2 = 0x00000000,
-        .applicationObject3 = 0x00000000,
-        .applicationObject4 = 0x00000000,
-        .applicationObject5 = 0x00000000,
-        .applicationObject6 = 0x00000000,
-        .applicationObject7 = 0x00000000,
+        .numberOfMappedApplicationObjectsInPDO = 0x07,
+        .applicationObject1 = 0x20800010,
+        .applicationObject2 = 0x20810108,
+        .applicationObject3 = 0x20810208,
+        .applicationObject4 = 0x20810308,
+        .applicationObject5 = 0x20820108,
+        .applicationObject6 = 0x20820208,
+        .applicationObject7 = 0x20820308,
         .applicationObject8 = 0x00000000
     },
     .x1A01_TPDOMappingParameter = {
@@ -606,7 +605,7 @@ typedef struct {
     OD_obj_var_t o_2000_VCUStates;
     OD_obj_array_t o_2001_VCUErrors;
     OD_obj_var_t o_2080_steerAngle;
-    OD_obj_record_t o_2081_accelerator[5];
+    OD_obj_record_t o_2081_accelerator[4];
     OD_obj_record_t o_2082_brake[4];
     OD_obj_var_t o_2090_speed;
     OD_obj_var_t o_2100_accumulatorStatus;
@@ -2619,12 +2618,6 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 3,
             .attribute = ODA_SDO_R | ODA_TPDO,
             .dataLength = 1
-        },
-        {
-            .dataOrig = &OD_RAM.x2081_accelerator.micro,
-            .subIndex = 4,
-            .attribute = ODA_SDO_R | ODA_TPDO,
-            .dataLength = 1
         }
     },
     .o_2082_brake = {
@@ -3065,7 +3058,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1012, 0x01, ODT_VAR, &ODObjs.o_1012_COB_IDTimeStampObject, NULL},
     {0x1014, 0x01, ODT_VAR, &ODObjs.o_1014_COB_ID_EMCY, NULL},
     {0x1015, 0x01, ODT_VAR, &ODObjs.o_1015_inhibitTimeEMCY, NULL},
-    {0x1016, 0x09, ODT_ARR, &ODObjs.o_1016_consumerHeartbeatTime, NULL},
+    {0x1016, 0x04, ODT_ARR, &ODObjs.o_1016_consumerHeartbeatTime, NULL},
     {0x1017, 0x01, ODT_VAR, &ODObjs.o_1017_producerHeartbeatTime, NULL},
     {0x1019, 0x01, ODT_VAR, &ODObjs.o_1019_synchronousCounterOverflowValue, NULL},
     {0x1200, 0x03, ODT_REC, &ODObjs.o_1200_SDOServerParameter, NULL},
@@ -3115,7 +3108,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x2000, 0x01, ODT_VAR, &ODObjs.o_2000_VCUStates, NULL},
     {0x2001, 0x11, ODT_ARR, &ODObjs.o_2001_VCUErrors, NULL},
     {0x2080, 0x01, ODT_VAR, &ODObjs.o_2080_steerAngle, NULL},
-    {0x2081, 0x05, ODT_REC, &ODObjs.o_2081_accelerator, NULL},
+    {0x2081, 0x04, ODT_REC, &ODObjs.o_2081_accelerator, NULL},
     {0x2082, 0x04, ODT_REC, &ODObjs.o_2082_brake, NULL},
     {0x2090, 0x01, ODT_VAR, &ODObjs.o_2090_speed, NULL},
     {0x2100, 0x01, ODT_VAR, &ODObjs.o_2100_accumulatorStatus, NULL},

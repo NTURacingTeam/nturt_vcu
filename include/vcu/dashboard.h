@@ -15,14 +15,16 @@
 #include <stdint.h>
 
 // zephyr includes
+#include <zephyr/devicetree.h>
 #include <zephyr/kernel.h>
 
-/* macro ---------------------------------------------------------------------*/
-#define LED_NUM_RUN 0
-#define LED_NUM_ERROR 1
-#define NUM_LED 16
+// project includes
+#include "vcu/dt-bindings/dashboard.h"
 
-#define LED_STRIP_LEN 20
+/* macro ---------------------------------------------------------------------*/
+#define NUM_LED DT_CHILD_NUM_STATUS_OKAY(DT_CHOSEN(nturt_leds))
+
+#define LED_STRIP_LEN DT_PROP(DT_CHOSEN(nturt_accel_display), chain_length)
 
 #define LED_BLINK_PERIOD K_MSEC(250)
 
@@ -34,6 +36,7 @@ typedef void (*dashboard_mode_trans_t)();
 
 enum dashboard_mode {
   DASHBOARD_NORMAL,
+  DASHBOARD_SETTING,
   DASHBOARD_TEST,
 
   NUM_DASHBOARD_MODE,
@@ -64,6 +67,9 @@ int dashboard_settings_save();
 
 void dashboard_normal_start();
 void dashboard_normal_stop();
+
+void dashboard_setting_start();
+void dashboard_setting_stop();
 
 void dashboard_test_start();
 void dashboard_test_stop();

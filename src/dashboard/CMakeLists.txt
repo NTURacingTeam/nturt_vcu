@@ -1,10 +1,10 @@
 if(CONFIG_VCU_DASHBOARD)
 
+add_subdirectory(modes)
+
 target_sources(app PRIVATE
     dashboard.c
-    normal.c
     peripherals.c
-    test.c
 )
 
 target_sources_ifdef(CONFIG_VCU_DASHBOARD_SHELL app PRIVATE

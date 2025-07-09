@@ -1,4 +1,4 @@
-#include "dashboard.h"
+#include "vcu/dashboard.h"
 
 // glibc includes
 #include <stdint.h>
@@ -31,7 +31,11 @@ struct dashboard_ctx {
 };
 
 /* static function declaration -----------------------------------------------*/
+static void dashboard_clear();
+
 static int init();
+
+static void input_cb(struct input_event* evt, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
 static const struct device* leds = DEVICE_DT_GET(DT_CHOSEN(nturt_leds));
@@ -54,6 +58,13 @@ static const struct dashboard_mode_info g_mode_infos[] = {
             .name = "normal",
             .desc = "Normal dashboard operations",
         },
+    [DASHBOARD_SETTING] =
+        {
+            .start = dashboard_setting_start,
+            .stop = dashboard_setting_stop,
+            .name = "setting",
+            .desc = "Dashboard settings mode",
+        },
     [DASHBOARD_TEST] =
         {
             .start = dashboard_test_start,
@@ -70,6 +81,8 @@ static struct dashboard_ctx g_ctx = {
 };
 
 SYS_INIT(init, APPLICATION, CONFIG_VCU_DASHBOARD_INIT_PRIORITY);
+
+INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
 
 /* function definition -------------------------------------------------------*/
 uint8_t dashboard_brightness_get() { return g_ctx.brightness; }
@@ -99,6 +112,8 @@ void dashboard_mode_set(enum dashboard_mode mode) {
   g_ctx.mode = mode;
 
   k_mutex_unlock(&g_ctx.lock);
+
+  LOG_INF("Set dashboard mode to: %s", dashboard_mode_info(mode)->name);
 }
 
 const struct dashboard_mode_info* dashboard_mode_info(
@@ -131,4 +146,14 @@ static int init() {
   g_mode_infos[g_ctx.mode].start();
 
   return 0;
+}
+
+static void input_cb(struct input_event* evt, void* user_data) {
+  (void)user_data;
+
+  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE) {
+    enum dashboard_mode next_mode =
+        (dashboard_mode_get() + 1) % NUM_DASHBOARD_MODE;
+    dashboard_mode_set(next_mode);
+  }
 }

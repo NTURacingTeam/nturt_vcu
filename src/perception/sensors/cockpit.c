@@ -1,4 +1,5 @@
 // glibc includes
+#include <stdbool.h>
 #include <stddef.h>
 
 // zephyr includes
@@ -17,9 +18,20 @@
 #include <nturt/err/err.h>
 #include <nturt/msg/msg.h>
 
+// project includes
+#include "vcu/ctrl/states.h"
+
 /// @todo APPS auto calibration triggered by micro
 
+/* type ----------------------------------------------------------------------*/
+struct cockpit_ctx {
+  bool accel_engaged;
+  bool brake_engaged;
+};
+
 /* static function declaration -----------------------------------------------*/
+static void states_update(struct cockpit_ctx* ctx);
+
 static int init();
 
 static void input_cb(struct input_event* evt, void* user_data);
@@ -47,9 +59,14 @@ static const struct device* bse2 =
 static const struct device* accel_pedal_plaus =
     DEVICE_DT_GET(DT_NODELABEL(accel_pedal_plaus));
 
+static struct cockpit_ctx g_ctx = {
+    .accel_engaged = false,
+    .brake_engaged = false,
+};
+
 SYS_INIT(init, APPLICATION, CONFIG_VCU_SENSORS_INIT_PRIORITY);
 
-INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
+INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
 
 ERR_DEFINE(steer, ERR_CODE_STEER, ERR_SEV_WARN, "Steering encoder error");
 
@@ -83,6 +100,17 @@ static AGG_TYPED_DEFINE(cockpit_agg,
 // clang-format on
 
 /* static function definition ------------------------------------------------*/
+static void states_update(struct cockpit_ctx* ctx) {
+  if ((states_get() & STATE_RTD_BLINK) && !ctx->accel_engaged &&
+      ctx->brake_engaged) {
+    states_transition(TRANS_CMD_PEDAL);
+
+  } else if ((states_get() & STATE_RTD_STEADY) &&
+             (ctx->accel_engaged || !ctx->brake_engaged)) {
+    states_transition(TRANS_CMD_PEDAL_CLEAR);
+  }
+}
+
 static int init() {
   sensor_axis_sensor_set_raw_cb(apps1, raw_cb, NULL);
   sensor_axis_sensor_set_raw_cb(apps2, raw_cb, NULL);
@@ -93,6 +121,8 @@ static int init() {
 }
 
 static void input_cb(struct input_event* evt, void* user_data) {
+  struct cockpit_ctx* ctx = user_data;
+
   if (evt->dev == steer) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_WHEEL) {
       AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, steer,
@@ -103,9 +133,18 @@ static void input_cb(struct input_event* evt, void* user_data) {
     }
 
   } else if (evt->dev == accel) {
-    if (evt->type == INPUT_EV_ERROR) {
+    if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_THROTTLE) {
+      ctx->accel_engaged = evt->value > 0;
+
+    } else if (evt->type == INPUT_EV_ERROR) {
       err_report(ERR_CODE_ACCEL, evt->value);
+
+      if (evt->value) {
+        ctx->accel_engaged = false;
+      }
     }
+
+    states_update(ctx);
 
   } else if (evt->dev == apps1) {
     if (evt->type == INPUT_EV_ERROR) {
@@ -121,10 +160,17 @@ static void input_cb(struct input_event* evt, void* user_data) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_BRAKE) {
       AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, brake,
                        evt->value);
+      ctx->brake_engaged = evt->value > 0;
 
     } else if (evt->type == INPUT_EV_ERROR) {
       err_report(ERR_CODE_BRAKE, evt->value);
+
+      if (evt->value) {
+        ctx->brake_engaged = false;
+      }
     }
+
+    states_update(ctx);
 
   } else if (evt->dev == bse1) {
     if (evt->type == INPUT_EV_ERROR) {

@@ -2,6 +2,8 @@
 #include <zephyr/dt-bindings/input/input-event-codes.h>
 #include <zephyr/dt-bindings/input/sensor-axis.h>
 
+#include "vcu/dt-bindings/dashboard.h"
+
 / {
     // sensing: sensing-node {
     //     compatible = "zephyr,sensing";
@@ -96,18 +98,17 @@
         input = <&buttons>;
         compatible = "zephyr,input-double-tap";
         input-codes = <INPUT_BTN_1>;
-        double-tap-codes = <INPUT_BTN_1>;
+        double-tap-codes = <INPUT_BTN_MODE>;
         double-tap-delay-ms = <300>;
-        status = "disabled";
     };
 
     longpress {
         input = <&buttons>;
         compatible = "zephyr,input-longpress";
-        input-codes = <INPUT_BTN_1>;
-        short-codes = <INPUT_BTN_1>;
-        long-codes = <INPUT_BTN_1>;
+        input-codes = <INPUT_BTN_UP>, <INPUT_BTN_DOWN>;
+        // ignore short presses using reserved code
+        short-codes = <INPUT_KEY_RESERVED>, <INPUT_KEY_RESERVED>;
+        long-codes = <INPUT_BTN_UP_HOLD>, <INPUT_BTN_DOWN_HOLD>;
         long-delay-ms = <1000>;
-        status = "disabled";
     };
 };

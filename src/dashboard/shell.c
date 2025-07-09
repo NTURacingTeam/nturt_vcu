@@ -1,4 +1,4 @@
-#include "dashboard.h"
+#include "vcu/dashboard.h"
 
 // glibc includes
 #include <stddef.h>

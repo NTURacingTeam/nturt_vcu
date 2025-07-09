@@ -1,9 +1,10 @@
-#include "dashboard.h"
+#include "vcu/dashboard.h"
 
 // glibc incldes
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 // zephyr includes
 #include <zephyr/device.h>
@@ -11,7 +12,7 @@
 #include <zephyr/drivers/auxdisplay.h>
 #include <zephyr/drivers/led.h>
 #include <zephyr/drivers/led_strip.h>
-#include <zephyr/input/input.h>
+#include <zephyr/init.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/zbus/zbus.h>
@@ -20,33 +21,47 @@
 #include <nturt/err/err.h>
 #include <nturt/msg/msg.h>
 
+// project includes
+#include "vcu/ctrl/states.h"
+
 /* type ----------------------------------------------------------------------*/
 enum {
   ACTIVE,
 
-  ERROR_BATTERY,
   ERROR_ACCEL,
   ERROR_BRAKE,
+  ERROR_PEDAL_PLAUS,
+  ERROR_INV_RL,
+  ERROR_INV_RR,
+  ERROR_ACC,
+
+  RUNNING,
+  ERR,
 
   NUM_DASHBOARD_STATE,
 };
 
 struct dashboard_normal_ctx {
+  const char *const err_str;
+
+  struct led_rgb err_rgb[LED_STRIP_LEN];
+
   struct k_mutex lock;
 
   bool states[NUM_DASHBOARD_STATE];
 };
 
 /* static function declaraion ------------------------------------------------*/
+static void led_set(const struct device *dev, int led, bool set);
 static void rgb_set_level(struct led_rgb *rgb, int len, int level);
+static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
+                                   bool set);
 
-/// @brief Set the LEDs to error pattern, which is a five-zone pattern with the
-/// second and fourth zones lit up.
-static void rgb_set_error_pattern(struct led_rgb *rgb, int len);
+static int init();
 
 static void msg_cb(const struct zbus_channel *chan);
-static void input_cb(struct input_event *evt, void *user_data);
 static void err_cb(uint32_t errcode, bool set, void *user_data);
+static void states_cb(enum states_state state, bool is_entry, void *user_data);
 
 /* static variable -----------------------------------------------------------*/
 static const struct device *leds = DEVICE_DT_GET(DT_CHOSEN(nturt_leds));
@@ -62,43 +77,34 @@ static const struct device *brake_display =
     DEVICE_DT_GET(DT_NODELABEL(brake_display));
 
 static struct dashboard_normal_ctx g_ctx = {
+    .err_str = "Er",
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
     .states = {0},
 };
+
+SYS_INIT(init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
 
 ZBUS_LISTENER_DEFINE(dashboard_normal_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, dashboard_normal_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_wheel_data_chan, dashboard_normal_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_acc_chan, dashboard_normal_listener, 0);
 
-INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
-
 ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
-                    ERR_FILTER_CODE(ERR_CODE_ACCEL, ERR_CODE_BRAKE));
+                    ERR_FILTER_CODE(ERR_CODE_ACCEL,
+                                    ERR_CODE_BRAKE | ERR_CODE_PEDAL_PLAUS,
+                                    ERR_CODE_HB_INV_RL, ERR_CODE_HB_INV_RR,
+                                    ERR_CODE_HB_ACC));
+
+STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_ERR, states_cb, &g_ctx);
 
 /* function definition -------------------------------------------------------*/
 void dashboard_normal_start() {
-  static const char *err_str = "Er";
-  struct led_rgb rgb[LED_STRIP_LEN];
-
   k_mutex_lock(&g_ctx.lock, K_FOREVER);
 
   g_ctx.states[ACTIVE] = true;
 
-  // auxdisplay_write(speed_display, err_str, strlen(err_str));
-
-  if (g_ctx.states[ERROR_BATTERY]) {
-    auxdisplay_write(battery_display, err_str, strlen(err_str));
-  }
-
-  if (g_ctx.states[ERROR_ACCEL]) {
-    rgb_set_error_pattern(rgb, LED_STRIP_LEN);
-    led_strip_update_rgb(accel_display, rgb, LED_STRIP_LEN);
-  }
-
-  if (g_ctx.states[ERROR_BRAKE]) {
-    rgb_set_error_pattern(rgb, LED_STRIP_LEN);
-    led_strip_update_rgb(brake_display, rgb, LED_STRIP_LEN);
+  for (int state = ACTIVE + 1; state < NUM_DASHBOARD_STATE; state++) {
+    dashboard_state_update(&g_ctx, state, g_ctx.states[state]);
   }
 
   k_mutex_unlock(&g_ctx.lock);
@@ -111,6 +117,14 @@ void dashboard_normal_stop() {
 }
 
 /* static function definition ------------------------------------------------*/
+static void led_set(const struct device *dev, int led, bool set) {
+  if (set) {
+    led_on(dev, led);
+  } else {
+    led_off(dev, led);
+  }
+}
+
 static void rgb_set_level(struct led_rgb *rgb, int len, int level) {
   level = DIV_ROUND_CLOSEST(level * len, 100);
 
@@ -123,18 +137,75 @@ static void rgb_set_level(struct led_rgb *rgb, int len, int level) {
   }
 }
 
-static void rgb_set_error_pattern(struct led_rgb *rgb, int len) {
+static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
+                                   bool set) {
+  ctx->states[state] = set;
+
+  if (!ctx->states[ACTIVE]) {
+    return;
+  }
+
+  switch (state) {
+    case ERROR_ACCEL:
+      if (set) {
+        led_strip_update_rgb(accel_display, ctx->err_rgb, LED_STRIP_LEN);
+      }
+      break;
+
+    case ERROR_BRAKE:
+      if (set) {
+        led_strip_update_rgb(brake_display, ctx->err_rgb, LED_STRIP_LEN);
+      }
+      break;
+
+    case ERROR_PEDAL_PLAUS:
+      if (set) {
+        led_set(leds, LED_NUM_PEDAL_PLAUS, true);
+      }
+
+    case ERROR_INV_RL:
+    case ERROR_INV_RR:
+      if (g_ctx.states[ERROR_INV_RL] || g_ctx.states[ERROR_INV_RR]) {
+        auxdisplay_write(speed_display, ctx->err_str, strlen(ctx->err_str));
+      }
+      break;
+
+    case ERROR_ACC:
+      if (set) {
+        auxdisplay_write(battery_display, ctx->err_str, strlen(ctx->err_str));
+      }
+      break;
+
+    case RUNNING:
+      led_set(leds, LED_NUM_RUNNING, set);
+      break;
+
+    case ERR:
+      led_set(leds, LED_NUM_ERROR, set);
+      break;
+
+    default:
+      __ASSERT(false, "Invalid state: %d", state);
+  }
+}
+
+static int init() {
+  // Initialize g_ctx.err_led, which is a five-zone pattern with the second and
+  // fourth zones lit up.
   int start = 0;
   for (int zone = 0; zone < 5; zone++) {
-    int zone_size = len / 5 + ((zone < len % 5) ? 1 : 0);
+    int zone_size = ARRAY_SIZE(g_ctx.err_rgb) / 5 +
+                    ((zone < ARRAY_SIZE(g_ctx.err_rgb) % 5) ? 1 : 0);
     int end = start + zone_size;
 
     for (int i = start; i < end; ++i) {
-      rgb[i].r = (zone == 1 || zone == 3) ? 1 : 0;
+      g_ctx.err_rgb[i].r = (zone == 1 || zone == 3) ? 1 : 0;
     }
 
     start = end;
   }
+
+  return 0;
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
@@ -165,16 +236,17 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_wheel_data_chan) {
     const struct msg_wheel_data *msg = zbus_chan_const_msg(chan);
 
-    /// @todo check error
-    int speed = RPM_TO_SPEED((msg->speed.rl + msg->speed.rr) / 2.0F);
-    snprintf(buf, sizeof(buf), "%2d", speed > 99 ? 99 : speed);
-    auxdisplay_write(speed_display, buf, strlen(buf));
+    if (!g_ctx.states[ERROR_INV_RL] && !g_ctx.states[ERROR_INV_RR]) {
+      int speed = RPM_TO_SPEED((msg->speed.rl + msg->speed.rr) / 2.0F);
+      snprintf(buf, sizeof(buf), "%2d", CLAMP(speed, -9, 99));
+      auxdisplay_write(speed_display, buf, strlen(buf));
+    }
 
   } else if (chan == &msg_acc_chan) {
     const struct msg_acc *msg = zbus_chan_const_msg(chan);
 
-    if (!g_ctx.states[ERROR_BATTERY]) {
-      snprintf(buf, sizeof(buf), "%2d", msg->soc > 99 ? 99 : msg->soc);
+    if (!g_ctx.states[ERROR_ACC]) {
+      snprintf(buf, sizeof(buf), "%2d", CLAMP(msg->soc, -9, 99));
       auxdisplay_write(battery_display, buf, strlen(buf));
     }
   }
@@ -182,48 +254,59 @@ static void msg_cb(const struct zbus_channel *chan) {
   k_mutex_unlock(&g_ctx.lock);
 }
 
-static void input_cb(struct input_event *evt, void *user_data) {}
-
 static void err_cb(uint32_t errcode, bool set, void *user_data) {
   struct dashboard_normal_ctx *ctx = user_data;
-
-  static const char *err_str = "Er";
-  struct led_rgb rgb[LED_STRIP_LEN];
 
   k_mutex_lock(&ctx->lock, K_FOREVER);
 
   switch (errcode) {
     case ERR_CODE_ACCEL:
-      ctx->states[ERROR_ACCEL] = set;
-
-      if (ctx->states[ACTIVE] && set) {
-        rgb_set_error_pattern(rgb, LED_STRIP_LEN);
-        led_strip_update_rgb(accel_display, rgb, LED_STRIP_LEN);
-      }
-
+      dashboard_state_update(ctx, ERROR_ACCEL, set);
       break;
 
     case ERR_CODE_BRAKE:
-      ctx->states[ERROR_BRAKE] = set;
+      dashboard_state_update(ctx, ERROR_BRAKE, set);
+      break;
 
-      if (ctx->states[ACTIVE] && set) {
-        rgb_set_error_pattern(rgb, LED_STRIP_LEN);
-        led_strip_update_rgb(brake_display, rgb, LED_STRIP_LEN);
-      }
+    case ERR_CODE_PEDAL_PLAUS:
+      dashboard_state_update(ctx, ERROR_PEDAL_PLAUS, set);
+      break;
 
+    case ERR_CODE_HB_INV_RL:
+      dashboard_state_update(ctx, ERROR_INV_RL, set);
+      break;
+
+    case ERR_CODE_HB_INV_RR:
+      dashboard_state_update(ctx, ERROR_INV_RR, set);
+      break;
+
+    case ERR_CODE_HB_ACC:
+      dashboard_state_update(ctx, ERROR_ACC, set);
       break;
 
     default:
-      /// @todo
-      if (ctx->states[ACTIVE] && set) {
-        auxdisplay_write(speed_display, err_str, strlen(err_str));
-      }
-
-      if (ctx->states[ACTIVE] && set) {
-        auxdisplay_write(battery_display, err_str, strlen(err_str));
-      }
-
       break;
+  }
+
+  k_mutex_unlock(&ctx->lock);
+}
+
+static void states_cb(enum states_state state, bool is_entry, void *user_data) {
+  struct dashboard_normal_ctx *ctx = user_data;
+
+  k_mutex_lock(&ctx->lock, K_FOREVER);
+
+  switch (state) {
+    case STATE_RUNNING:
+      dashboard_state_update(ctx, RUNNING, is_entry);
+      break;
+
+    case STATE_ERR:
+      dashboard_state_update(ctx, ERR, is_entry);
+      break;
+
+    default:
+      return;
   }
 
   k_mutex_unlock(&ctx->lock);

@@ -16,7 +16,7 @@
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2025/7/5 下午 08:08:22
+        Modified:     2025/7/9 下午 01:39:25
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
@@ -54,7 +54,7 @@
 #define OD_CNT_ARR_1003 16
 #define OD_CNT_ARR_1010 4
 #define OD_CNT_ARR_1011 4
-#define OD_CNT_ARR_1016 8
+#define OD_CNT_ARR_1016 3
 #define OD_CNT_ARR_2001 16
 #define OD_CNT_ARR_2240 3
 #define OD_CNT_ARR_2241 3
@@ -86,7 +86,6 @@ typedef struct {
         uint8_t travel;
         int8_t raw1;
         int8_t raw2;
-        uint8_t micro;
     } x2081_accelerator;
     struct {
         uint8_t highestSub_indexSupported;

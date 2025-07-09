@@ -1,4 +1,4 @@
-#include "dashboard.h"
+#include "vcu/dashboard.h"
 
 // zephyr includes
 #include <zephyr/device.h>
@@ -27,12 +27,13 @@ struct peripherials_ctx {
 };
 
 /* static function declaration -----------------------------------------------*/
+static int init();
+
 static void msg_cb(const struct zbus_channel *chan);
+static void input_cb(struct input_event *evt, void *user_data);
 static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void rtd_blink_work(struct k_work *work);
 static void rtd_sound_work(struct k_work *work);
-
-static int init();
 
 /* static variable -----------------------------------------------------------*/
 static const struct gpio_dt_spec buzzer =
@@ -53,14 +54,53 @@ SYS_INIT(init, APPLICATION, CONFIG_VCU_DASHBOARD_INIT_PRIORITY);
 ZBUS_LISTENER_DEFINE(peripherials_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, peripherials_listener, 0);
 
+INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
+
 STATES_CALLBACK_DEFINE(STATE_RTD_BLINK | STATE_RTD_STEADY | STATE_RTD_SOUND,
                        states_cb, &g_ctx);
 
 /* static function definition ------------------------------------------------*/
+static int init() {
+  const struct gpio_dt_spec *gpios[] = {
+      &buzzer,
+      &rtd_light,
+      &brake_light,
+  };
+
+  for (int i = 0; i < ARRAY_SIZE(gpios); i++) {
+    if (!device_is_ready(gpios[i]->port)) {
+      LOG_ERR("Device %s not ready", gpios[i]->port->name);
+      return -ENODEV;
+    }
+  }
+
+  int ret;
+  for (int i = 0; i < ARRAY_SIZE(gpios); i++) {
+    ret = gpio_pin_configure_dt(gpios[i], GPIO_OUTPUT_INACTIVE);
+    if (ret < 0) {
+      LOG_ERR("Failed to configure GPIO %s pin %hu: %s", gpios[i]->port->name,
+              gpios[i]->pin, strerror(-ret));
+      return ret;
+    }
+  }
+
+  return 0;
+}
+
 static void msg_cb(const struct zbus_channel *chan) {
   const struct msg_cockpit_data *msg = zbus_chan_const_msg(chan);
 
-  gpio_pin_set_dt(&brake_light, msg->accel > 0);
+  gpio_pin_set_dt(&brake_light, msg->brake > 0);
+}
+
+static void input_cb(struct input_event *evt, void *user_data) {
+  struct peripherials_ctx *ctx = user_data;
+
+  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_RTD && evt->value) {
+    if (states_valid_transition(TRANS_CMD_RTD)) {
+      states_transition(TRANS_CMD_RTD);
+    }
+  }
 }
 
 static void states_cb(enum states_state state, bool is_entry, void *user_data) {
@@ -132,31 +172,4 @@ static void rtd_sound_work(struct k_work *work) {
   }
 
   ctx->rtd_sound_count++;
-}
-
-static int init() {
-  const struct gpio_dt_spec *gpios[] = {
-      &buzzer,
-      &rtd_light,
-      &brake_light,
-  };
-
-  for (int i = 0; i < ARRAY_SIZE(gpios); i++) {
-    if (!device_is_ready(gpios[i]->port)) {
-      LOG_ERR("Device %s not ready", gpios[i]->port->name);
-      return -ENODEV;
-    }
-  }
-
-  int ret;
-  for (int i = 0; i < ARRAY_SIZE(gpios); i++) {
-    ret = gpio_pin_configure_dt(gpios[i], GPIO_OUTPUT_INACTIVE);
-    if (ret < 0) {
-      LOG_ERR("Failed to configure GPIO %s pin %hu: %s", gpios[i]->port->name,
-              gpios[i]->pin, strerror(-ret));
-      return ret;
-    }
-  }
-
-  return 0;
 }
