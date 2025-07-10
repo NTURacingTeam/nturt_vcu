@@ -31,7 +31,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
     SHELL_CMD_ARG(get, NULL, "Get brightness level.",
                   dashboard_brightness_get_cmd_handler, 0, 0),
     SHELL_CMD_ARG(set, NULL, "Set brightness level.",
-                  dashboard_brightness_set_cmd_handler, 1, 0),
+                  dashboard_brightness_set_cmd_handler, 2, 0),
     SHELL_SUBCMD_SET_END);
 
 SHELL_DYNAMIC_CMD_CREATE(dashboard_mode_set_subcmd,
@@ -40,18 +40,17 @@ SHELL_DYNAMIC_CMD_CREATE(dashboard_mode_set_subcmd,
 SHELL_STATIC_SUBCMD_SET_CREATE(
     dashboard_mode_cmd,
     SHELL_CMD_ARG(get, NULL, "Get current dashboard mode.",
-                  dashboard_mode_get_cmd_handler, 0, 0),
+                  dashboard_mode_get_cmd_handler, 1, 0),
     SHELL_CMD_ARG(set, &dashboard_mode_set_subcmd, "Set dashboard mode.",
-                  dashboard_mode_set_cmd_handler, 1, 0),
+                  dashboard_mode_set_cmd_handler, 2, 0),
     SHELL_SUBCMD_SET_END);
 
-SHELL_STATIC_SUBCMD_SET_CREATE(
-    dashboard_cmd,
-    SHELL_CMD_ARG(brightness, &dashboard_brightness_cmd,
-                  "Dashboard brightness control.", NULL, 1, 1),
-    SHELL_CMD_ARG(mode, &dashboard_mode_cmd, "Dashboard mode control.", NULL, 1,
-                  1),
-    SHELL_SUBCMD_SET_END);
+SHELL_STATIC_SUBCMD_SET_CREATE(dashboard_cmd,
+                               SHELL_CMD(brightness, &dashboard_brightness_cmd,
+                                         "Dashboard brightness control.", NULL),
+                               SHELL_CMD(mode, &dashboard_mode_cmd,
+                                         "Dashboard mode control.", NULL),
+                               SHELL_SUBCMD_SET_END);
 
 SHELL_CMD_REGISTER(dashboard, &dashboard_cmd, "Dashboard and display.", NULL);
 

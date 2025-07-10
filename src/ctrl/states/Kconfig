@@ -17,7 +17,7 @@ config VCU_STATES_INIT_PRIORITY
 
 choice VCU_STATES_TRANS_MODE
 	prompt "Control system state transition process mode"
-	default VCU_STATES_TRANS_THREAD
+	default VCU_STATES_TRANS_SYNC
 
 config VCU_STATES_TRANS_SYNC
 	bool "Process control system state transition synchronously"

@@ -8,13 +8,13 @@
 #define TRIG_SEV (ERR_SEV_FATAL)
 
 /* static function declaration -----------------------------------------------*/
-void states_err_handler(uint32_t errcode, bool set, void* user_data);
+void err_handler(uint32_t errcode, bool set, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
-ERR_CALLBACK_DEFINE(states_err_handler, NULL, ERR_FILTER_SEV(TRIG_SEV));
+ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(TRIG_SEV));
 
 /* static function definition ------------------------------------------------*/
-void states_err_handler(uint32_t errcode, bool set, void* user_data) {
+void err_handler(uint32_t errcode, bool set, void* user_data) {
   (void)errcode;
   (void)set;
   (void)user_data;

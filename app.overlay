@@ -19,7 +19,7 @@
 
     cockpit: sensor-axis-cockpit {
         compatible = "sensor-axis";
-        poll-period = <10>;
+        poll-period = <200>;
 
         steer: steer {
             zephyr,axis = <INPUT_ABS_WHEEL>;

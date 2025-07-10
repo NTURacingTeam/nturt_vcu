@@ -54,7 +54,7 @@ SYS_INIT(init, APPLICATION, CONFIG_VCU_DASHBOARD_INIT_PRIORITY);
 ZBUS_LISTENER_DEFINE(peripherials_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, peripherials_listener, 0);
 
-INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
+INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
 
 STATES_CALLBACK_DEFINE(STATE_RTD_BLINK | STATE_RTD_STEADY | STATE_RTD_SOUND,
                        states_cb, &g_ctx);
@@ -94,8 +94,6 @@ static void msg_cb(const struct zbus_channel *chan) {
 }
 
 static void input_cb(struct input_event *evt, void *user_data) {
-  struct peripherials_ctx *ctx = user_data;
-
   if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_RTD && evt->value) {
     if (states_valid_transition(TRANS_CMD_RTD)) {
       states_transition(TRANS_CMD_RTD);
@@ -112,6 +110,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
         k_work_schedule(&ctx->rtd_blink_dwork, K_NO_WAIT);
       } else {
         k_work_cancel_delayable(&ctx->rtd_blink_dwork);
+        gpio_pin_set_dt(&rtd_light, false);
       }
 
       break;

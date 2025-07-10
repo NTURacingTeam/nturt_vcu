@@ -76,6 +76,8 @@ static char *num_char(int i) {
   static char buf[20];
   if (i < 10) {
     snprintf(buf, sizeof(buf), ".%d", i);
+  } else if (i == 100) {
+    snprintf(buf, sizeof(buf), "00.");
   } else {
     snprintf(buf, sizeof(buf), "%2d.", i);
   }

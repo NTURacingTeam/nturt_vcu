@@ -71,18 +71,22 @@ static void show_brightness(uint8_t brightness) {
 }
 
 static void modify_brightness(bool increase) {
-  uint8_t brightness = dashboard_brightness_get();
+  int brightness = dashboard_brightness_get();
   brightness += increase ? 1 : -1;
   brightness = CLAMP(brightness, 0, 100);
 
   dashboard_brightness_set(brightness);
+  if (IS_ENABLED(CONFIG_VCU_DASHBOARD_SETTINGS)) {
+    dashboard_settings_save();
+  }
+
   show_brightness(brightness);
 }
 
 static void input_cb(struct input_event *evt, void *user_data) {
   struct dashboard_setting_ctx *ctx = user_data;
 
-  if (!ctx->states[ACTIVE] && evt->type != INPUT_EV_KEY) {
+  if (!ctx->states[ACTIVE] || evt->type != INPUT_EV_KEY) {
     return;
   }
 

@@ -151,7 +151,7 @@ static int init() {
 static void input_cb(struct input_event* evt, void* user_data) {
   (void)user_data;
 
-  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE) {
+  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE && evt->value) {
     enum dashboard_mode next_mode =
         (dashboard_mode_get() + 1) % NUM_DASHBOARD_MODE;
     dashboard_mode_set(next_mode);
