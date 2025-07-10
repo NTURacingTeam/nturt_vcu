@@ -134,6 +134,11 @@ static void input_cb(struct input_event* evt, void* user_data) {
 
   } else if (evt->dev == accel) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_THROTTLE) {
+      if (!IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
+        AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, accel,
+                         evt->value);
+      }
+
       ctx->accel_engaged = evt->value > 0;
 
     } else if (evt->type == INPUT_EV_ERROR) {
@@ -184,8 +189,10 @@ static void input_cb(struct input_event* evt, void* user_data) {
 
   } else if (evt->dev == accel_pedal_plaus) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_THROTTLE) {
-      AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, accel,
-                       evt->value);
+      if (IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
+        AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, accel,
+                         evt->value);
+      }
 
     } else if (evt->type == INPUT_EV_ERROR &&
                evt->code == INPUT_ERROR_PEDAL_PLAUS) {

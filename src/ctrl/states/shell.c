@@ -27,10 +27,14 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
                   1, 0),
     SHELL_CMD_ARG(
         trans, &states_trans_subcmd,
-        "Execute a state transition command to to transition to a new state.",
+        "Execute a state transition command to to transition to a new state.\n"
+        "Usage: trans <transition>",
         states_trans_cmd_handler, 2, 0),
     SHELL_SUBCMD_SET_END);
-SHELL_CMD_REGISTER(states, &states_cmd, "Control system state machine.", NULL);
+SHELL_CMD_REGISTER(states, &states_cmd,
+                   "Control system state machine commands.\n"
+                   "Usage: states <subcommand>",
+                   NULL);
 
 /* static function definition ------------------------------------------------*/
 static void states_trans_get_handler(size_t idx,

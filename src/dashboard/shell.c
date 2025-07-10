@@ -30,7 +30,9 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
     dashboard_brightness_cmd,
     SHELL_CMD_ARG(get, NULL, "Get brightness level.",
                   dashboard_brightness_get_cmd_handler, 0, 0),
-    SHELL_CMD_ARG(set, NULL, "Set brightness level.",
+    SHELL_CMD_ARG(set, NULL,
+                  "Set brightness level.\n"
+                  "Usage: set <level>",
                   dashboard_brightness_set_cmd_handler, 2, 0),
     SHELL_SUBCMD_SET_END);
 
@@ -52,7 +54,10 @@ SHELL_STATIC_SUBCMD_SET_CREATE(dashboard_cmd,
                                          "Dashboard mode control.", NULL),
                                SHELL_SUBCMD_SET_END);
 
-SHELL_CMD_REGISTER(dashboard, &dashboard_cmd, "Dashboard and display.", NULL);
+SHELL_CMD_REGISTER(dashboard, &dashboard_cmd,
+                   "Dashboard and display commands.\n"
+                   "Usage: dashboard <subcommand>",
+                   NULL);
 
 /* function definition -------------------------------------------------------*/
 static int dashboard_brightness_get_cmd_handler(const struct shell *sh,
@@ -62,7 +67,7 @@ static int dashboard_brightness_get_cmd_handler(const struct shell *sh,
   (void)argv;
   (void)data;
 
-  shell_print(sh, "Current brightness: %hu", dashboard_brightness_get());
+  shell_info(sh, "Current brightness: %hu", dashboard_brightness_get());
 
   return 0;
 }
@@ -73,15 +78,15 @@ static int dashboard_brightness_set_cmd_handler(const struct shell *sh,
   (void)argc;
   (void)data;
 
-  char *endptr;
-  long brightness = strtol(argv[1], &endptr, 10);
-  if (endptr == argv[1]) {
-    shell_error(sh, "Invalid brightness value: %s", argv[1]);
-    return -EINVAL;
-
-  } else if (brightness < 0 || brightness > 100) {
+  int ret = 0;
+  int brightness = shell_strtol(argv[1], 0, &ret);
+  if (ret == -ERANGE || brightness < 0 || brightness > 100) {
     shell_error(sh, "Brightness must be between 0 and 100.");
     return -ERANGE;
+
+  } else if (ret < 0) {
+    shell_error(sh, "Invalid brightness value: %s", argv[1]);
+    return -EINVAL;
   }
 
   dashboard_brightness_set(brightness);
@@ -117,7 +122,7 @@ static int dashboard_mode_get_cmd_handler(const struct shell *sh, size_t argc,
   enum dashboard_mode mode = dashboard_mode_get();
   const struct dashboard_mode_info *mode_info = dashboard_mode_info(mode);
 
-  shell_print(sh, "Current mode: %s", mode_info->name);
+  shell_info(sh, "Current mode: %s", mode_info->name);
 
   return 0;
 }

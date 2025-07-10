@@ -12,6 +12,13 @@ config VCU_SENSORS_INIT_PRIORITY
 	help
 	  Sensor and input system initialization priority.
 
+config VCU_SENSORS_PEDAL_PLAUS
+	bool "Pedal plausibility check"
+	default y
+	help
+	  Enable plausibility check for pedals according to the FSAE rule EV4.7,
+	  APPS / Brake Pedal Plausibility Check.
+
 config VCU_SENSORS_SHELL
 	bool "Sensor and input shell"
 	depends on VCU_SHELL
