@@ -67,7 +67,7 @@ static int dashboard_brightness_get_cmd_handler(const struct shell *sh,
   (void)argv;
   (void)data;
 
-  shell_info(sh, "Current brightness: %hu", dashboard_brightness_get());
+  shell_print(sh, "Current brightness: %hu", dashboard_brightness_get());
 
   return 0;
 }
@@ -122,7 +122,7 @@ static int dashboard_mode_get_cmd_handler(const struct shell *sh, size_t argc,
   enum dashboard_mode mode = dashboard_mode_get();
   const struct dashboard_mode_info *mode_info = dashboard_mode_info(mode);
 
-  shell_info(sh, "Current mode: %s", mode_info->name);
+  shell_print(sh, "Current mode: %s", mode_info->name);
 
   return 0;
 }

@@ -13,6 +13,7 @@
 
 // nturt includes
 #include <nturt/msg/msg.h>
+#include <nturt/sys/sys.h>
 
 // project includes
 #include "vcu/ctrl/states.h"
@@ -94,9 +95,23 @@ static void msg_cb(const struct zbus_channel *chan) {
 }
 
 static void input_cb(struct input_event *evt, void *user_data) {
-  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_RTD && evt->value) {
-    if (states_valid_transition(TRANS_CMD_RTD)) {
-      states_transition(TRANS_CMD_RTD);
+  if (evt->type == INPUT_EV_KEY && evt->value) {
+    switch (evt->code) {
+      case INPUT_BTN_RTD:
+        if (states_valid_transition(TRANS_CMD_RTD)) {
+          states_transition(TRANS_CMD_RTD);
+        }
+        break;
+
+      case INPUT_BTN_DISABLE:
+        if (states_valid_transition(TRANS_CMD_DISABLE)) {
+          states_transition(TRANS_CMD_DISABLE);
+        }
+        break;
+
+      case INPUT_BTN_RESET:
+        sys_reset();
+        break;
     }
   }
 }

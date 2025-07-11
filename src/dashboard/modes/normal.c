@@ -158,9 +158,8 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
       break;
 
     case ERROR_PEDAL_PLAUS:
-      if (set) {
-        led_set(leds, LED_NUM_PEDAL_PLAUS, true);
-      }
+      led_set(leds, LED_NUM_PEDAL_PLAUS, set);
+      break;
 
     case ERROR_INV_RL:
     case ERROR_INV_RR:
