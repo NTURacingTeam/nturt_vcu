@@ -67,7 +67,7 @@ static int states_get_cmd_handler(const struct shell *sh, size_t argc,
   char buf[100];
   states_t states = states_get();
   states_states_str(buf, sizeof(buf), states);
-  shell_info(sh, "Current states: 0x%X (%s)", states, buf);
+  shell_print(sh, "Current states: 0x%X (%s)", states, buf);
 
   return 0;
 }
@@ -97,7 +97,7 @@ static int states_trans_cmd_handler(const struct shell *sh, size_t argc,
     char buf[100];
     states_t states = states_get();
     states_states_str(buf, sizeof(buf), states);
-    shell_info(sh, "Note current states: 0x%X (%s)", states, buf);
+    shell_print(sh, "Note current states: 0x%X (%s)", states, buf);
 
     return -EINVAL;
   }

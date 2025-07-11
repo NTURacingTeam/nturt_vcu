@@ -15,6 +15,21 @@ config VCU_STATES_INIT_PRIORITY
 	help
 	  Control system state machine initialization priority.
 
+choice VCU_STATES_TRANS_TO_ERROR_ON_SEVERITY
+	prompt "Error severity to transition to error state"
+	default VCU_STATES_TRANS_TO_ERROR_ON_FATAL
+
+config VCU_STATES_TRANS_TO_ERROR_DISABLED
+	bool "Disable transition to error state on errors"
+
+config VCU_STATES_TRANS_TO_ERROR_ON_FATAL
+	bool "Transition to error state on fatal errors"
+
+config VCU_STATES_TRANS_TO_ERROR_ON_WARNING
+	bool "Transition to error state on warning errors"
+
+endchoice
+
 choice VCU_STATES_TRANS_MODE
 	prompt "Control system state transition process mode"
 	default VCU_STATES_TRANS_SYNC

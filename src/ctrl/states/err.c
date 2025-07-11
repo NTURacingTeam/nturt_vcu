@@ -4,24 +4,30 @@
 // project includes
 #include "vcu/ctrl/states.h"
 
+#ifndef CONFIG_VCU_STATES_TRANS_TO_ERROR_DISABLED
+
 /* macro ---------------------------------------------------------------------*/
-#define TRIG_SEV (ERR_SEV_FATAL)
+#ifdef CONFIG_VCU_STATES_TRANS_TO_ERROR_ON_FATAL
+#define ON_SEVERITY (ERR_SEV_FATAL)
+#elif defined(CONFIG_VCU_STATES_TRANS_TO_ERROR_ON_WARNING)
+#define ON_SEVERITY (ERR_SEV_WARNING)
+#endif
 
 /* static function declaration -----------------------------------------------*/
-void err_handler(uint32_t errcode, bool set, void* user_data);
+static void err_handler(uint32_t errcode, bool set, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
-ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(TRIG_SEV));
+ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(ON_SEVERITY));
 
 /* static function definition ------------------------------------------------*/
-void err_handler(uint32_t errcode, bool set, void* user_data) {
+static void err_handler(uint32_t errcode, bool set, void* user_data) {
   (void)errcode;
   (void)set;
   (void)user_data;
 
   struct err* err;
   ERR_FOREACH_SET(err) {
-    if (err->flags & ERR_FLAG_SET) {
+    if (err->flags & ON_SEVERITY) {
       if (states_get() & STATE_ERR_FREE) {
         states_transition(TRANS_CMD_ERR);
       }
@@ -34,3 +40,5 @@ void err_handler(uint32_t errcode, bool set, void* user_data) {
     states_transition(TRANS_CMD_ERR_CLEAR);
   }
 }
+
+#endif  // CONFIG_VCU_STATES_TRANS_TO_ERROR_DISABLED
