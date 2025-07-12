@@ -48,16 +48,16 @@
             apps1_sensor_axis: apps1 {
                 sensor = <&apps1>;
                 zephyr,channel = <SENSOR_CHAN_ROTATION>;
-                in-min = <0 0>;
-                in-max = <15 0>;
+                in-min = <(-60) 0>;
+                in-max = <60 0>;
                 range-tolerance = <10>; // 10%
             };
 
             apps2_sensor_axis: apps2 {
                 sensor = <&apps2>;
                 zephyr,channel = <SENSOR_CHAN_ROTATION>;
-                in-min = <0 0>;
-                in-max = <15 0>;
+                in-min = <(-60) 0>;
+                in-max = <60 0>;
                 range-tolerance = <10>; // 10%
             };
         };
@@ -97,18 +97,21 @@
     double-tap {
         input = <&buttons>;
         compatible = "zephyr,input-double-tap";
-        input-codes = <INPUT_BTN_1>;
-        double-tap-codes = <INPUT_BTN_MODE>;
+        input-codes = <INPUT_BTN_1>, <INPUT_BTN_RTD>;
+        double-tap-codes = <INPUT_BTN_MODE>, <INPUT_BTN_DISABLE>;
         double-tap-delay-ms = <300>;
     };
 
     longpress {
         input = <&buttons>;
         compatible = "zephyr,input-longpress";
-        input-codes = <INPUT_BTN_UP>, <INPUT_BTN_DOWN>;
+        input-codes = <INPUT_BTN_RTD>, <INPUT_BTN_UP>,
+            <INPUT_BTN_DOWN>;
         // ignore short presses using reserved code
-        short-codes = <INPUT_KEY_RESERVED>, <INPUT_KEY_RESERVED>;
-        long-codes = <INPUT_BTN_UP_HOLD>, <INPUT_BTN_DOWN_HOLD>;
+        short-codes = <INPUT_KEY_RESERVED>, <INPUT_KEY_RESERVED>,
+            <INPUT_KEY_RESERVED>;
+        long-codes = <INPUT_BTN_RESET>, <INPUT_BTN_UP_HOLD>,
+            <INPUT_BTN_DOWN_HOLD>;
         long-delay-ms = <1000>;
     };
 };

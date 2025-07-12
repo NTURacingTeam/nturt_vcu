@@ -3,12 +3,19 @@ menuconfig VCU_SENSORS
 	default y
 	select SENSOR
 	select INPUT
+	select INPUT_THREAD_PRIORITY_OVERRIDE
 
 if VCU_SENSORS
 
+config INPUT_THREAD_PRIORITY
+	default 1
+
+config INPUT_SENSOR_AXIS_THREAD_PRIORITY
+	default 1
+
 config VCU_SENSORS_INIT_PRIORITY
 	int "Init priority"
-	default 60
+	default 50
 	help
 	  Sensor and input system initialization priority.
 

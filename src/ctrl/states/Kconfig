@@ -11,7 +11,7 @@ if VCU_STATES
 
 config VCU_STATES_INIT_PRIORITY
 	int "Init priority"
-	default 50
+	default 30
 	help
 	  Control system state machine initialization priority.
 
