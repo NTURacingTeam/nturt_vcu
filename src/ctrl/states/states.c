@@ -157,7 +157,9 @@ static const struct states_trans_cmd_info g_trans_cmd_infos[] = {
 /// @brief State machine framework states and their names.
 SMF_STATES_DEFINE(g_smf_states, g_state_names,
                   (STATE_ERR_FREE, NO_STATE, STATE_READY),
-                  (STATE_READY, STATE_ERR_FREE, STATE_RTD_BLINK),
+                  (STATE_READY, STATE_ERR_FREE,
+                   COND_CODE_1(CONFIG_VCU_STATES_CHECK_PEDAL, (STATE_RTD_BLINK),
+                               (STATE_RTD_STEADY))),
                   (STATE_RTD_BLINK, STATE_READY, NO_STATE),
                   (STATE_RTD_STEADY, STATE_READY, STATE_RTD_READY),
                   (STATE_RTD_READY, STATE_RTD_STEADY, NO_STATE),

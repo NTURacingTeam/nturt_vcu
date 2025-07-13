@@ -105,7 +105,8 @@ static void states_update(struct cockpit_ctx* ctx) {
       ctx->brake_engaged) {
     states_transition(TRANS_CMD_PEDAL);
 
-  } else if ((states_get() & STATE_RTD_STEADY) &&
+  } else if (IS_ENABLED(CONFIG_VCU_STATES_CHECK_PEDAL) &&
+             (states_get() & STATE_RTD_STEADY) &&
              (ctx->accel_engaged || !ctx->brake_engaged)) {
     states_transition(TRANS_CMD_PEDAL_CLEAR);
   }

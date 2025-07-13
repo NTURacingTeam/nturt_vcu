@@ -28,7 +28,7 @@ struct peripherials_ctx {
 };
 
 /* static function declaration -----------------------------------------------*/
-static int init();
+static int gpio_init();
 
 static void msg_cb(const struct zbus_channel *chan);
 static void input_cb(struct input_event *evt, void *user_data);
@@ -50,7 +50,8 @@ static struct peripherials_ctx g_ctx = {
     .rtd_sound_dwork = Z_WORK_DELAYABLE_INITIALIZER(rtd_sound_work),
 };
 
-SYS_INIT(init, APPLICATION, CONFIG_VCU_DASHBOARD_INIT_PRIORITY);
+// use the same init priority as the LEDs since they are used in the same way
+SYS_INIT(gpio_init, POST_KERNEL, CONFIG_LED_INIT_PRIORITY);
 
 ZBUS_LISTENER_DEFINE(peripherials_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, peripherials_listener, 0);
@@ -61,7 +62,7 @@ STATES_CALLBACK_DEFINE(STATE_RTD_BLINK | STATE_RTD_STEADY | STATE_RTD_SOUND,
                        states_cb, &g_ctx);
 
 /* static function definition ------------------------------------------------*/
-static int init() {
+static int gpio_init() {
   const struct gpio_dt_spec *gpios[] = {
       &buzzer,
       &rtd_light,

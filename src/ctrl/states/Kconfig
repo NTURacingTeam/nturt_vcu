@@ -15,6 +15,13 @@ config VCU_STATES_INIT_PRIORITY
 	help
 	  Control system state machine initialization priority.
 
+config VCU_STATES_CHECK_PEDAL
+	bool "Check pedal states for RTD readiness"
+	default y
+	help
+	  When enabled, only when accelerator is not engaged and brake is engaged
+	  can start RTD.
+
 choice VCU_STATES_TRANS_TO_ERROR_ON_SEVERITY
 	prompt "Error severity to transition to error state"
 	default VCU_STATES_TRANS_TO_ERROR_ON_FATAL
