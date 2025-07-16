@@ -61,8 +61,8 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2132_invRLTargetTorque = 0,
     .x2133_invRL_Motor = {
         .highestSub_indexSupported = 0x02,
-        .speed = 0,
-        .feedbackTorque = 0
+        .feedbackTorque = 0,
+        .speed = 0
     },
     .x2134_invRL_DCBus = {
         .highestSub_indexSupported = 0x02,
@@ -80,8 +80,8 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2142_invRRTargetTorque = 0,
     .x2143_invRR_Motor = {
         .highestSub_indexSupported = 0x02,
-        .speed = 0,
-        .feedbackTorque = 0
+        .feedbackTorque = 0,
+        .speed = 0
     },
     .x2144_invRR_DCBus = {
         .highestSub_indexSupported = 0x02,
@@ -148,7 +148,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1007_synchronousWindowLength = 0x00000000,
     .x1012_COB_IDTimeStampObject = 0x80000100,
     .x1014_COB_ID_EMCY = 0x00000080,
-    .x1015_inhibitTimeEMCY = 0x0000,
+    .x1015_inhibitTimeEMCY = 0x0064,
     .x1016_consumerHeartbeatTime_sub0 = 0x03,
     .x1016_consumerHeartbeatTime = {0x001001F4, 0x001301F4, 0x001401F4},
     .x1017_producerHeartbeatTime = 0x0064,
@@ -2704,13 +2704,13 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .dataLength = 1
         },
         {
-            .dataOrig = &OD_RAM.x2133_invRL_Motor.speed,
+            .dataOrig = &OD_RAM.x2133_invRL_Motor.feedbackTorque,
             .subIndex = 1,
             .attribute = ODA_RPDO | ODA_MB,
             .dataLength = 2
         },
         {
-            .dataOrig = &OD_RAM.x2133_invRL_Motor.feedbackTorque,
+            .dataOrig = &OD_RAM.x2133_invRL_Motor.speed,
             .subIndex = 2,
             .attribute = ODA_RPDO | ODA_MB,
             .dataLength = 2
@@ -2785,13 +2785,13 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .dataLength = 1
         },
         {
-            .dataOrig = &OD_RAM.x2143_invRR_Motor.speed,
+            .dataOrig = &OD_RAM.x2143_invRR_Motor.feedbackTorque,
             .subIndex = 1,
             .attribute = ODA_RPDO | ODA_MB,
             .dataLength = 2
         },
         {
-            .dataOrig = &OD_RAM.x2143_invRR_Motor.feedbackTorque,
+            .dataOrig = &OD_RAM.x2143_invRR_Motor.speed,
             .subIndex = 2,
             .attribute = ODA_RPDO | ODA_MB,
             .dataLength = 2

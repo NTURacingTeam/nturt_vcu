@@ -16,7 +16,7 @@
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2025/7/9 下午 01:39:25
+        Modified:     2025/7/13 下午 04:14:09
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
@@ -105,8 +105,8 @@ typedef struct {
     int16_t x2132_invRLTargetTorque;
     struct {
         uint8_t highestSub_indexSupported;
-        int16_t speed;
         int16_t feedbackTorque;
+        int16_t speed;
     } x2133_invRL_Motor;
     struct {
         uint8_t highestSub_indexSupported;
@@ -124,8 +124,8 @@ typedef struct {
     int16_t x2142_invRRTargetTorque;
     struct {
         uint8_t highestSub_indexSupported;
-        int16_t speed;
         int16_t feedbackTorque;
+        int16_t speed;
     } x2143_invRR_Motor;
     struct {
         uint8_t highestSub_indexSupported;

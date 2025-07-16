@@ -85,16 +85,18 @@ ERR_DEFINE(pedal_plaus, ERR_CODE_PEDAL_PLAUS, ERR_SEV_WARN,
 
 static AGG_TYPED_DEFINE(cockpit_agg,
     struct msg_cockpit_data, AGG_DATA_INIT(0),
-    K_MSEC(10), K_MSEC(8), K_MSEC(3), cockpit_publish, NULL,
+    K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
+    cockpit_publish, NULL,
+
     AGG_MEMBER(steer),
 
     AGG_MEMBER(accel),
-    AGG_MEMBER(apps1, AGG_FLAG_OPTIONAL),
-    AGG_MEMBER(apps2, AGG_FLAG_OPTIONAL),
+    AGG_MEMBER(apps1, AGG_MEMBER_FLAG_OPTIONAL),
+    AGG_MEMBER(apps2, AGG_MEMBER_FLAG_OPTIONAL),
 
     AGG_MEMBER(brake),
-    AGG_MEMBER(bse1, AGG_FLAG_OPTIONAL),
-    AGG_MEMBER(bse2, AGG_FLAG_OPTIONAL)
+    AGG_MEMBER(bse1, AGG_MEMBER_FLAG_OPTIONAL),
+    AGG_MEMBER(bse2, AGG_MEMBER_FLAG_OPTIONAL)
 );
 
 // clang-format on
