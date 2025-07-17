@@ -5,5 +5,3 @@
 // nturt includes
 #include <nturt/msg/msg.h>
 
-// project includes
-#include "vcu/msg.h"
