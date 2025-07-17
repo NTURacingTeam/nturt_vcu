@@ -51,6 +51,8 @@ struct dashboard_setting_ctx {
   struct k_work_delayable blink_dwork;
 
   struct led_rgb blink_rgb[LED_STRIP_LEN];
+  struct led_rgb accel_rgb[LED_STRIP_LEN];
+  struct led_rgb brake_rgb[LED_STRIP_LEN];
 };
 
 /* static function declaration -----------------------------------------------*/
@@ -113,6 +115,8 @@ ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, dashboard_settings_listener, 0);
 void dashboard_setting_start() {
   g_ctx.states[ACTIVE] = true;
   k_work_schedule(&g_ctx.blink_dwork, K_NO_WAIT);
+  int brightness = dashboard_brightness_get();
+  show_brightness(brightness); 
 }
 
 void dashboard_setting_stop() {
@@ -196,6 +200,14 @@ static void switch_mode() {
     int brightness = dashboard_brightness_get();
     show_brightness(brightness);
   }
+
+  if(next_mode != APPS_SET) {
+    led_strip_update_rgb(accel_display, g_ctx.accel_rgb, LED_STRIP_LEN);
+  }
+
+  if(next_mode != BSE_SET) {
+    led_strip_update_rgb(brake_display, g_ctx.brake_rgb, LED_STRIP_LEN);
+  }
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
@@ -205,16 +217,14 @@ static void msg_cb(const struct zbus_channel *chan) {
     return;
   }
   
-  struct led_rgb rgb[LED_STRIP_LEN];
-
   if(chan == &msg_cockpit_data_chan) {
     const struct msg_cockpit_data *msg = zbus_chan_const_msg(chan);
 
-    rgb_set_level(rgb, ARRAY_SIZE(rgb), msg->accel);
-    led_strip_update_rgb(accel_display, rgb, LED_STRIP_LEN);
+    rgb_set_level(g_ctx.accel_rgb, ARRAY_SIZE(g_ctx.accel_rgb), msg->accel);
+    led_strip_update_rgb(accel_display, g_ctx.accel_rgb, LED_STRIP_LEN);
 
-    rgb_set_level(rgb, ARRAY_SIZE(rgb), msg->brake);
-    led_strip_update_rgb(brake_display, rgb, LED_STRIP_LEN);
+    rgb_set_level(g_ctx.brake_rgb, ARRAY_SIZE(g_ctx.brake_rgb), msg->brake);
+    led_strip_update_rgb(brake_display, g_ctx.brake_rgb, LED_STRIP_LEN);
   }
   k_spin_unlock(&g_ctx.lock, key);
 }
@@ -312,7 +322,6 @@ static void blink_work(struct k_work *work) {
 
   if(ctx->mode == BRIGHTNESS_SET){
     speed_blink(ctx->blink_state);
-    
   }
 
   if(ctx->mode == APPS_SET) {
