@@ -26,27 +26,27 @@ BUILD_ASSERT(NUM_STATE <= 32, "Number of states must not exceed 32");
 /// transition when defining states using @ref SMF_STATES_DEFINE.
 #define NO_STATE 0
 
-#define __SMF_STATE_FUNCTIONS_DEFINE(_state)            \
-  static void CONCAT(__, _state, _, entry)(void *obj) { \
-    struct states_ctx *ctx = obj;                       \
-                                                        \
-    ctx->states |= _state;                              \
-                                                        \
-    states_process_trans(ctx, _state, true);            \
-  }                                                     \
-                                                        \
-  static void CONCAT(__, _state, _, run)(void *obj) {   \
-    struct states_ctx *ctx = obj;                       \
-                                                        \
-    states_process_cmd(ctx, _state);                    \
-  }                                                     \
-                                                        \
-  static void CONCAT(__, _state, _, exit)(void *obj) {  \
-    struct states_ctx *ctx = obj;                       \
-                                                        \
-    ctx->states &= ~_state;                             \
-                                                        \
-    states_process_trans(ctx, _state, false);           \
+#define __SMF_STATE_FUNCTIONS_DEFINE(_state)                           \
+  static void CONCAT(__, _state, _, entry)(void *obj) {                \
+    struct states_ctx *ctx = obj;                                      \
+                                                                       \
+    ctx->states |= _state;                                             \
+                                                                       \
+    states_process_trans(ctx, _state, true);                           \
+  }                                                                    \
+                                                                       \
+  static enum smf_state_result CONCAT(__, _state, _, run)(void *obj) { \
+    struct states_ctx *ctx = obj;                                      \
+                                                                       \
+    return states_process_cmd(ctx, _state);                            \
+  }                                                                    \
+                                                                       \
+  static void CONCAT(__, _state, _, exit)(void *obj) {                 \
+    struct states_ctx *ctx = obj;                                      \
+                                                                       \
+    ctx->states &= ~_state;                                            \
+                                                                       \
+    states_process_trans(ctx, _state, false);                          \
   }
 
 #define _SMF_STATE_FUNCTIONS_DEFINE(args) \
@@ -127,7 +127,8 @@ struct states_ctx {
 
 /* static function declaration -----------------------------------------------*/
 static void states_init(struct states_ctx *ctx);
-static void states_process_cmd(struct states_ctx *ctx, enum states_state state);
+static enum smf_state_result states_process_cmd(struct states_ctx *ctx,
+                                                enum states_state state);
 static void states_process_trans(struct states_ctx *ctx,
                                  enum states_state state, bool is_entry);
 static void states_run_state(struct states_ctx *ctx);
@@ -254,16 +255,19 @@ static void states_init(struct states_ctx *ctx) {
   ctx->initialized = true;
 }
 
-static void states_process_cmd(struct states_ctx *ctx,
-                               enum states_state state) {
+static enum smf_state_result states_process_cmd(struct states_ctx *ctx,
+                                                enum states_state state) {
   if (ctx->cmd == TRANS_CMD_INVALID) {
-    return;
-  }
+    return SMF_EVENT_HANDLED;
 
-  if (g_trans_cmd_infos[ctx->cmd].src == state) {
+  } else if (g_trans_cmd_infos[ctx->cmd].src == state) {
     smf_set_state(&ctx->smf_ctx,
                   &g_smf_states[LOG2(g_trans_cmd_infos[ctx->cmd].dst)]);
     ctx->cmd = TRANS_CMD_INVALID;
+    return SMF_EVENT_HANDLED;
+
+  } else {
+    return SMF_EVENT_PROPAGATE;
   }
 }
 

@@ -49,7 +49,6 @@ static void fault_reset_work(struct k_work *work);
 static struct ctrl_inv_ctx g_ctx = {
     .fault_reset_work = Z_WORK_DELAYABLE_INITIALIZER(fault_reset_work),
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
-    .msg = {0},
 };
 
 ZBUS_LISTENER_DEFINE(ctrl_inv_listener, msg_cb);
@@ -126,7 +125,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
 
   struct ctrl_inv_ctx *ctx = user_data;
 
-  ctrl_inv_word_set_and_pub(&ctx, CTRL_WORD_ENABLE, is_entry);
+  ctrl_inv_word_set_and_pub(ctx, CTRL_WORD_ENABLE, is_entry);
 }
 
 static void fault_reset_work(struct k_work *work) {
