@@ -10,7 +10,7 @@
 #include "vcu/ctrl/states.h"
 #include "vcu/msg/msg.h"
 
-LOG_MODULE_REGISTER(ctrl);
+LOG_MODULE_REGISTER(vcu_ctrl);
 
 /* static function declaration -----------------------------------------------*/
 static void msg_cb(const struct zbus_channel *chan);

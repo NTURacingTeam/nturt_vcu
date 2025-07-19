@@ -15,7 +15,7 @@
 #include "vcu/ctrl/states.h"
 #include "vcu/msg/msg.h"
 
-LOG_MODULE_REGISTER(ctrl_inv);
+LOG_MODULE_REGISTER(vcu_ctrl_inv);
 
 /* macro ---------------------------------------------------------------------*/
 #define STATUS_WORD_READY BIT(1)

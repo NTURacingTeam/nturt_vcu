@@ -5,7 +5,7 @@ menuconfig VCU_STATES
 	select SMF_ANCESTOR_SUPPORT
 	select SMF_INITIAL_TRANSITION
 	select NTURT_ERR
-	select NTURT_MSG
+	select VCU_MSG
 
 if VCU_STATES
 

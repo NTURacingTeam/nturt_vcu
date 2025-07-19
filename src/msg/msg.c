@@ -7,5 +7,8 @@
 // nturt includes
 #include <nturt/msg/msg.h>
 
+LOG_MODULE_REGISTER(vcu_msg);
+
 /* static variable -----------------------------------------------------------*/
 MSG_ZBUS_CHAN_DEFINE(MSG_VCU_LIST);
+MSG_SHELL_DEFINE(MSG_VCU_LIST);
