@@ -14,8 +14,8 @@
 #include <zephyr/sys/util.h>
 #include <zephyr/zbus/zbus.h>
 
-// nturt includes
-#include "nturt/msg/msg.h"
+// project includes
+#include "vcu/msg/msg.h"
 
 LOG_MODULE_REGISTER(vcu_states);
 

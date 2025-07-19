@@ -10,10 +10,10 @@
 
 // nturt includes
 #include <nturt/err/err.h>
-#include <nturt/msg/msg.h>
 
 // project includes
 #include "vcu/ctrl/states.h"
+#include "vcu/msg/msg.h"
 
 LOG_MODULE_REGISTER(ctrl_inv);
 

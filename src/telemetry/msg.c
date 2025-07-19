@@ -11,6 +11,9 @@
 #include <nturt/msg/msg.h>
 #include <nturt/telemetry.h>
 
+// project includes
+#include "vcu/msg/msg.h"
+
 /* static function declaration -----------------------------------------------*/
 static void msg_cb(const struct zbus_channel *chan);
 
