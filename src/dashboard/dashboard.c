@@ -123,6 +123,37 @@ const struct dashboard_mode_info* dashboard_mode_info(
   return &g_mode_infos[mode];
 }
 
+void rgb_set_level(struct led_rgb* rgb, int len, int level) {
+  level = DIV_ROUND_CLOSEST(level * len, 100);
+
+  for (int i = 0; i < level; i++) {
+    rgb[i].r = 1;
+  }
+
+  for (int i = level; i < len; i++) {
+    rgb[i].r = 0;
+  }
+}
+
+void rgb_set_error(struct led_rgb* rgb, int len) {
+  int start = 0;
+  for (int zone = 0; zone < 5; zone++) {
+    int zone_size = len / 5 + ((zone < len % 5) ? 1 : 0);
+    int end = start + zone_size;
+
+    for (int i = start; i < end; ++i) {
+      rgb[i].r = (zone == 1 || zone == 3) ? 1 : 0;
+    }
+
+    start = end;
+  }
+}
+
+void rgb_apply_selected(struct led_rgb* rgb, int len) {
+  rgb[0].r = !rgb[0].r;
+  rgb[len - 1].r = !rgb[len - 1].r;
+}
+
 /* static function definition ------------------------------------------------*/
 static void dashboard_clear() {
   static const char* empty_str = "  ";

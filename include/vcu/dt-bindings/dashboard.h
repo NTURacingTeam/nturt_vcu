@@ -12,13 +12,13 @@
 #define VCU_DT_BINDINGS_DASHBOARD_H_
 
 #include <zephyr/dt-bindings/input/input-event-codes.h>
+
 #undef INPUT_BTN_LEFT
 #undef INPUT_BTN_RIGHT
 
+#define LED_NUM_PEDAL_PLAUS 4
 #define LED_NUM_RUNNING 8
 #define LED_NUM_ERROR 12
-#define LED_NUM_SETTINGS_MODE 13
-#define LED_NUM_PEDAL_PLAUS 4
 
 #define INPUT_BTN_RTD INPUT_BTN_2
 #define INPUT_BTN_UP INPUT_BTN_4
