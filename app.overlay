@@ -17,6 +17,16 @@
     //     };
     // };
 
+    fstab {
+        compatible = "zephyr,fstab";
+        ffs1: ffs1 {
+            compatible = "zephyr,fstab,fatfs";
+            automount;
+            disk-access;
+            mount-point = "/SD:";
+        };
+    };
+
     cockpit: sensor-axis-cockpit {
         compatible = "sensor-axis";
         poll-period = <10>;
