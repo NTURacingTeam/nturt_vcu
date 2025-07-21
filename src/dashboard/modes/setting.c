@@ -65,6 +65,7 @@ static void dashboard_modify_brightness(const struct dashboard_setting_ctx *ctx,
                                         bool increase);
 
 static void input_cb(struct input_event *evt, void *user_data);
+static void err_cb(uint32_t errcode, bool set, void *user_data);
 static void msg_cb(const struct zbus_channel *chan);
 
 static void blink_work(struct k_work *work);
@@ -103,6 +104,9 @@ INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
 ZBUS_LISTENER_DEFINE(dashboard_setting_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, dashboard_setting_listener, 0);
 
+ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
+                    ERR_FILTER_CODE(ERR_CODE_ACCEL, ERR_CODE_BRAKE));
+
 /* function definition -------------------------------------------------------*/
 void dashboard_setting_start() {
   k_mutex_lock(&g_ctx.lock, K_FOREVER);
@@ -123,6 +127,10 @@ void dashboard_setting_stop() {
 
   k_work_cancel_delayable(&g_ctx.blink_dwork);
   k_work_cancel_delayable(&g_ctx.modify_dwork);
+
+  if (IS_ENABLED(CONFIG_VCU_DASHBOARD_SETTINGS)) {
+    dashboard_settings_save();
+  }
 
   k_mutex_unlock(&g_ctx.lock);
 }
@@ -193,23 +201,6 @@ static void dashboard_modify_brightness(const struct dashboard_setting_ctx *ctx,
   dashboard_display(ctx);
 }
 
-static void msg_cb(const struct zbus_channel *chan) {
-  k_mutex_lock(&g_ctx.lock, K_FOREVER);
-
-  if (!g_ctx.states[ACTIVE]) {
-    k_mutex_unlock(&g_ctx.lock);
-    return;
-  }
-
-  const struct msg_cockpit_data *msg = zbus_chan_const_msg(chan);
-
-  g_ctx.accel = msg->accel;
-  g_ctx.brake = msg->brake;
-  dashboard_display(&g_ctx);
-
-  k_mutex_unlock(&g_ctx.lock);
-}
-
 static void input_cb(struct input_event *evt, void *user_data) {
   struct dashboard_setting_ctx *ctx = user_data;
 
@@ -222,7 +213,7 @@ static void input_cb(struct input_event *evt, void *user_data) {
   // change mode
   if (evt->value &&
       (evt->code == INPUT_BTN_LEFT || evt->code == INPUT_BTN_RIGHT)) {
-    if (evt->code == INPUT_BTN_LEFT) {
+    if (evt->code == INPUT_BTN_RIGHT) {
       g_ctx.mode = (g_ctx.mode - 1 + NUM_MODE) % NUM_MODE;
     } else {
       g_ctx.mode = (g_ctx.mode + 1) % NUM_MODE;
@@ -298,6 +289,41 @@ static void input_cb(struct input_event *evt, void *user_data) {
   }
 
 out:
+  k_mutex_unlock(&ctx->lock);
+}
+
+static void msg_cb(const struct zbus_channel *chan) {
+  k_mutex_lock(&g_ctx.lock, K_FOREVER);
+
+  const struct msg_cockpit_data *msg = zbus_chan_const_msg(chan);
+
+  g_ctx.accel = msg->accel;
+  g_ctx.brake = msg->brake;
+  dashboard_display(&g_ctx);
+
+  k_mutex_unlock(&g_ctx.lock);
+}
+
+static void err_cb(uint32_t errcode, bool set, void *user_data) {
+  struct dashboard_setting_ctx *ctx = user_data;
+
+  k_mutex_lock(&ctx->lock, K_FOREVER);
+
+  switch (errcode) {
+    case ERR_CODE_ACCEL:
+      ctx->states[ERROR_ACCEL] = set;
+      dashboard_display(ctx);
+      break;
+
+    case ERR_CODE_BRAKE:
+      ctx->states[ERROR_BRAKE] = set;
+      dashboard_display(ctx);
+      break;
+
+    default:
+      break;
+  }
+
   k_mutex_unlock(&ctx->lock);
 }
 
