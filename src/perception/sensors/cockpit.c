@@ -84,7 +84,7 @@ ERR_DEFINE(pedal_plaus, ERR_CODE_PEDAL_PLAUS, ERR_SEV_WARN,
 // clang-format off
 
 static AGG_TYPED_DEFINE(cockpit_agg,
-    struct msg_cockpit_data, AGG_DATA_INIT(0),
+    struct msg_sensor_cockpit, AGG_DATA_INIT(0),
     K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
     cockpit_publish, NULL,
 
@@ -128,7 +128,7 @@ static void input_cb(struct input_event* evt, void* user_data) {
 
   if (evt->dev == steer) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_WHEEL) {
-      AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, steer,
+      AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, steer,
                        evt->value);
 
     } else if (evt->type == INPUT_EV_ERROR) {
@@ -138,7 +138,7 @@ static void input_cb(struct input_event* evt, void* user_data) {
   } else if (evt->dev == accel) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_THROTTLE) {
       if (!IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
-        AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, accel,
+        AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, accel,
                          evt->value);
       }
 
@@ -166,7 +166,7 @@ static void input_cb(struct input_event* evt, void* user_data) {
 
   } else if (evt->dev == brake) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_BRAKE) {
-      AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, brake,
+      AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, brake,
                        evt->value);
       ctx->brake_engaged = evt->value > 0;
 
@@ -193,7 +193,7 @@ static void input_cb(struct input_event* evt, void* user_data) {
   } else if (evt->dev == accel_pedal_plaus) {
     if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_THROTTLE) {
       if (IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
-        AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, accel,
+        AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, accel,
                          evt->value);
       }
 
@@ -207,19 +207,19 @@ static void input_cb(struct input_event* evt, void* user_data) {
 static void raw_cb(const struct device* dev, const struct sensor_value* val,
                    void* user_data) {
   if (dev == apps1) {
-    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, apps1,
+    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, apps1,
                      sensor_value_to_float(val));
 
   } else if (dev == apps2) {
-    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, apps2,
+    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, apps2,
                      sensor_value_to_float(val));
 
   } else if (dev == bse1) {
-    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, bse1,
+    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, bse1,
                      sensor_value_to_float(val));
 
   } else if (dev == bse2) {
-    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_cockpit_data, bse2,
+    AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, bse2,
                      sensor_value_to_float(val));
   }
 }
@@ -227,8 +227,8 @@ static void raw_cb(const struct device* dev, const struct sensor_value* val,
 static void cockpit_publish(const void* data, void* user_data) {
   (void)user_data;
 
-  struct msg_cockpit_data* msg = (struct msg_cockpit_data*)data;
+  struct msg_sensor_cockpit* msg = (struct msg_sensor_cockpit*)data;
   msg_header_init(&msg->header);
 
-  zbus_chan_pub(&msg_cockpit_data_chan, msg, K_MSEC(5));
+  zbus_chan_pub(&msg_sensor_cockpit_chan, msg, K_MSEC(5));
 }

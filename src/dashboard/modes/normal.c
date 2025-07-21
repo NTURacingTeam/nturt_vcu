@@ -85,9 +85,9 @@ static struct dashboard_normal_ctx g_ctx = {
 SYS_INIT(init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
 
 ZBUS_LISTENER_DEFINE(dashboard_normal_listener, msg_cb);
-ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, dashboard_normal_listener, 0);
-ZBUS_CHAN_ADD_OBS(msg_wheel_data_chan, dashboard_normal_listener, 0);
-ZBUS_CHAN_ADD_OBS(msg_acc_chan, dashboard_normal_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, dashboard_normal_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, dashboard_normal_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ts_acc_chan, dashboard_normal_listener, 0);
 
 ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
                     ERR_FILTER_CODE(ERR_CODE_ACCEL, ERR_CODE_BRAKE,
@@ -218,8 +218,8 @@ static void msg_cb(const struct zbus_channel *chan) {
   char buf[20];
   struct led_rgb rgb[LED_STRIP_LEN];
 
-  if (chan == &msg_cockpit_data_chan) {
-    const struct msg_cockpit_data *msg = zbus_chan_const_msg(chan);
+  if (chan == &msg_sensor_cockpit_chan) {
+    const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
     if (!g_ctx.states[ERROR_ACCEL]) {
       rgb_set_level(rgb, ARRAY_SIZE(rgb), msg->accel);
@@ -231,8 +231,8 @@ static void msg_cb(const struct zbus_channel *chan) {
       led_strip_update_rgb(brake_display, rgb, LED_STRIP_LEN);
     }
 
-  } else if (chan == &msg_wheel_data_chan) {
-    const struct msg_wheel_data *msg = zbus_chan_const_msg(chan);
+  } else if (chan == &msg_sensor_wheel_chan) {
+    const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
 
     if (!g_ctx.states[ERROR_INV_RL] && !g_ctx.states[ERROR_INV_RR]) {
       int speed = RPM_TO_SPEED((msg->speed.rl + msg->speed.rr) / 2.0F);
@@ -240,8 +240,8 @@ static void msg_cb(const struct zbus_channel *chan) {
       auxdisplay_write(speed_display, buf, strlen(buf));
     }
 
-  } else if (chan == &msg_acc_chan) {
-    const struct msg_acc *msg = zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ts_acc_chan) {
+    const struct msg_ts_acc *msg = zbus_chan_const_msg(chan);
 
     if (!g_ctx.states[ERROR_ACC]) {
       snprintf(buf, sizeof(buf), "%2d", CLAMP(msg->soc, -9, 99));

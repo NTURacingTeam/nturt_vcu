@@ -54,7 +54,7 @@ static struct peripherials_ctx g_ctx = {
 SYS_INIT(gpio_init, POST_KERNEL, CONFIG_LED_INIT_PRIORITY);
 
 ZBUS_LISTENER_DEFINE(peripherials_listener, msg_cb);
-ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, peripherials_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, peripherials_listener, 0);
 
 INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
 
@@ -90,7 +90,7 @@ static int gpio_init() {
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
-  const struct msg_cockpit_data *msg = zbus_chan_const_msg(chan);
+  const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
   gpio_pin_set_dt(&brake_light, msg->brake > 0);
 }

@@ -19,14 +19,14 @@ static void msg_cb(const struct zbus_channel *chan);
 
 /* static variable -----------------------------------------------------------*/
 ZBUS_LISTENER_DEFINE(telemetry_listener, msg_cb);
-ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, telemetry_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_word_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_torque_chan, telemetry_listener, 0);
 
 /* static function definition ------------------------------------------------*/
 static void msg_cb(const struct zbus_channel *chan) {
-  if (chan == &msg_cockpit_data_chan) {
-    const struct msg_cockpit_data *msg = zbus_chan_const_msg(chan);
+  if (chan == &msg_sensor_cockpit_chan) {
+    const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
     TM_DATA_UPDATE(steer, STEER_PHY_TO_CAN(msg->steer));
     TM_DATA_UPDATE(accel, PEDAL_TRAV_PHY_TO_CAN(msg->accel));

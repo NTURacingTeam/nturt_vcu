@@ -52,7 +52,7 @@ static struct ctrl_inv_ctx g_ctx = {
 };
 
 ZBUS_LISTENER_DEFINE(ctrl_inv_listener, msg_cb);
-ZBUS_CHAN_ADD_OBS(msg_inv_chan, ctrl_inv_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
 
 ERR_DEFINE(inv_fl, ERR_CODE_INV_FL, ERR_SEV_FATAL, "Inverter FL error");
 ERR_DEFINE(inv_fr, ERR_CODE_INV_FR, ERR_SEV_FATAL, "Inverter FR error");
@@ -108,7 +108,7 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
-  const struct msg_inv *msg = zbus_chan_const_msg(chan);
+  const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
 
   for (int i = 2; i < 4; i++) {
     if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {

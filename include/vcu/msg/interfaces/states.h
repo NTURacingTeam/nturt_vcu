@@ -21,8 +21,14 @@
 /// @brief List of state messages.
 #define MSG_STATES_LIST msg_states
 
+/// @brief Insert @ref msg_states printf format string.
 #define PRImsg_states PRImsg_header "\n\r\tTODO"
 
+/**
+ * @brief Insert @ref msg_states arguments to printf format.
+ *
+ * @param[in] data The control system state message data.
+ */
 #define PRImsg_states_arg(data) PRImsg_header_arg((data).header)
 
 /* type ----------------------------------------------------------------------*/
