@@ -12,28 +12,28 @@ config VCU_HAS_GNSS
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_GNSS))
 	default y
 
-DT_CHOSEN_NTURT_SUSP_FL := nturt,susp_fl
+DT_CHOSEN_NTURT_SUSP_FL := nturt,susp-fl
 
 config VCU_HAS_SUSP_FL
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_FL))
 	default y
 
-DT_CHOSEN_NTURT_SUSP_FR := nturt,susp_fr
+DT_CHOSEN_NTURT_SUSP_FR := nturt,susp-fr
 
 config VCU_HAS_SUSP_FR
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_FR))
 	default y
 
-DT_CHOSEN_NTURT_SUSP_RL := nturt,susp_rl
+DT_CHOSEN_NTURT_SUSP_RL := nturt,susp-rl
 
 config VCU_HAS_SUSP_RL
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_RL))
 	default y
 
-DT_CHOSEN_NTURT_SUSP_RR := nturt,susp_rr
+DT_CHOSEN_NTURT_SUSP_RR := nturt,susp-rr
 
 config VCU_HAS_SUSP_RR
 	bool
@@ -44,4 +44,31 @@ config VCU_HAS_SUSP
 	bool
 	depends on VCU_HAS_SUSP_FL || VCU_HAS_SUSP_FR || \
 		VCU_HAS_SUSP_RL || VCU_HAS_SUSP_RR
+	default y
+
+DT_CHOSEN_NTURT_POW_IN_VOLT := nturt,pow-in-volt
+
+config VCU_HAS_POW_IN_VOLT
+	bool
+	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_IN_VOLT))
+	default y
+
+DT_CHOSEN_NTURT_POW_5V_CURR := nturt,pow-5v-curr
+
+config VCU_HAS_POW_5V_CURR
+	bool
+	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_5V_CURR))
+	default y
+
+DT_CHOSEN_NTURT_POW_5V_RPI_CURR := nturt,pow-5v-rpi-curr
+
+config VCU_HAS_POW_5V_RPI_CURR
+	bool
+	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_5V_RPI_CURR))
+	default y
+
+config VCU_HAS_POW
+	bool
+	depends on VCU_HAS_POW_IN_VOLT || VCU_HAS_POW_5V_CURR || \
+		VCU_HAS_POW_5V_RPI_CURR
 	default y

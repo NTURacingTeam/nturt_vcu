@@ -2,6 +2,7 @@ if(CONFIG_VCU_SENSORS)
 
 target_sources(app PRIVATE
     cockpit.c
+    sensors.c
 )
 
 target_sources_ifdef(CONFIG_VCU_HAS_IMU app PRIVATE
@@ -14,6 +15,10 @@ target_sources_ifdef(CONFIG_VCU_HAS_GNSS app PRIVATE
 
 target_sources_ifdef(CONFIG_VCU_HAS_SUSP app PRIVATE
     susp.c
+)
+
+target_sources_ifdef(CONFIG_VCU_HAS_POW app PRIVATE
+    pow.c
 )
 
 endif()
