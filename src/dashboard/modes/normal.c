@@ -53,7 +53,6 @@ struct dashboard_normal_ctx {
 
 /* static function declaraion ------------------------------------------------*/
 static void led_set(const struct device *dev, int led, bool set);
-static void rgb_set_level(struct led_rgb *rgb, int len, int level);
 static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
                                    bool set);
 
@@ -100,7 +99,7 @@ STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_ERR, states_cb, &g_ctx);
 void dashboard_normal_start() {
   k_mutex_lock(&g_ctx.lock, K_FOREVER);
 
-  g_ctx.states[ACTIVE] = true;
+  dashboard_state_update(&g_ctx, ACTIVE, true);
 
   for (int state = ACTIVE + 1; state < NUM_DASHBOARD_STATE; state++) {
     dashboard_state_update(&g_ctx, state, g_ctx.states[state]);
@@ -111,7 +110,7 @@ void dashboard_normal_start() {
 
 void dashboard_normal_stop() {
   k_mutex_lock(&g_ctx.lock, K_FOREVER);
-  g_ctx.states[ACTIVE] = false;
+  dashboard_state_update(&g_ctx, ACTIVE, false);
   k_mutex_unlock(&g_ctx.lock);
 }
 
@@ -121,18 +120,6 @@ static void led_set(const struct device *dev, int led, bool set) {
     led_on(dev, led);
   } else {
     led_off(dev, led);
-  }
-}
-
-static void rgb_set_level(struct led_rgb *rgb, int len, int level) {
-  level = DIV_ROUND_CLOSEST(level * len, 100);
-
-  for (int i = 0; i < level; i++) {
-    rgb[i].r = 1;
-  }
-
-  for (int i = level; i < len; i++) {
-    rgb[i].r = 0;
   }
 }
 
@@ -183,25 +170,12 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
       break;
 
     default:
-      __ASSERT(false, "Invalid state: %d", state);
+      break;
   }
 }
 
 static int init() {
-  // Initialize g_ctx.err_led, which is a five-zone pattern with the second and
-  // fourth zones lit up.
-  int start = 0;
-  for (int zone = 0; zone < 5; zone++) {
-    int zone_size = ARRAY_SIZE(g_ctx.err_rgb) / 5 +
-                    ((zone < ARRAY_SIZE(g_ctx.err_rgb) % 5) ? 1 : 0);
-    int end = start + zone_size;
-
-    for (int i = start; i < end; ++i) {
-      g_ctx.err_rgb[i].r = (zone == 1 || zone == 3) ? 1 : 0;
-    }
-
-    start = end;
-  }
+  rgb_set_error(g_ctx.err_rgb, LED_STRIP_LEN);
 
   return 0;
 }
@@ -222,12 +196,12 @@ static void msg_cb(const struct zbus_channel *chan) {
     const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
     if (!g_ctx.states[ERROR_ACCEL]) {
-      rgb_set_level(rgb, ARRAY_SIZE(rgb), msg->accel);
+      rgb_set_level(rgb, LED_STRIP_LEN, msg->accel);
       led_strip_update_rgb(accel_display, rgb, LED_STRIP_LEN);
     }
 
     if (!g_ctx.states[ERROR_BRAKE]) {
-      rgb_set_level(rgb, ARRAY_SIZE(rgb), msg->brake);
+      rgb_set_level(rgb, LED_STRIP_LEN, msg->brake);
       led_strip_update_rgb(brake_display, rgb, LED_STRIP_LEN);
     }
 

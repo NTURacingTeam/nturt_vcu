@@ -16,6 +16,7 @@
 
 // zephyr includes
 #include <zephyr/devicetree.h>
+#include <zephyr/drivers/led_strip.h>
 #include <zephyr/kernel.h>
 
 // project includes
@@ -50,10 +51,10 @@ struct dashboard_mode_info {
   dashboard_mode_trans_t stop;
 
   /** String representation of the command. */
-  const char *name;
+  const char* name;
 
   /** Description of the command. */
-  const char *desc;
+  const char* desc;
 };
 
 /* function declaration ------------------------------------------------------*/
@@ -74,6 +75,16 @@ void dashboard_setting_stop();
 void dashboard_test_start();
 void dashboard_test_stop();
 
-const struct dashboard_mode_info *dashboard_mode_info(enum dashboard_mode mode);
+const struct dashboard_mode_info* dashboard_mode_info(enum dashboard_mode mode);
+
+void rgb_set_level(struct led_rgb* rgb, int len, int level);
+
+/**
+ * @brief Set rgb struct to error pattern, which is a five-zone pattern with the
+ * second and fourth zones lit up.
+ */
+void rgb_set_error(struct led_rgb* rgb, int len);
+
+void rgb_apply_selected(struct led_rgb* rgb, int len);
 
 #endif  // DASHBOARD_H_

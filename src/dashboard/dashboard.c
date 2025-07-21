@@ -17,6 +17,9 @@
 #include <zephyr/settings/settings.h>
 #include <zephyr/sys/__assert.h>
 
+// project includes
+#include "vcu/ctrl/states.h"
+
 LOG_MODULE_REGISTER(vcu_dashboard);
 
 /* macro ---------------------------------------------------------------------*/
@@ -36,6 +39,7 @@ static void dashboard_clear();
 static int init();
 
 static void input_cb(struct input_event* evt, void* user_data);
+static void states_cb(enum states_state state, bool is_entry, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
 static const struct device* leds = DEVICE_DT_GET(DT_CHOSEN(nturt_leds));
@@ -84,6 +88,8 @@ SYS_INIT(init, APPLICATION, CONFIG_VCU_DASHBOARD_INIT_PRIORITY);
 
 INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
 
+STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, NULL);
+
 /* function definition -------------------------------------------------------*/
 uint8_t dashboard_brightness_get() { return g_ctx.brightness; }
 
@@ -123,6 +129,37 @@ const struct dashboard_mode_info* dashboard_mode_info(
   return &g_mode_infos[mode];
 }
 
+void rgb_set_level(struct led_rgb* rgb, int len, int level) {
+  level = DIV_ROUND_CLOSEST(level * len, 100);
+
+  for (int i = 0; i < level; i++) {
+    rgb[i].r = 1;
+  }
+
+  for (int i = level; i < len; i++) {
+    rgb[i].r = 0;
+  }
+}
+
+void rgb_set_error(struct led_rgb* rgb, int len) {
+  int start = 0;
+  for (int zone = 0; zone < 5; zone++) {
+    int zone_size = len / 5 + ((zone < len % 5) ? 1 : 0);
+    int end = start + zone_size;
+
+    for (int i = start; i < end; ++i) {
+      rgb[i].r = (zone == 1 || zone == 3) ? 1 : 0;
+    }
+
+    start = end;
+  }
+}
+
+void rgb_apply_selected(struct led_rgb* rgb, int len) {
+  rgb[0].r = !rgb[0].r;
+  rgb[len - 1].r = !rgb[len - 1].r;
+}
+
 /* static function definition ------------------------------------------------*/
 static void dashboard_clear() {
   static const char* empty_str = "  ";
@@ -151,9 +188,18 @@ static int init() {
 static void input_cb(struct input_event* evt, void* user_data) {
   (void)user_data;
 
-  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE && evt->value) {
+  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE && evt->value &&
+      !(states_get() & STATE_RUNNING)) {
     enum dashboard_mode next_mode =
         (dashboard_mode_get() + 1) % NUM_DASHBOARD_MODE;
     dashboard_mode_set(next_mode);
+  }
+}
+
+static void states_cb(enum states_state state, bool is_entry, void* user_data) {
+  (void)user_data;
+
+  if (is_entry && dashboard_mode_get() != DASHBOARD_NORMAL) {
+    dashboard_mode_set(DASHBOARD_NORMAL);
   }
 }
