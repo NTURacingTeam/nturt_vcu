@@ -18,42 +18,7 @@
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
-static const struct device *speed_display =
-    DEVICE_DT_GET(DT_NODELABEL(speed_display));
-static const struct device *battery_display =
-    DEVICE_DT_GET(DT_NODELABEL(battery_display));
-
-static const struct device *accel_display =
-    DEVICE_DT_GET(DT_NODELABEL(accel_display));
-static const struct device *brake_display =
-    DEVICE_DT_GET(DT_NODELABEL(brake_display));
-
-char *num_char(int i) {
-  static char buf[20];
-  if (i < 10) {
-    snprintf(buf, sizeof(buf), ".%d", i);
-  } else {
-    snprintf(buf, sizeof(buf), "%2d.", i);
-  }
-
-  return buf;
-}
-
-void rgb_set_level(struct led_rgb *rgb, int level) {
-  for (int i = 0; i < level; i++) {
-    rgb[i].r = 1;
-  }
-
-  for (int i = level; i < 20; i++) {
-    rgb[i].r = 0;
-  }
-}
-
 int main() {
-  int ret;
-  int i = 0;
-  struct led_rgb rgb[20];
-
   while (true) {
     k_sleep(K_MSEC(100));
   }

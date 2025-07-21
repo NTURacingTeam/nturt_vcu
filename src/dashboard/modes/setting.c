@@ -238,11 +238,11 @@ static void input_cb(struct input_event *evt, void *user_data) {
       if (evt->value) {
         switch (evt->code) {
           case INPUT_BTN_UP:
-            modify_brightness(true);
+            dashboard_modify_brightness(ctx, true);
             break;
 
           case INPUT_BTN_DOWN:
-            modify_brightness(false);
+            dashboard_modify_brightness(ctx, false);
             break;
 
           case INPUT_BTN_UP_HOLD:

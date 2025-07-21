@@ -17,6 +17,9 @@
 #include <zephyr/settings/settings.h>
 #include <zephyr/sys/__assert.h>
 
+// project includes
+#include "vcu/ctrl/states.h"
+
 LOG_MODULE_REGISTER(vcu_dashboard);
 
 /* macro ---------------------------------------------------------------------*/
@@ -36,6 +39,7 @@ static void dashboard_clear();
 static int init();
 
 static void input_cb(struct input_event* evt, void* user_data);
+static void states_cb(enum states_state state, bool is_entry, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
 static const struct device* leds = DEVICE_DT_GET(DT_CHOSEN(nturt_leds));
@@ -83,6 +87,8 @@ static struct dashboard_ctx g_ctx = {
 SYS_INIT(init, APPLICATION, CONFIG_VCU_DASHBOARD_INIT_PRIORITY);
 
 INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
+
+STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, NULL);
 
 /* function definition -------------------------------------------------------*/
 uint8_t dashboard_brightness_get() { return g_ctx.brightness; }
@@ -182,9 +188,18 @@ static int init() {
 static void input_cb(struct input_event* evt, void* user_data) {
   (void)user_data;
 
-  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE && evt->value) {
+  if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE && evt->value &&
+      !(states_get() & STATE_RUNNING)) {
     enum dashboard_mode next_mode =
         (dashboard_mode_get() + 1) % NUM_DASHBOARD_MODE;
     dashboard_mode_set(next_mode);
+  }
+}
+
+static void states_cb(enum states_state state, bool is_entry, void* user_data) {
+  (void)user_data;
+
+  if (is_entry && dashboard_mode_get() != DASHBOARD_NORMAL) {
+    dashboard_mode_set(DASHBOARD_NORMAL);
   }
 }

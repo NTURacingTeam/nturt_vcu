@@ -26,7 +26,6 @@ struct dashboard_test_ctx {
 
 /* static function declaration -----------------------------------------------*/
 static char *num_char(int i);
-static void rgb_set_level(struct led_rgb *rgb, int len, int level);
 
 static void input_cb(struct input_event *evt, void *user_data);
 static void dashboard_test_thread(void *arg1, void *arg2, void *arg3);
@@ -83,18 +82,6 @@ static char *num_char(int i) {
   }
 
   return buf;
-}
-
-static void rgb_set_level(struct led_rgb *rgb, int len, int level) {
-  level = DIV_ROUND_CLOSEST(level * len, 100);
-
-  for (int i = 0; i < level; i++) {
-    rgb[i].r = 1;
-  }
-
-  for (int i = level; i < len; i++) {
-    rgb[i].r = 0;
-  }
 }
 
 static void input_cb(struct input_event *evt, void *user_data) {

@@ -81,6 +81,8 @@ static struct dashboard_normal_ctx g_ctx = {
     .states = {0},
 };
 
+SYS_INIT(init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
+
 ZBUS_LISTENER_DEFINE(dashboard_normal_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_cockpit_data_chan, dashboard_normal_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_wheel_data_chan, dashboard_normal_listener, 0);
@@ -168,7 +170,7 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
       break;
 
     default:
-      __ASSERT(false, "Invalid state: %d", state);
+      break;
   }
 }
 

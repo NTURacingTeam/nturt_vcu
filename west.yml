@@ -10,8 +10,8 @@ manifest:
   projects:
     - name: zephyr
       remote: nturt
-      revision: main
+      revision: v4.1.0-nturt
       import: true
     - name: nturt_zephyr_common
       remote: nturt
-      revision: master
+      revision: bb4935ca3801b2745eca38182e7092255ba8fe85
