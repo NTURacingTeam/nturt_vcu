@@ -147,6 +147,17 @@ static void input_cb(struct input_event* evt, void* user_data) {
     } else if (evt->type == INPUT_EV_ERROR) {
       err_report(ERR_CODE_ACCEL, evt->value);
 
+      if (!IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
+        static bool reported = false;
+        if (evt->value && !reported) {
+          AGG_TYPED_UPDATE(&cockpit_agg, struct msg_sensor_cockpit, accel, 0);
+
+          reported = true;
+        } else if (!evt->value) {
+          reported = false;
+        }
+      }
+
       if (evt->value) {
         ctx->accel_engaged = false;
       }
