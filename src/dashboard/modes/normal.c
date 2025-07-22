@@ -13,6 +13,7 @@
 #include <zephyr/drivers/led.h>
 #include <zephyr/drivers/led_strip.h>
 #include <zephyr/init.h>
+#include <zephyr/input/input.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/zbus/zbus.h>
@@ -22,6 +23,7 @@
 #include <nturt/msg/msg.h>
 
 // project includes
+#include "vcu/ctrl/inv.h"
 #include "vcu/ctrl/states.h"
 
 /* type ----------------------------------------------------------------------*/
@@ -31,12 +33,12 @@ enum {
   ERROR_ACCEL,
   ERROR_BRAKE,
   ERROR_PEDAL_PLAUS,
-  ERROR_INV_RL,
-  ERROR_INV_RR,
-  ERROR_ACC,
+  ERROR_HB_INV_RL,
+  ERROR_HB_INV_RR,
+  ERROR_HB_ACC,
 
-  RUNNING,
-  ERR,
+  STAT_RUNNING,
+  STAT_ERROR,
 
   NUM_DASHBOARD_STATE,
 };
@@ -58,6 +60,7 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
 
 static int init();
 
+static void input_cb(struct input_event *evt, void *user_data);
 static void msg_cb(const struct zbus_channel *chan);
 static void err_cb(uint32_t errcode, bool set, void *user_data);
 static void states_cb(enum states_state state, bool is_entry, void *user_data);
@@ -82,6 +85,8 @@ static struct dashboard_normal_ctx g_ctx = {
 };
 
 SYS_INIT(init, APPLICATION, CONFIG_APPLICATION_INIT_PRIORITY);
+
+INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
 
 ZBUS_LISTENER_DEFINE(dashboard_normal_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, dashboard_normal_listener, 0);
@@ -148,24 +153,24 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
       led_set(leds, LED_NUM_PEDAL_PLAUS, set);
       break;
 
-    case ERROR_INV_RL:
-    case ERROR_INV_RR:
-      if (g_ctx.states[ERROR_INV_RL] || g_ctx.states[ERROR_INV_RR]) {
+    case ERROR_HB_INV_RL:
+    case ERROR_HB_INV_RR:
+      if (g_ctx.states[ERROR_HB_INV_RL] || g_ctx.states[ERROR_HB_INV_RR]) {
         auxdisplay_write(speed_display, ctx->err_str, strlen(ctx->err_str));
       }
       break;
 
-    case ERROR_ACC:
+    case ERROR_HB_ACC:
       if (set) {
         auxdisplay_write(battery_display, ctx->err_str, strlen(ctx->err_str));
       }
       break;
 
-    case RUNNING:
+    case STAT_RUNNING:
       led_set(leds, LED_NUM_RUNNING, set);
       break;
 
-    case ERR:
+    case STAT_ERROR:
       led_set(leds, LED_NUM_ERROR, set);
       break;
 
@@ -178,6 +183,23 @@ static int init() {
   rgb_set_error(g_ctx.err_rgb, LED_STRIP_LEN);
 
   return 0;
+}
+
+static void input_cb(struct input_event *evt, void *user_data) {
+  struct dashboard_normal_ctx *ctx = user_data;
+
+  k_mutex_lock(&ctx->lock, K_FOREVER);
+
+  if (!ctx->states[ACTIVE] || evt->type != INPUT_EV_KEY) {
+    k_mutex_unlock(&ctx->lock);
+    return;
+  }
+
+  if (evt->value && evt->code == INPUT_BTN_FAULT_RESET) {
+    ctrl_inv_fault_reset();
+  }
+
+  k_mutex_unlock(&ctx->lock);
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
@@ -208,7 +230,7 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_sensor_wheel_chan) {
     const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
 
-    if (!g_ctx.states[ERROR_INV_RL] && !g_ctx.states[ERROR_INV_RR]) {
+    if (!g_ctx.states[ERROR_HB_INV_RL] && !g_ctx.states[ERROR_HB_INV_RR]) {
       int speed = RPM_TO_SPEED((msg->speed.rl + msg->speed.rr) / 2.0F);
       snprintf(buf, sizeof(buf), "%2d", CLAMP(speed, -9, 99));
       auxdisplay_write(speed_display, buf, strlen(buf));
@@ -217,7 +239,7 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_ts_acc_chan) {
     const struct msg_ts_acc *msg = zbus_chan_const_msg(chan);
 
-    if (!g_ctx.states[ERROR_ACC]) {
+    if (!g_ctx.states[ERROR_HB_ACC]) {
       snprintf(buf, sizeof(buf), "%2d", CLAMP(msg->soc, -9, 99));
       auxdisplay_write(battery_display, buf, strlen(buf));
     }
@@ -245,15 +267,15 @@ static void err_cb(uint32_t errcode, bool set, void *user_data) {
       break;
 
     case ERR_CODE_HB_INV_RL:
-      dashboard_state_update(ctx, ERROR_INV_RL, set);
+      dashboard_state_update(ctx, ERROR_HB_INV_RL, set);
       break;
 
     case ERR_CODE_HB_INV_RR:
-      dashboard_state_update(ctx, ERROR_INV_RR, set);
+      dashboard_state_update(ctx, ERROR_HB_INV_RR, set);
       break;
 
     case ERR_CODE_HB_ACC:
-      dashboard_state_update(ctx, ERROR_ACC, set);
+      dashboard_state_update(ctx, ERROR_HB_ACC, set);
       break;
 
     default:
@@ -270,11 +292,11 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
 
   switch (state) {
     case STATE_RUNNING:
-      dashboard_state_update(ctx, RUNNING, is_entry);
+      dashboard_state_update(ctx, STAT_RUNNING, is_entry);
       break;
 
     case STATE_ERR:
-      dashboard_state_update(ctx, ERR, is_entry);
+      dashboard_state_update(ctx, STAT_ERROR, is_entry);
       break;
 
     default:

@@ -43,7 +43,8 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
     for (int i = 0; i < 4; i++) {
       if (states_get() & STATE_RUNNING) {
-        msg.torque.values[i] = (i % 2 == 0 ? -0.2F : 0.2F) * _msg.accel;
+        msg.torque.values[i] =
+            (i % 2 == 0 ? -0.5F : 0.5F) * _msg.accel_pedal_plaus;
       } else {
         msg.torque.values[i] = 0.0F;
       }

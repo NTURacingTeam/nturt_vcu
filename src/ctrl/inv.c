@@ -42,6 +42,7 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
                                       bool is_set);
 
 static void msg_cb(const struct zbus_channel *chan);
+static void err_cb(uint32_t errcode, bool set, void *user_data);
 static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void fault_reset_work(struct k_work *work);
 
@@ -59,14 +60,19 @@ ERR_DEFINE(inv_fr, ERR_CODE_INV_FR, ERR_SEV_FATAL, "Inverter FR error");
 ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_FATAL, "Inverter RL error");
 ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_FATAL, "Inverter RR error");
 
-ERR_DEFINE(inv_fl_no_power, ERR_CODE_INV_FL_NO_POWER, ERR_SEV_FATAL,
+ERR_DEFINE(inv_fl_no_power, ERR_CODE_INV_FL_HV_LOW, ERR_SEV_WARN,
            "Inverter FL HV low voltage");
-ERR_DEFINE(inv_fr_no_power, ERR_CODE_INV_FR_NO_POWER, ERR_SEV_FATAL,
+ERR_DEFINE(inv_fr_no_power, ERR_CODE_INV_FR_HV_LOW, ERR_SEV_WARN,
            "Inverter FR HV low voltage");
-ERR_DEFINE(inv_rl_no_power, ERR_CODE_INV_RL_NO_POWER, ERR_SEV_FATAL,
+ERR_DEFINE(inv_rl_no_power, ERR_CODE_INV_RL_HV_LOW, ERR_SEV_WARN,
            "Inverter RL HV low voltage");
-ERR_DEFINE(inv_rr_no_power, ERR_CODE_INV_RR_NO_POWER, ERR_SEV_FATAL,
+ERR_DEFINE(inv_rr_no_power, ERR_CODE_INV_RR_HV_LOW, ERR_SEV_WARN,
            "Inverter RR HV low voltage");
+
+ERR_CALLBACK_DEFINE(err_cb, NULL,
+                    ERR_FILTER_CODE(ERR_CODE_INV_FL_HV_LOW, ERR_CODE_INV_FR_HV_LOW,
+                                    ERR_CODE_INV_RL_HV_LOW,
+                                    ERR_CODE_INV_RR_HV_LOW));
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, &g_ctx);
 
@@ -114,9 +120,18 @@ static void msg_cb(const struct zbus_channel *chan) {
     if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
       err_report(ERR_CODE_INV_FL + i,
                  msg->status.values[i] & STATUS_WORD_FAULT);
-      err_report(ERR_CODE_INV_FL_NO_POWER + i,
+      err_report(ERR_CODE_INV_FL_HV_LOW + i,
                  !(msg->status.values[i] & STATUS_WORD_POWER));
     }
+  }
+}
+
+static void err_cb(uint32_t errcode, bool set, void *user_data) {
+  (void)user_data;
+
+  if (set && states_get() & STATE_RUNNING) {
+    LOG_INF("Disable due to inverter no power");
+    states_transition(TRANS_CMD_DISABLE);
   }
 }
 

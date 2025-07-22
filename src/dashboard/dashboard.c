@@ -88,7 +88,7 @@ SYS_INIT(init, APPLICATION, CONFIG_VCU_DASHBOARD_INIT_PRIORITY);
 
 INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
 
-STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, NULL);
+STATES_CALLBACK_DEFINE(STATE_RTD_SOUND, states_cb, NULL);
 
 /* function definition -------------------------------------------------------*/
 uint8_t dashboard_brightness_get() { return g_ctx.brightness; }
@@ -189,7 +189,7 @@ static void input_cb(struct input_event* evt, void* user_data) {
   (void)user_data;
 
   if (evt->type == INPUT_EV_KEY && evt->code == INPUT_BTN_MODE && evt->value &&
-      !(states_get() & STATE_RUNNING)) {
+      !(states_get() & (STATE_RTD_SOUND | STATE_RUNNING))) {
     enum dashboard_mode next_mode =
         (dashboard_mode_get() + 1) % NUM_DASHBOARD_MODE;
     dashboard_mode_set(next_mode);

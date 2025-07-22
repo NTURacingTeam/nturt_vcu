@@ -5,6 +5,8 @@ menuconfig VCU_DASHBOARD
 	select AUXDISPLAY
 	select DISPLAY
 	select VCU_SYS
+	select VCU_STATES
+	select VCU_CTRL
 
 if VCU_DASHBOARD
 
