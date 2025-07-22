@@ -1,14 +1,27 @@
 // zephyr includes
+#include <zephyr/init.h>
 #include <zephyr/kernel.h>
+#include <zephyr/sys/util.h>
 
 /* static function declaration -----------------------------------------------*/
-static void thread(void *arg1, void *arg2, void *arg3);
+static int init();
 
-// K_THREAD_DEFINE(ctrl_thread, 1024, thread, NULL, NULL, NULL, 0, 0, 0);
+/* variable ------------------------------------------------------------------*/
+struct k_work_q sensor_work_q;
+
+/* static variable -----------------------------------------------------------*/
+SYS_INIT(init, APPLICATION, UTIL_DEC(CONFIG_VCU_SENSORS_INIT_PRIORITY));
+
+static K_THREAD_STACK_DEFINE(sensor_work_q_stack, 1024);
 
 /* static function definition ------------------------------------------------*/
-static void thread(void *arg1, void *arg2, void *arg3) {
-  (void)arg1;
-  (void)arg2;
-  (void)arg3;
+static int init() {
+  struct k_work_queue_config config = {
+      .name = "sensor_work_queue",
+  };
+
+  k_work_queue_init(&sensor_work_q);
+  k_work_queue_start(&sensor_work_q, sensor_work_q_stack,
+                     K_THREAD_STACK_SIZEOF(sensor_work_q_stack), 5, &config);
+  return 0;
 }
