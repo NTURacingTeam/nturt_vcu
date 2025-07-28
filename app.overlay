@@ -37,7 +37,7 @@
             out-max = <127>;
             noise = <1000>; // 1%
 
-            steer_encoder {
+            steer_sensor_axis: steer_encoder {
                 sensor = <&steer_encoder>;
                 zephyr,channel = <SENSOR_CHAN_ROTATION>;
                 in-min = <(-180) 0>;
@@ -51,7 +51,7 @@
             deadzone-mode = <INPUT_DEADZONE_MODE_EDGE>;
             deadzone-size = <5>; // 5%
             noise = <1000>; // 1%
-            dev-tolerance = <10>; // 10%
+            // dev-tolerance = <10>; // 10%
             time-tolerance = <100>; // 100ms
             time-tolerance-decay = <20>; // 20%
 
@@ -84,7 +84,7 @@
                 sensor = <&bse1>;
                 zephyr,channel = <SENSOR_CHAN_PRESS>;
                 in-min = <0 0>;
-                in-max = <100 0>;
+                in-max = <6894 76>;
                 range-tolerance = <10>; // 10%
             };
 
@@ -92,7 +92,7 @@
                 sensor = <&bse2>;
                 zephyr,channel = <SENSOR_CHAN_PRESS>;
                 in-min = <0 0>;
-                in-max = <100 0>;
+                in-max = <6894 76>;
                 range-tolerance = <10>; // 10%
             };
         };
