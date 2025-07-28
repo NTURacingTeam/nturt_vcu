@@ -106,14 +106,15 @@ static AGG_TYPED_DEFINE(cockpit_agg,
 
 /* static function definition ------------------------------------------------*/
 static void states_update(struct cockpit_ctx* ctx) {
-  if ((states_get() & STATE_RTD_BLINK) && !ctx->accel_engaged &&
-      ctx->brake_engaged) {
-    states_transition(TRANS_CMD_PEDAL);
+  if (IS_ENABLED(CONFIG_VCU_STATES_CHECK_PEDAL)) {
+    if ((states_get() & STATE_RTD_BLINK) && !ctx->accel_engaged &&
+        ctx->brake_engaged) {
+      states_transition(TRANS_CMD_PEDAL);
 
-  } else if (IS_ENABLED(CONFIG_VCU_STATES_CHECK_PEDAL) &&
-             (states_get() & STATE_RTD_STEADY) &&
-             (ctx->accel_engaged || !ctx->brake_engaged)) {
-    states_transition(TRANS_CMD_PEDAL_CLEAR);
+    } else if ((states_get() & STATE_RTD_STEADY) &&
+               (ctx->accel_engaged || !ctx->brake_engaged)) {
+      states_transition(TRANS_CMD_PEDAL_CLEAR);
+    }
   }
 }
 

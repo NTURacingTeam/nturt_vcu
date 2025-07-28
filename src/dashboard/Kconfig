@@ -3,12 +3,13 @@ menuconfig VCU_DASHBOARD
 	select LED
 	select LED_STRIP
 	select AUXDISPLAY
-	select DISPLAY
 	select VCU_SYS
 	select VCU_STATES
 	select VCU_CTRL
 
 if VCU_DASHBOARD
+
+rsource "display/Kconfig"
 
 config VCU_DASHBOARD_INIT_PRIORITY
 	int "Init priority"

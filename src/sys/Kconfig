@@ -12,4 +12,19 @@ config VCU_SHELL
 	select SETTINGS_SHELL
 	select NTURT_SHELL
 
+config RTC_SHELL
+	default y
+config GPIO_SHELL
+	default y
+config PWM_SHELL
+	default y
+config ADC_SHELL
+	default y
+config UART_SHELL
+	default y
+config I2C_SHELL
+	default y
+config SPI_SHELL
+	default y
+
 endif # VCU_SYS
