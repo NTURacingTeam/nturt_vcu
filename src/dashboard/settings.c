@@ -15,12 +15,12 @@ LOG_MODULE_DECLARE(vcu_dashboard);
 #define DASHBOARD_SETTINGS_ROOT "dashboard"
 
 /* static function definition ------------------------------------------------*/
-static int calib_load(const char* key, size_t len_rd, settings_read_cb read_cb,
-                      void* cb_arg);
+static int dashboard_settings_load(const char* key, size_t len_rd,
+                                   settings_read_cb read_cb, void* cb_arg);
 
 /* static variable -----------------------------------------------------------*/
 SETTINGS_STATIC_HANDLER_DEFINE(dashboard, DASHBOARD_SETTINGS_ROOT, NULL,
-                               calib_load, NULL, NULL);
+                               dashboard_settings_load, NULL, NULL);
 
 /* function definition -------------------------------------------------------*/
 int dashboard_settings_save() {
@@ -37,8 +37,8 @@ int dashboard_settings_save() {
 }
 
 /* static function definition ------------------------------------------------*/
-static int calib_load(const char* key, size_t len, settings_read_cb read_cb,
-                      void* cb_arg) {
+static int dashboard_settings_load(const char* key, size_t len,
+                                   settings_read_cb read_cb, void* cb_arg) {
   const char* next;
   int ret;
 

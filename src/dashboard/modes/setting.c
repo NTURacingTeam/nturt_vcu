@@ -1,6 +1,7 @@
-#include "vcu/dashboard.h"
+#include "modes.h"
 
 // glibc incldes
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -10,9 +11,7 @@
 // zephyr includes
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
-#include <zephyr/drivers/auxdisplay.h>
 #include <zephyr/drivers/input/sensor_axis.h>
-#include <zephyr/drivers/led_strip.h>
 #include <zephyr/input/input.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
@@ -22,13 +21,18 @@
 #include <nturt/err/err.h>
 #include <nturt/msg/msg.h>
 
+// project includes
+#include "vcu/ctrl/ctrl.h"
+#include "vcu/dashboard.h"
+
 /* macro ---------------------------------------------------------------------*/
 #define DEFAULT_MODE SET_BRIGHTNESS
 
 /* type ----------------------------------------------------------------------*/
-enum {
+enum dashboard_setting_state {
   ACTIVE,
 
+  ERROR_STEER,
   ERROR_ACCEL,
   ERROR_BRAKE,
 
@@ -40,6 +44,9 @@ enum {
 
 enum dashboard_setting_mode {
   SET_BRIGHTNESS,
+  SET_INV_RL,
+  SET_INV_RR,
+  SET_STEER,
   SET_ACCEL,
   SET_BRAKE,
 
@@ -52,6 +59,7 @@ struct dashboard_setting_ctx {
   bool states[NUM_STATES];
   enum dashboard_setting_mode mode;
 
+  int steer;
   int accel;
   int brake;
 
@@ -72,12 +80,8 @@ static void blink_work(struct k_work *work);
 static void modify_work(struct k_work *work);
 
 /* static variable -----------------------------------------------------------*/
-static const struct device *speed_display =
-    DEVICE_DT_GET(DT_NODELABEL(speed_display));
-static const struct device *accel_display =
-    DEVICE_DT_GET(DT_NODELABEL(accel_display));
-static const struct device *brake_display =
-    DEVICE_DT_GET(DT_NODELABEL(brake_display));
+static const struct device *steer =
+    DEVICE_DT_GET(DT_NODELABEL(steer_sensor_axis));
 
 static const struct device *apps1 =
     DEVICE_DT_GET(DT_NODELABEL(apps1_sensor_axis));
@@ -105,7 +109,8 @@ ZBUS_LISTENER_DEFINE(dashboard_setting_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, dashboard_setting_listener, 0);
 
 ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
-                    ERR_FILTER_CODE(ERR_CODE_ACCEL, ERR_CODE_BRAKE));
+                    ERR_FILTER_CODE(ERR_CODE_STEER, ERR_CODE_ACCEL,
+                                    ERR_CODE_BRAKE));
 
 /* function definition -------------------------------------------------------*/
 void dashboard_setting_start() {
@@ -141,59 +146,77 @@ static void dashboard_display(const struct dashboard_setting_ctx *ctx) {
     return;
   }
 
-  // longer to prevent compiler warnings
-  char buf[20];
-  struct led_rgb rgb[LED_STRIP_LEN];
-
   // display brightness
-  if (ctx->mode == SET_BRIGHTNESS && ctx->states[BLINK_OFF]) {
-    snprintf(buf, sizeof(buf), "  ");
+  dashboard_set_level(DASHBOARD_BATTERY, dashboard_brightness_get());
 
-  } else {
-    int brightness = dashboard_brightness_get();
-    if (brightness == 100) {
-      snprintf(buf, sizeof(buf), "00");
-    } else {
-      snprintf(buf, sizeof(buf), "%2hu", brightness);
-    }
+  // display inv_rl, inv_rr, steer
+  dashboard_led_set(LED_NUM_INV_RL, false);
+  dashboard_led_set(LED_NUM_INV_RR, false);
+
+  switch (ctx->mode) {
+    case SET_INV_RL:
+      dashboard_led_set(LED_NUM_INV_RL, true);
+      dashboard_set_level(DASHBOARD_SPEED, ctrl_inv_torq_rl_get());
+      break;
+
+    case SET_INV_RR:
+      dashboard_led_set(LED_NUM_INV_RR, true);
+      dashboard_set_level(DASHBOARD_SPEED, ctrl_inv_torq_rr_get());
+      break;
+
+    default:
+      if (ctx->states[ERROR_STEER]) {
+        dashboard_set_error(DASHBOARD_SPEED);
+      } else {
+        dashboard_set_level(DASHBOARD_SPEED, ctx->steer);
+      }
+
+      break;
   }
-
-  auxdisplay_write(speed_display, buf, strlen(buf));
 
   // display accelerator
   if (ctx->states[ERROR_ACCEL]) {
-    rgb_set_error(rgb, LED_STRIP_LEN);
+    dashboard_set_error(DASHBOARD_ACCEL);
   } else {
-    rgb_set_level(rgb, LED_STRIP_LEN, ctx->accel);
+    dashboard_set_level(DASHBOARD_ACCEL, ctx->accel);
   }
-
-  if (ctx->mode == SET_ACCEL && ctx->states[BLINK_OFF]) {
-    rgb_apply_selected(rgb, LED_STRIP_LEN);
-  }
-
-  led_strip_update_rgb(accel_display, rgb, LED_STRIP_LEN);
 
   // display brake
   if (ctx->states[ERROR_BRAKE]) {
-    rgb_set_error(rgb, LED_STRIP_LEN);
+    dashboard_set_error(DASHBOARD_BRAKE);
   } else {
-    rgb_set_level(rgb, LED_STRIP_LEN, ctx->brake);
+    dashboard_set_level(DASHBOARD_BRAKE, ctx->brake);
   }
 
-  if (ctx->mode == SET_BRAKE && ctx->states[BLINK_OFF]) {
-    rgb_apply_selected(rgb, LED_STRIP_LEN);
-  }
+  if (ctx->states[BLINK_OFF]) {
+    switch (ctx->mode) {
+      case SET_BRIGHTNESS:
+        dashboard_apply_selected(DASHBOARD_BATTERY);
+        break;
 
-  led_strip_update_rgb(brake_display, rgb, LED_STRIP_LEN);
+      case SET_INV_RL:
+      case SET_INV_RR:
+      case SET_STEER:
+        dashboard_apply_selected(DASHBOARD_SPEED);
+        break;
+
+      case SET_ACCEL:
+        dashboard_apply_selected(DASHBOARD_ACCEL);
+        break;
+
+      case SET_BRAKE:
+        dashboard_apply_selected(DASHBOARD_BRAKE);
+        break;
+
+      default:
+        break;
+    }
+  }
 }
 
 static void dashboard_modify_brightness(const struct dashboard_setting_ctx *ctx,
                                         bool increase) {
-  int brightness = dashboard_brightness_get();
-  brightness += increase ? 1 : -1;
-  brightness = CLAMP(brightness, 0, 100);
-
-  dashboard_brightness_set(brightness);
+  dashboard_brightness_set(dashboard_brightness_get() + (increase ? 1 : -1));
   dashboard_display(ctx);
 }
 
@@ -253,6 +276,49 @@ static void input_cb(struct input_event *evt, void *user_data) {
 
       break;
 
+    case SET_INV_RL:
+      if (evt->value) {
+        uint8_t torq = ctrl_inv_torq_rl_get();
+
+        if (evt->value == INPUT_BTN_UP) {
+          ctrl_inv_torq_rl_set(CLAMP(torq + 1, 0, 100));
+        } else if (evt->value == INPUT_BTN_DOWN) {
+          ctrl_inv_torq_rl_set(CLAMP(torq - 1, 0, 100));
+        }
+
+        ctrl_settings_save();
+      }
+
+      break;
+
+    case SET_INV_RR:
+      if (evt->value) {
+        uint8_t torq = ctrl_inv_torq_rr_get();
+
+        if (evt->value == INPUT_BTN_UP) {
+          ctrl_inv_torq_rr_set(CLAMP(torq + 1, 0, 100));
+        } else if (evt->value == INPUT_BTN_DOWN) {
+          ctrl_inv_torq_rr_set(CLAMP(torq - 1, 0, 100));
+        }
+
+        ctrl_settings_save();
+      }
+
+      break;
+
+    case SET_STEER:
+      if (evt->value) {
+        if (evt->code == INPUT_BTN_UP) {
+          sensor_axis_sensor_range_set_curr(steer, 10, K_MSEC(10), false);
+        } else if (evt->code == INPUT_BTN_DOWN) {
+          sensor_axis_sensor_center_set_curr(steer, 10, K_MSEC(10));
+        }
+
+        sensor_axis_sensor_calib_save(steer);
+      }
+
+      break;
+
     case SET_ACCEL:
       if (evt->value) {
         if (evt->code == INPUT_BTN_UP) {
@@ -299,6 +365,7 @@ static void msg_cb(const struct zbus_channel *chan) {
 
   const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
+  g_ctx.steer = roundf(msg->steer);
   g_ctx.accel = msg->accel;
   g_ctx.brake = msg->brake;
   dashboard_display(&g_ctx);
@@ -312,6 +379,11 @@ static void err_cb(uint32_t errcode, bool set, void *user_data) {
   k_mutex_lock(&ctx->lock, K_FOREVER);
 
   switch (errcode) {
+    case ERR_CODE_STEER:
+      ctx->states[ERROR_STEER] = set;
+      dashboard_display(ctx);
+      break;
+
     case ERR_CODE_ACCEL:
       ctx->states[ERROR_ACCEL] = set;
       dashboard_display(ctx);
@@ -334,7 +406,7 @@ static void blink_work(struct k_work *work) {
   struct dashboard_setting_ctx *ctx =
       CONTAINER_OF(dwork, struct dashboard_setting_ctx, blink_dwork);
 
-  k_mutex_lock(&ctx->lock, K_FOREVER);
+  k_mutex_lock(&ctx->lock, K_MSEC(5));
 
   ctx->states[BLINK_OFF] = !ctx->states[BLINK_OFF];
   dashboard_display(ctx);
@@ -348,7 +420,7 @@ static void modify_work(struct k_work *work) {
   struct dashboard_setting_ctx *ctx =
       CONTAINER_OF(dwork, struct dashboard_setting_ctx, modify_dwork);
 
-  k_mutex_lock(&ctx->lock, K_FOREVER);
+  k_mutex_lock(&ctx->lock, K_MSEC(5));
 
   dashboard_modify_brightness(ctx, ctx->states[MODIFY_INCREASING]);
 

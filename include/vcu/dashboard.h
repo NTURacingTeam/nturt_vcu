@@ -11,30 +11,37 @@
 #ifndef DASHBOARD_H_
 #define DASHBOARD_H_
 
-// glibc includes
-#include <stdint.h>
-
 // zephyr includes
 #include <zephyr/devicetree.h>
-#include <zephyr/drivers/led_strip.h>
 #include <zephyr/kernel.h>
 
 // project includes
 #include "vcu/dt-bindings/dashboard.h"
 
 /* macro ---------------------------------------------------------------------*/
+/// @brief Number of LEDs in the dashboard.
 #define NUM_LED DT_CHILD_NUM_STATUS_OKAY(DT_CHOSEN(nturt_leds))
 
+/// @brief Length of the LED strips.
 #define LED_STRIP_LEN DT_PROP(DT_CHOSEN(nturt_accel_display), chain_length)
 
+/// @brief Period for a blinking LED to switch state.
 #define LED_BLINK_PERIOD K_MSEC(250)
-
-/// @todo
-#define RPM_TO_SPEED(rpm) (rpm)
 
 /* type ----------------------------------------------------------------------*/
 typedef void (*dashboard_mode_trans_t)();
 
+/// @brief Components of the dashboard.
+enum dashboard_component {
+  DASHBOARD_SPEED,
+  DASHBOARD_BATTERY,
+  DASHBOARD_ACCEL,
+  DASHBOARD_BRAKE,
+
+  NUM_DASHBOARD_DISPLAY,
+};
+
+/// @brief Dashboard modes.
 enum dashboard_mode {
   DASHBOARD_NORMAL,
   DASHBOARD_SETTING,
@@ -43,6 +50,7 @@ enum dashboard_mode {
   NUM_DASHBOARD_MODE,
 };
 
+/// @brief Information about a dashboard mode.
 struct dashboard_mode_info {
   /** Function to start the mode. */
   dashboard_mode_trans_t start;
@@ -58,33 +66,85 @@ struct dashboard_mode_info {
 };
 
 /* function declaration ------------------------------------------------------*/
-uint8_t dashboard_brightness_get();
-void dashboard_brightness_set(uint8_t brightness);
-
-enum dashboard_mode dashboard_mode_get();
-void dashboard_mode_set(enum dashboard_mode mode);
-
-int dashboard_settings_save();
-
-void dashboard_normal_start();
-void dashboard_normal_stop();
-
-void dashboard_setting_start();
-void dashboard_setting_stop();
-
-void dashboard_test_start();
-void dashboard_test_stop();
-
-const struct dashboard_mode_info* dashboard_mode_info(enum dashboard_mode mode);
-
-void rgb_set_level(struct led_rgb* rgb, int len, int level);
+/**
+ * @brief Get the current brightness of the dashboard.
+ *
+ * @return int Current brightness level in [0, 100].
+ */
+int dashboard_brightness_get();
 
 /**
- * @brief Set rgb struct to error pattern, which is a five-zone pattern with the
- * second and fourth zones lit up.
+ * @brief Set the brightness of the dashboard.
+ *
+ * @param brightness The brightness level to set in [0, 100]. If the value is
+ * outside this range, it will be clamped.
  */
-void rgb_set_error(struct led_rgb* rgb, int len);
+void dashboard_brightness_set(int brightness);
 
-void rgb_apply_selected(struct led_rgb* rgb, int len);
+/**
+ * @brief Set the LED state.
+ *
+ * @param led The LED number to set.
+ * @param set True to turn on the LED, false to turn it off.
+ */
+void dashboard_led_set(int led, bool set);
+
+/**
+ * @brief Clear the display for a component.
+ *
+ * @param display The component to clear.
+ */
+void dashboard_clear(enum dashboard_component display);
+
+/**
+ * @brief Set the level for a component.
+ *
+ * @param display The component to set.
+ * @param level The level to set, clamped to the range of the component.
+ */
+void dashboard_set_level(enum dashboard_component display, int level);
+
+/**
+ * @brief Set error state for a component.
+ *
+ * @param display The component to set the error for.
+ */
+void dashboard_set_error(enum dashboard_component display);
+
+/**
+ * @brief Apply the selected state for a component.
+ *
+ * @param display The component to apply the selected state for.
+ */
+void dashboard_apply_selected(enum dashboard_component display);
+
+/**
+ * @brief Get the current dashboard mode.
+ *
+ * @return enum dashboard_mode The current mode.
+ */
+enum dashboard_mode dashboard_mode_get();
+
+/**
+ * @brief Set the  dashboard mode.
+ *
+ * @param mode The mode to set.
+ */
+void dashboard_mode_set(enum dashboard_mode mode);
+
+/**
+ * @brief Get the information about a dashboard mode.
+ *
+ * @param mode The mode to get information for.
+ * @return const struct dashboard_mode_info* Pointer to the mode information.
+ */
+const struct dashboard_mode_info* dashboard_mode_info(enum dashboard_mode mode);
+
+/**
+ * @brief Save the current dashboard settings.
+ *
+ * @return int 0 on success, negative error code on failure.
+ */
+int dashboard_settings_save();
 
 #endif  // DASHBOARD_H_
