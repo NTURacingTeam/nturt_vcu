@@ -17,6 +17,14 @@
 // project includes
 #include "vcu/ctrl/states.h"
 
+/**
+ * @defgroup msg_interfaces_states State Machine Messages
+ * @brief Control system state machine message type definitions.
+ * 
+ * @ingroup msg_interface
+ * @{
+ */
+
 /* macro ---------------------------------------------------------------------*/
 /// @brief List of state messages.
 #define MSG_STATES_LIST msg_states
@@ -46,5 +54,9 @@ struct msg_states {
   /** States after processing the command. */
   states_t after;
 };
+
+/**
+ * @} // msg_interfaces_states
+ */
 
 #endif  // VCU_MSG_INTERFACES_STATES_H_

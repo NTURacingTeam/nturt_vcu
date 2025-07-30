@@ -42,7 +42,7 @@ static void states_trans_get_handler(size_t idx,
   for (enum states_trans_cmd cmd = 0; cmd < NUM_TRANS_CMD; cmd++) {
     if (states_valid_transition(cmd)) {
       if (idx == 0) {
-        const struct states_trans_cmd_info *info = states_trans_cmd_info(cmd);
+        const struct states_trans_cmd_info *info = states_transition_info(cmd);
         entry->syntax = info->name;
         entry->handler = NULL;
         entry->subcmd = NULL;
@@ -78,7 +78,7 @@ static int states_trans_cmd_handler(const struct shell *sh, size_t argc,
 
   enum states_trans_cmd cmd = TRANS_CMD_INVALID;
   for (enum states_trans_cmd i = 0; i < NUM_TRANS_CMD; i++) {
-    if (!strcmp(states_trans_cmd_info(i)->name, argv[1])) {
+    if (!strcmp(states_transition_info(i)->name, argv[1])) {
       cmd = i;
       break;
     }
@@ -89,7 +89,7 @@ static int states_trans_cmd_handler(const struct shell *sh, size_t argc,
     return -ENOENT;
 
   } else if (!states_valid_transition(cmd)) {
-    const struct states_trans_cmd_info *info = states_trans_cmd_info(cmd);
+    const struct states_trans_cmd_info *info = states_transition_info(cmd);
 
     shell_error(sh, "Transition %s requires state %s, which is not satisfied.",
                 info->name, states_state_str(info->src));

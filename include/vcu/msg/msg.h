@@ -17,11 +17,20 @@
 // project includes
 #include "vcu/msg/interfaces/interfaces.h"
 
+/**
+ * @addtogroup msg
+ * @{
+ */
+
 /* macro ---------------------------------------------------------------------*/
 /// @brief List of all VCU messages.
 #define MSG_VCU_LIST MSG_CTRL_LIST, MSG_STATES_LIST
 
 /* exported variable ---------------------------------------------------------*/
 MSG_ZBUS_CHAN_DECLARE(MSG_VCU_LIST);
+
+/**
+ * @} // msg
+ */
 
 #endif  // VCU_MSG_MSG_H_

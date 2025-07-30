@@ -14,6 +14,14 @@
 // nturt includes
 #include <nturt/msg/interfaces/common.h>
 
+/**
+ * @defgroup msg_interface_ctrl Control Message
+ * @brief Control message type definitions.
+ *
+ * @ingroup msg_interface
+ * @{
+ */
+
 /* macro ---------------------------------------------------------------------*/
 #define MSG_CTRL_LIST msg_ctrl_word, msg_ctrl_torque
 
@@ -57,5 +65,9 @@ struct msg_ctrl_torque {
   /** Inverter target torque. */
   union msg_4wheel_data torque;
 };
+
+/**
+ * @} // msg_interface_ctrl
+ */
 
 #endif  // VCU_MSG_INTERFACES_CTRL_H_
