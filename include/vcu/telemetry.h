@@ -17,6 +17,14 @@
 // nturt includes
 #include <nturt/telemetry.h>
 
+/**
+ * @defgroup tm_vcu VCU Telemetry
+ * @brief VCU telemetry support.
+ *
+ * @ingroup tm
+ * @{
+ */
+
 /* type ----------------------------------------------------------------------*/
 /// @brief Telemetry data address for VCU. Currently the addresses are not used
 /// and can be changed to match those used in future protocols.
@@ -49,5 +57,9 @@ TM_DATA_DECLARE(inv_rl_target_torque, int16_t);
 
 TM_DATA_DECLARE(inv_rr_ctrl_word, uint16_t);
 TM_DATA_DECLARE(inv_rr_target_torque, int16_t);
+
+/**
+ * @} // tm_vcu
+ */
 
 #endif  // VCU_TELEMETRY_H_

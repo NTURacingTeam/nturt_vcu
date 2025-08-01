@@ -15,7 +15,7 @@
 #include <stdint.h>
 
 /**
- * @defgroup ctrl Ctrl
+ * @defgroup ctrl Control
  * @brief Control system.
  *
  * @{

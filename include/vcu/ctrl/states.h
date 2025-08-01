@@ -66,7 +66,7 @@ typedef uint32_t states_t;
 /**
  * @brief State transition handler type.
  *
- * @param[in] State to transition from/to.
+ * @param[in] state to transition from/to.
  * @param[in] is_entry True when transitioning to the state. False when
  * transition from.
  * @param[in,out] user_data Pointer to custom data for the callback provided by
@@ -172,7 +172,7 @@ const char *states_state_str(enum states_state state);
 
 /**
  * @brief Get the string representation of states separated by commas in the
- * same semantic as snprintf
+ * same semantic as snprintf.
  *
  * @param[out] buf Buffer to store the string representation.
  * @param[in] size Size of the buffer.
@@ -183,13 +183,13 @@ const char *states_state_str(enum states_state state);
 int states_states_str(char *buf, size_t size, states_t states);
 
 /**
- * @brief Get the information of a state transition command.
+ * @brief Get the information of a state transition.
  *
  * @param[in] cmd State transition command.
  * @return const struct states_trans_cmd_info* Pointer to the state transition
  * command information.
  */
-const struct states_trans_cmd_info *states_trans_cmd_info(
+const struct states_trans_cmd_info *states_transition_info(
     enum states_trans_cmd cmd);
 
 /**

@@ -15,4 +15,13 @@
 #include "vcu/msg/interfaces/ctrl.h"
 #include "vcu/msg/interfaces/states.h"
 
+/**
+ * @addtogroup msg_interface
+ * @{
+ */
+
+/**
+ * @} // msg_interface
+ */
+
 #endif  // VCU_MSG_INTERFACES_INTERFACES_H_

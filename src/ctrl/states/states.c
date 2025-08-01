@@ -199,7 +199,7 @@ void states_transition(enum states_trans_cmd cmd) {
   k_sem_take(&g_ctx.sem, K_FOREVER);
 
   if (!states_valid_transition(cmd)) {
-    LOG_ERR("Invalid command: %s", states_trans_cmd_info(cmd)->name);
+    LOG_ERR("Invalid command: %s", states_transition_info(cmd)->name);
     k_sem_give(&g_ctx.sem);
     return;
   }
@@ -237,7 +237,7 @@ int states_states_str(char *buf, size_t size, states_t states) {
   return n;
 }
 
-const struct states_trans_cmd_info *states_trans_cmd_info(
+const struct states_trans_cmd_info *states_transition_info(
     enum states_trans_cmd cmd) {
   __ASSERT(cmd < NUM_TRANS_CMD, "Invalid transition command: %d", cmd);
 
@@ -299,7 +299,7 @@ static void states_run_state(struct states_ctx *ctx) {
   zbus_chan_pub(&msg_states_chan, &msg, K_FOREVER);
 
   LOG_INF("Processed transition command %s: 0x%X -> 0x%X",
-          states_trans_cmd_info(cmd)->name, before, after);
+          states_transition_info(cmd)->name, before, after);
 
   char buf[100];
   states_states_str(buf, sizeof(buf), before & ~after);

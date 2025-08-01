@@ -18,6 +18,13 @@
 // project includes
 #include "vcu/dt-bindings/dashboard.h"
 
+/**
+ * @defgroup dashboard Dashboard
+ * @brief Dashboard and display system.
+ * 
+ * @{
+ */
+
 /* macro ---------------------------------------------------------------------*/
 /// @brief Number of LEDs in the dashboard.
 #define NUM_LED DT_CHILD_NUM_STATUS_OKAY(DT_CHOSEN(nturt_leds))
@@ -146,5 +153,9 @@ const struct dashboard_mode_info* dashboard_mode_info(enum dashboard_mode mode);
  * @return int 0 on success, negative error code on failure.
  */
 int dashboard_settings_save();
+
+/**
+ * @} // dashboard
+ */
 
 #endif  // DASHBOARD_H_
