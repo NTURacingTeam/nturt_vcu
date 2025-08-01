@@ -72,6 +72,7 @@ static struct ctrl_inv_ctx g_ctx = {
 };
 
 ZBUS_LISTENER_DEFINE(ctrl_inv_listener, msg_cb);
+ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, ctrl_inv_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
 
 ERR_DEFINE(inv_fl, ERR_CODE_INV_FL, ERR_SEV_FATAL, "Inverter FL error");
@@ -140,38 +141,48 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
-  const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
+  if (chan == &msg_sensor_cockpit_chan) {
+    const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
-  for (int i = 2; i < 4; i++) {
-    if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
-      if (msg->status.values[i] & STATUS_WORD_FAULT) {
-        if (err_is_set(ERR_CODE_INV_FL + i) ||
-            g_ctx.fault_counts[i] >= INV_ERR_THRES) {
-          err_report(ERR_CODE_INV_FL + i, true);
+    if (states_get() & STATE_RUNNING) {
+      ctrl_inv_word_set_and_pub(&g_ctx, CTRL_WORD_ENABLE, msg->brake == 0.0F);
+    }
 
-        } else {
-          g_ctx.fault_counts[i]++;
-          ctrl_inv_word_set_and_pub(&g_ctx, CTRL_WORD_FAULT_RESET, true);
-          k_work_reschedule(&g_ctx.fault_reset_work, CTRL_RESET_BIT_HOLD_TIME);
+  } else if (chan == &msg_ts_inv_chan) {
+    const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
 
-          for (int j = 0; j < INV_ERR_THRES; j++) {
-            if (!k_work_delayable_is_pending(
-                    &g_ctx.fault_dec_work[i][j].work)) {
-              k_work_schedule(&g_ctx.fault_dec_work[i][j].work,
-                              INV_ERR_DEC_TIME);
-              break;
+    for (int i = 2; i < 4; i++) {
+      if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
+        if (msg->status.values[i] & STATUS_WORD_FAULT) {
+          if (err_is_set(ERR_CODE_INV_FL + i) ||
+              g_ctx.fault_counts[i] >= INV_ERR_THRES) {
+            err_report(ERR_CODE_INV_FL + i, true);
+
+          } else {
+            g_ctx.fault_counts[i]++;
+            ctrl_inv_word_set_and_pub(&g_ctx, CTRL_WORD_FAULT_RESET, true);
+            k_work_reschedule(&g_ctx.fault_reset_work,
+                              CTRL_RESET_BIT_HOLD_TIME);
+
+            for (int j = 0; j < INV_ERR_THRES; j++) {
+              if (!k_work_delayable_is_pending(
+                      &g_ctx.fault_dec_work[i][j].work)) {
+                k_work_schedule(&g_ctx.fault_dec_work[i][j].work,
+                                INV_ERR_DEC_TIME);
+                break;
+              }
             }
+
+            LOG_WRN("Inverter %d fault detected, count increased to %d", i,
+                    g_ctx.fault_counts[i]);
           }
-
-          LOG_WRN("Inverter %d fault detected, count increased to %d", i,
-                  g_ctx.fault_counts[i]);
+        } else {
+          err_report(ERR_CODE_INV_FL + i, false);
         }
-      } else {
-        err_report(ERR_CODE_INV_FL + i, false);
-      }
 
-      err_report(ERR_CODE_INV_FL_HV_LOW + i,
-                 !(msg->status.values[i] & STATUS_WORD_POWER));
+        err_report(ERR_CODE_INV_FL_HV_LOW + i,
+                   !(msg->status.values[i] & STATUS_WORD_POWER));
+      }
     }
   }
 }
@@ -190,7 +201,11 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
 
   struct ctrl_inv_ctx *ctx = user_data;
 
-  ctrl_inv_word_set_and_pub(ctx, CTRL_WORD_ENABLE, is_entry);
+  // ctrl_inv_word_set_and_pub(ctx, CTRL_WORD_ENABLE, is_entry);
+  struct msg_sensor_cockpit msg;
+  zbus_chan_read(&msg_sensor_cockpit_chan, &msg, K_MSEC(5));
+
+  ctrl_inv_word_set_and_pub(&g_ctx, CTRL_WORD_ENABLE, msg.brake == 0.0F);
 }
 
 static void fault_reset_work(struct k_work *work) {
