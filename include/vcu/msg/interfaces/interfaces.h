@@ -16,12 +16,12 @@
 #include "vcu/msg/interfaces/states.h"
 
 /**
- * @addtogroup msg_interface
+ * @addtogroup msg_if
  * @{
  */
 
 /**
- * @} // msg_interface
+ * @} // msg_if
  */
 
 #endif  // VCU_MSG_INTERFACES_INTERFACES_H_
