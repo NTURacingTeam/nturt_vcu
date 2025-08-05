@@ -69,8 +69,8 @@ struct dashboard_setting_ctx {
 
 /* static function declaration -----------------------------------------------*/
 static void dashboard_display(const struct dashboard_setting_ctx *ctx);
-static void dashboard_modify_brightness(const struct dashboard_setting_ctx *ctx,
-                                        bool increase);
+static void dashboard_modify(const struct dashboard_setting_ctx *ctx,
+                             enum dashboard_setting_mode mode, bool increase);
 
 static void input_cb(struct input_event *evt, void *user_data);
 static void err_cb(uint32_t errcode, bool set, void *user_data);
@@ -135,6 +135,16 @@ void dashboard_setting_stop() {
 
   if (IS_ENABLED(CONFIG_VCU_DASHBOARD_SETTINGS)) {
     dashboard_settings_save();
+  }
+
+  ctrl_settings_save();
+
+  if (IS_ENABLED(CONFIG_INPUT_SENSOR_AXIS_SETTINGS)) {
+    sensor_axis_sensor_calib_save(steer);
+    sensor_axis_sensor_calib_save(apps1);
+    sensor_axis_sensor_calib_save(apps2);
+    sensor_axis_sensor_calib_save(bse1);
+    sensor_axis_sensor_calib_save(bse2);
   }
 
   k_mutex_unlock(&g_ctx.lock);
@@ -214,9 +224,34 @@ static void dashboard_display(const struct dashboard_setting_ctx *ctx) {
   }
 }
 
-static void dashboard_modify_brightness(const struct dashboard_setting_ctx *ctx,
-                                        bool increase) {
-  dashboard_brightness_set(dashboard_brightness_get() + (increase ? 1 : -1));
+static void dashboard_modify(const struct dashboard_setting_ctx *ctx,
+                             enum dashboard_setting_mode mode, bool increase) {
+  switch (mode) {
+    case SET_BRIGHTNESS: {
+      int brightness = dashboard_brightness_get();
+      brightness += increase ? 1 : -1;
+      dashboard_brightness_set(CLAMP(brightness, 0, 100));
+      break;
+    }
+
+    case SET_INV_RL: {
+      int torq = ctrl_inv_torq_rl_get();
+      torq += increase ? 1 : -1;
+      ctrl_inv_torq_rl_set(CLAMP(torq, 0, 100));
+      break;
+    }
+
+    case SET_INV_RR: {
+      int torq = ctrl_inv_torq_rr_get();
+      torq += increase ? 1 : -1;
+      ctrl_inv_torq_rr_set(CLAMP(torq, 0, 100));
+      break;
+    }
+
+    default:
+      break;
+  }
+
   dashboard_display(ctx);
 }
 
@@ -245,14 +280,16 @@ static void input_cb(struct input_event *evt, void *user_data) {
 
   switch (ctx->mode) {
     case SET_BRIGHTNESS:
+    case SET_INV_RL:
+    case SET_INV_RR:
       if (evt->value) {
         switch (evt->code) {
           case INPUT_BTN_UP:
-            dashboard_modify_brightness(ctx, true);
+            dashboard_modify(ctx, ctx->mode, true);
             break;
 
           case INPUT_BTN_DOWN:
-            dashboard_modify_brightness(ctx, false);
+            dashboard_modify(ctx, ctx->mode, false);
             break;
 
           case INPUT_BTN_UP_HOLD:
@@ -276,36 +313,6 @@ static void input_cb(struct input_event *evt, void *user_data) {
 
       break;
 
-    case SET_INV_RL:
-      if (evt->value) {
-        uint8_t torq = ctrl_inv_torq_rl_get();
-
-        if (evt->value == INPUT_BTN_UP) {
-          ctrl_inv_torq_rl_set(CLAMP(torq + 1, 0, 100));
-        } else if (evt->value == INPUT_BTN_DOWN) {
-          ctrl_inv_torq_rl_set(CLAMP(torq - 1, 0, 100));
-        }
-
-        ctrl_settings_save();
-      }
-
-      break;
-
-    case SET_INV_RR:
-      if (evt->value) {
-        uint8_t torq = ctrl_inv_torq_rr_get();
-
-        if (evt->value == INPUT_BTN_UP) {
-          ctrl_inv_torq_rr_set(CLAMP(torq + 1, 0, 100));
-        } else if (evt->value == INPUT_BTN_DOWN) {
-          ctrl_inv_torq_rr_set(CLAMP(torq - 1, 0, 100));
-        }
-
-        ctrl_settings_save();
-      }
-
-      break;
-
     case SET_STEER:
       if (evt->value) {
         if (evt->code == INPUT_BTN_UP) {
@@ -313,8 +320,6 @@ static void input_cb(struct input_event *evt, void *user_data) {
         } else if (evt->code == INPUT_BTN_DOWN) {
           sensor_axis_sensor_center_set_curr(steer, 10, K_MSEC(10));
         }
-
-        sensor_axis_sensor_calib_save(steer);
       }
 
       break;
@@ -329,9 +334,6 @@ static void input_cb(struct input_event *evt, void *user_data) {
           sensor_axis_sensor_min_set_curr(apps1, 10, K_MSEC(10));
           sensor_axis_sensor_min_set_curr(apps2, 10, K_MSEC(10));
         }
-
-        sensor_axis_sensor_calib_save(apps1);
-        sensor_axis_sensor_calib_save(apps2);
       }
 
       break;
@@ -346,9 +348,6 @@ static void input_cb(struct input_event *evt, void *user_data) {
           sensor_axis_sensor_min_set_curr(bse1, 10, K_MSEC(10));
           sensor_axis_sensor_min_set_curr(bse2, 10, K_MSEC(10));
         }
-
-        sensor_axis_sensor_calib_save(bse1);
-        sensor_axis_sensor_calib_save(bse2);
       }
       break;
 
@@ -422,7 +421,7 @@ static void modify_work(struct k_work *work) {
 
   k_mutex_lock(&ctx->lock, K_MSEC(5));
 
-  dashboard_modify_brightness(ctx, ctx->states[MODIFY_INCREASING]);
+  dashboard_modify(ctx, ctx->mode, ctx->states[MODIFY_INCREASING]);
 
   k_work_reschedule(&ctx->modify_dwork, K_MSEC(100));
   k_mutex_unlock(&ctx->lock);
