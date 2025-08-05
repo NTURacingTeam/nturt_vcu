@@ -27,7 +27,7 @@
 #define MSG_VCU_LIST MSG_CTRL_LIST, MSG_STATES_LIST
 
 /* exported variable ---------------------------------------------------------*/
-MSG_ZBUS_CHAN_DECLARE(MSG_VCU_LIST);
+MSG_CHAN_DECLARE(MSG_VCU_LIST);
 
 /**
  * @} // msg

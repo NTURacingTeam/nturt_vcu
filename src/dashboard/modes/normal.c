@@ -195,7 +195,7 @@ static void msg_cb(const struct zbus_channel *chan) {
     const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
 
     if (!g_ctx.states[ERROR_HB_INV_RL] && !g_ctx.states[ERROR_HB_INV_RR]) {
-      int speed = RPM_TO_SPEED((-msg->speed.rl + msg->speed.rr) / 2.0F);
+      int speed = (-msg->speed.rl + msg->speed.rr) / 2.0F * 0.00736F;
       dashboard_set_level(DASHBOARD_SPEED, speed);
     }
 

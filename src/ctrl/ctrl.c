@@ -158,7 +158,7 @@ static int ctrl_settings_load(const char *key, size_t len,
     goto out;
   }
 
-  ret = read_cb(cb_arg, &target, len);
+  ret = read_cb(cb_arg, target, len);
 
 out:
   k_mutex_unlock(&g_ctx.lock);
@@ -202,5 +202,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
     }
 
     zbus_chan_pub(&msg_ctrl_torque_chan, &msg, K_MSEC(5));
+
+    k_mutex_unlock(&ctx->lock);
   }
 }
