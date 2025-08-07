@@ -4,4 +4,10 @@ menuconfig VCU_MSG
 
 if VCU_MSG
 
+config VCU_MSG_LOGGING_DIR
+	string "VCU message logging directory"
+	default "/SD:/msg_logs"
+	help
+	  Directory where VCU message logs will be stored.
+
 endif # VCU_MSG
