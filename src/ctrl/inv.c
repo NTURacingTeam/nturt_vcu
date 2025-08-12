@@ -3,6 +3,7 @@
 #include <string.h>
 
 // zephyr includes
+#include <zephyr/drivers/can.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
@@ -67,6 +68,8 @@ static void fault_dec_work(struct k_work *work);
              .work = Z_WORK_DELAYABLE_INITIALIZER(fault_dec_work), \
              .inv_index = i,                                       \
          }}
+
+static const struct device *can = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
 
 static struct ctrl_inv_ctx g_ctx = {
     .fault_reset_work = Z_WORK_DELAYABLE_INITIALIZER(fault_reset_work),
@@ -210,6 +213,16 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   struct ctrl_inv_ctx *ctx = user_data;
 
   ctrl_inv_word_set_and_pub(ctx, CTRL_WORD_ENABLE, is_entry);
+
+  struct can_frame frame = {
+      .id = 0x420,
+      .dlc = 1,
+      .flags = 0,
+      .data[0] = is_entry ? 0x01 : 0x02,
+  };
+
+  can_send(can, &frame, K_MSEC(10), NULL, NULL);
+
   // struct msg_sensor_cockpit msg;
   // zbus_chan_read(&msg_sensor_cockpit_chan, &msg, K_MSEC(5));
 
