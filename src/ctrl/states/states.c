@@ -303,13 +303,13 @@ static void states_run_state(struct states_ctx *ctx) {
 
   char buf[100];
   states_states_str(buf, sizeof(buf), before & ~after);
-  LOG_INF("\tFrom: 0x%X (%s)", before & ~after, buf);
+  LOG_DBG("\tFrom: 0x%X (%s)", before & ~after, buf);
 
   states_states_str(buf, sizeof(buf), after & ~before);
-  LOG_INF("\tTo:   0x%X (%s)", after & ~before, buf);
+  LOG_DBG("\tTo:   0x%X (%s)", after & ~before, buf);
 
   states_states_str(buf, sizeof(buf), before & after);
-  LOG_INF("\tSame: 0x%X (%s)", before & after, buf);
+  LOG_DBG("\tSame: 0x%X (%s)", before & after, buf);
 
   ctx->transitiong_thread = NULL;
   k_sem_give(&ctx->sem);

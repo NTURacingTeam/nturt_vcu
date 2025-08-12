@@ -10,6 +10,7 @@
 
 // nturt includes
 #include <nturt/err/err.h>
+#include <nturt/sys/sys.h>
 
 // project includes
 #include "vcu/ctrl/states.h"
@@ -85,7 +86,7 @@ int ctrl_inv_fault_reset() {
 
   ctrl_inv_word_set_and_pub(&g_ctx, CTRL_WORD_FAULT_RESET, true);
 
-  k_work_reschedule(&g_ctx.fault_reset_work, CTRL_RESET_BIT_HOLD_TIME);
+  sys_work_reschedule(&g_ctx.fault_reset_work, CTRL_RESET_BIT_HOLD_TIME);
 
   return 0;
 }

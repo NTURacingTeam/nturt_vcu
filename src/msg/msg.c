@@ -24,7 +24,7 @@
 // represent the size of '/'.
 BUILD_ASSERT(sizeof(CONFIG_VCU_MSG_LOGGING_DIR) +
                      sizeof("1970_01_01_00_00_00") <
-                 MAX_PATH_LEN,
+                 FS_MAX_PATH_LEN,
              "Path too long");
 
 LOG_MODULE_REGISTER(vcu_msg);
@@ -34,12 +34,8 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data);
 
 /* static variable -----------------------------------------------------------*/
 const struct zbus_channel *logged_chans[] = {
-    &msg_sensor_cockpit_chan,
-    &msg_sensor_wheel_chan,
-    &msg_sensor_pow_chan,
-    &msg_ctrl_torque_chan,
-    &msg_ctrl_word_chan,
-    &msg_states_chan,
+    &msg_sensor_cockpit_chan, &msg_sensor_wheel_chan, &msg_sensor_pow_chan,
+    &msg_ctrl_torque_chan,    &msg_ctrl_word_chan,    &msg_states_chan,
 };
 
 MSG_CHAN_DEFINE(MSG_VCU_LIST);
@@ -52,7 +48,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   (void)user_data;
 
   if (is_entry) {
-    char path[MAX_PATH_LEN];
+    char path[FS_MAX_PATH_LEN];
     char *p = stpcpy(path, CONFIG_VCU_MSG_LOGGING_DIR);
     *p = '/';
     p++;
@@ -66,7 +62,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
 
     ARRAY_FOR_EACH_PTR(logged_chans, chan) {
       __ASSERT(p - path + strlen(zbus_chan_name(*chan)) + strlen(".csv") <
-                   MAX_PATH_LEN,
+                   FS_MAX_PATH_LEN,
                "Path too long");
 
       sprintf(p, "%s.csv", zbus_chan_name(*chan));

@@ -4,6 +4,7 @@ menuconfig VCU_SENSORS
 	select SENSOR
 	select INPUT
 	select INPUT_THREAD_PRIORITY_OVERRIDE
+	select VCU_SYS
 
 if VCU_SENSORS
 

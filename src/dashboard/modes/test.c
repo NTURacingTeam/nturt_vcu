@@ -14,85 +14,110 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
 
+// nturt includes
+#include <nturt/sys/sys.h>
+
 // project includes
 #include "vcu/dashboard.h"
 
 /* type ----------------------------------------------------------------------*/
+enum dashboard_test_state {
+  ACTIVE,
+
+  NUM_STATES,
+};
+
 struct dashboard_test_ctx {
+  struct k_mutex lock;
+
+  bool states[NUM_STATES];
+  int counter;
   int pressed;
 
-  k_tid_t tid;
-  struct k_thread thread;
+  struct k_work_delayable test_dwork;
 };
 
 /* static function declaration -----------------------------------------------*/
 static void input_cb(struct input_event *evt, void *user_data);
-static void dashboard_test_thread(void *arg1, void *arg2, void *arg3);
+static void test_work(struct k_work *work);
 
 /* static variable -----------------------------------------------------------*/
 static const struct device *speed_display =
     DEVICE_DT_GET(DT_NODELABEL(speed_display));
 
 static struct dashboard_test_ctx g_ctx = {
+    .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
+    .states = {0},
+    .counter = 0,
     .pressed = -1,
-    .tid = NULL,
+    .test_dwork = Z_WORK_DELAYABLE_INITIALIZER(test_work),
 };
-
-K_THREAD_STACK_DEFINE(dashboard_test_thread_stack, 512);
 
 INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
 
 /* function definition -------------------------------------------------------*/
 void dashboard_test_start() {
-  if (g_ctx.pressed != -1 && g_ctx.pressed < NUM_LED) {
+  k_mutex_lock(&g_ctx.lock, K_FOREVER);
+
+  g_ctx.states[ACTIVE] = true;
+  g_ctx.counter = 0;
+
+  if (IN_RANGE(g_ctx.pressed, 0, NUM_LED - 1)) {
     dashboard_led_set(g_ctx.pressed, true);
   }
 
-  g_ctx.tid =
-      k_thread_create(&g_ctx.thread, dashboard_test_thread_stack,
-                      K_THREAD_STACK_SIZEOF(dashboard_test_thread_stack),
-                      dashboard_test_thread, NULL, NULL, NULL, 5, 0, K_NO_WAIT);
-  k_thread_name_set(g_ctx.tid, "dashboard_test");
+  sys_work_schedule(&g_ctx.test_dwork, K_NO_WAIT);
+
+  k_mutex_unlock(&g_ctx.lock);
 }
 
 void dashboard_test_stop() {
-  k_thread_abort(g_ctx.tid);
-  g_ctx.tid = NULL;
+  k_mutex_lock(&g_ctx.lock, K_FOREVER);
+
+  g_ctx.states[ACTIVE] = false;
+
+  k_work_cancel_delayable(&g_ctx.test_dwork);
+
+  k_mutex_unlock(&g_ctx.lock);
 }
 
 /* static function definition ------------------------------------------------*/
 static void input_cb(struct input_event *evt, void *user_data) {
   struct dashboard_test_ctx *ctx = user_data;
 
-  if (evt->type == INPUT_EV_KEY && evt->code >= INPUT_BTN_1 &&
-      evt->code <= INPUT_BTN_7) {
-    if (ctx->tid != NULL && ctx->pressed != -1 && ctx->pressed < NUM_LED) {
+  k_mutex_lock(&ctx->lock, K_FOREVER);
+
+  if (!ctx->states[ACTIVE] || evt->type != INPUT_EV_KEY) {
+    goto out;
+  }
+
+  if (IN_RANGE(evt->code, INPUT_BTN_1, INPUT_BTN_7)) {
+    if (IN_RANGE(ctx->pressed, 0, NUM_LED - 1)) {
       dashboard_led_set(ctx->pressed, false);
     }
 
     ctx->pressed += (evt->value ? 1 : -1) * (evt->code - INPUT_BTN_0);
 
-    if (ctx->tid != NULL && ctx->pressed != -1 && ctx->pressed < NUM_LED) {
+    if (IN_RANGE(ctx->pressed, 0, NUM_LED - 1)) {
       dashboard_led_set(ctx->pressed, true);
     }
   }
+
+out:
+  k_mutex_unlock(&ctx->lock);
 }
 
-static void dashboard_test_thread(void *arg1, void *arg2, void *arg3) {
-  (void)arg1;
-  (void)arg2;
-  (void)arg3;
+static void test_work(struct k_work *work) {
+  struct k_work_delayable *dwork = k_work_delayable_from_work(work);
+  struct dashboard_test_ctx *ctx =
+      CONTAINER_OF(dwork, struct dashboard_test_ctx, test_dwork);
 
-  int i = 0;
+  ctx->counter = (ctx->counter + 1) % 100;
 
-  while (true) {
-    i = (i + 1) % 100;
-
-    auxdisplay_brightness_set(speed_display, i);
-    for (int j = 0; j < NUM_DASHBOARD_DISPLAY; j++) {
-      dashboard_set_level(j, j % 2 == 0 ? i : 100 - i);
-    }
-
-    k_sleep(K_MSEC(100));
+  auxdisplay_brightness_set(speed_display, ctx->counter);
+  for (int j = 0; j < NUM_DASHBOARD_DISPLAY; j++) {
+    dashboard_set_level(j, j % 2 == 0 ? ctx->counter : 100 - ctx->counter);
   }
+
+  sys_work_reschedule(&ctx->test_dwork, HOLD_MODIFY_INTERVAL);
 }
