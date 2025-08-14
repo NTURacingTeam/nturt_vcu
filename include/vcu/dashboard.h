@@ -21,7 +21,7 @@
 /**
  * @defgroup dashboard Dashboard
  * @brief Dashboard and display system.
- * 
+ *
  * @{
  */
 
@@ -34,6 +34,9 @@
 
 /// @brief Period for a blinking LED to switch state.
 #define LED_BLINK_PERIOD K_MSEC(250)
+
+/// @brief Interval between two modifications when holding.
+#define HOLD_MODIFY_INTERVAL K_MSEC(100)
 
 /* type ----------------------------------------------------------------------*/
 typedef void (*dashboard_mode_trans_t)();
