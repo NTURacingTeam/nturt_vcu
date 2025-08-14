@@ -123,7 +123,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   switch (state) {
     case STATE_RTD_BLINK:
       if (is_entry) {
-        k_work_schedule(&ctx->rtd_blink_dwork, K_NO_WAIT);
+        sys_work_schedule(&ctx->rtd_blink_dwork, K_NO_WAIT);
       } else {
         k_work_cancel_delayable(&ctx->rtd_blink_dwork);
         gpio_pin_set_dt(&rtd_light, false);
@@ -139,7 +139,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
     case STATE_RTD_SOUND:
       if (is_entry) {
         ctx->rtd_sound_count = 0;
-        k_work_schedule(&ctx->rtd_sound_dwork, K_NO_WAIT);
+        sys_work_schedule(&ctx->rtd_sound_dwork, K_NO_WAIT);
       } else {
         gpio_pin_set_dt(&buzzer, false);
         k_work_cancel_delayable(&ctx->rtd_sound_dwork);
@@ -159,7 +159,7 @@ static void rtd_blink_work(struct k_work *work) {
 
   gpio_pin_toggle_dt(&rtd_light);
 
-  k_work_reschedule(&ctx->rtd_blink_dwork, LED_BLINK_PERIOD);
+  sys_work_reschedule(&ctx->rtd_blink_dwork, LED_BLINK_PERIOD);
 }
 
 static void rtd_sound_work(struct k_work *work) {
@@ -171,9 +171,9 @@ static void rtd_sound_work(struct k_work *work) {
     gpio_pin_set_dt(&buzzer, true);
 
     if (ctx->rtd_sound_count == 0) {
-      k_work_reschedule(&ctx->rtd_sound_dwork, K_MSEC(1000));
+      sys_work_reschedule(&ctx->rtd_sound_dwork, K_MSEC(1000));
     } else {
-      k_work_reschedule(&ctx->rtd_sound_dwork, K_MSEC(200));
+      sys_work_reschedule(&ctx->rtd_sound_dwork, K_MSEC(200));
     }
 
   } else {
@@ -182,7 +182,7 @@ static void rtd_sound_work(struct k_work *work) {
     if (ctx->rtd_sound_count >= 5) {
       states_transition(TRANS_CMD_RTD_FINISH);
     } else {
-      k_work_reschedule(&ctx->rtd_sound_dwork, K_MSEC(100));
+      sys_work_reschedule(&ctx->rtd_sound_dwork, K_MSEC(100));
     }
   }
 

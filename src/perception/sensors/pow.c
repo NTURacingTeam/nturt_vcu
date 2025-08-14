@@ -1,5 +1,3 @@
-#include "sensor.h"
-
 // zephyr includes
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -10,11 +8,15 @@
 
 // nturt includes
 #include <nturt/msg/msg.h>
+#include <nturt/sys/sys.h>
 
 // project includes
 #include "vcu/msg/msg.h"
 
 LOG_MODULE_REGISTER(vcu_sensor_pow);
+
+/* macro ---------------------------------------------------------------------*/
+#define SENSOR_POW_PERIOD K_MSEC(100)
 
 /* static function declaration -----------------------------------------------*/
 static int init();
@@ -64,7 +66,7 @@ static int init() {
   }
 #endif
 
-  k_work_schedule_for_queue(sensor_work_q, &dwork, SENSOR_POW_PERIOD);
+  sys_work_schedule(&dwork, SENSOR_POW_PERIOD);
 
   return 0;
 }
@@ -122,5 +124,5 @@ static void read_work(struct k_work *work) {
   msg_header_init(&msg.header);
   zbus_chan_pub(&msg_sensor_pow_chan, &msg, K_MSEC(5));
 
-  k_work_reschedule_for_queue(sensor_work_q, &dwork, SENSOR_POW_PERIOD);
+  sys_work_reschedule(&dwork, SENSOR_POW_PERIOD);
 }

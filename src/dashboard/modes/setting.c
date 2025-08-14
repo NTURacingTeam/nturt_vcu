@@ -20,6 +20,7 @@
 // nturt includes
 #include <nturt/err/err.h>
 #include <nturt/msg/msg.h>
+#include <nturt/sys/sys.h>
 
 // project includes
 #include "vcu/ctrl/ctrl.h"
@@ -27,6 +28,9 @@
 
 /* macro ---------------------------------------------------------------------*/
 #define DEFAULT_MODE SET_BRIGHTNESS
+
+#define CALIB_TIMES 10
+#define CALIB_INTERVAL K_MSEC(10)
 
 /* type ----------------------------------------------------------------------*/
 enum dashboard_setting_state {
@@ -36,7 +40,8 @@ enum dashboard_setting_state {
   ERROR_ACCEL,
   ERROR_BRAKE,
 
-  MODIFY_INCREASING,
+  MODIFY_UP,
+  MODIFY_HOLDING,
   BLINK_OFF,
 
   NUM_STATES,
@@ -70,7 +75,7 @@ struct dashboard_setting_ctx {
 /* static function declaration -----------------------------------------------*/
 static void dashboard_display(const struct dashboard_setting_ctx *ctx);
 static void dashboard_modify(const struct dashboard_setting_ctx *ctx,
-                             enum dashboard_setting_mode mode, bool increase);
+                             enum dashboard_setting_mode mode, bool is_up);
 
 static void input_cb(struct input_event *evt, void *user_data);
 static void err_cb(uint32_t errcode, bool set, void *user_data);
@@ -80,18 +85,9 @@ static void blink_work(struct k_work *work);
 static void modify_work(struct k_work *work);
 
 /* static variable -----------------------------------------------------------*/
-static const struct device *steer =
-    DEVICE_DT_GET(DT_NODELABEL(steer_sensor_axis));
-
-static const struct device *apps1 =
-    DEVICE_DT_GET(DT_NODELABEL(apps1_sensor_axis));
-static const struct device *apps2 =
-    DEVICE_DT_GET(DT_NODELABEL(apps2_sensor_axis));
-
-static const struct device *bse1 =
-    DEVICE_DT_GET(DT_NODELABEL(bse1_sensor_axis));
-static const struct device *bse2 =
-    DEVICE_DT_GET(DT_NODELABEL(bse2_sensor_axis));
+static const struct device *steer = DEVICE_DT_GET(DT_NODELABEL(steer));
+static const struct device *accel = DEVICE_DT_GET(DT_NODELABEL(accel));
+static const struct device *brake = DEVICE_DT_GET(DT_NODELABEL(brake));
 
 static struct dashboard_setting_ctx g_ctx = {
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
@@ -117,10 +113,11 @@ void dashboard_setting_start() {
   k_mutex_lock(&g_ctx.lock, K_FOREVER);
 
   g_ctx.states[ACTIVE] = true;
+  g_ctx.states[MODIFY_HOLDING] = false;
   g_ctx.mode = DEFAULT_MODE;
   dashboard_display(&g_ctx);
 
-  k_work_schedule(&g_ctx.blink_dwork, K_NO_WAIT);
+  sys_work_schedule(&g_ctx.blink_dwork, K_NO_WAIT);
 
   k_mutex_unlock(&g_ctx.lock);
 }
@@ -132,20 +129,6 @@ void dashboard_setting_stop() {
 
   k_work_cancel_delayable(&g_ctx.blink_dwork);
   k_work_cancel_delayable(&g_ctx.modify_dwork);
-
-  if (IS_ENABLED(CONFIG_VCU_DASHBOARD_SETTINGS)) {
-    dashboard_settings_save();
-  }
-
-  ctrl_settings_save();
-
-  if (IS_ENABLED(CONFIG_INPUT_SENSOR_AXIS_SETTINGS)) {
-    sensor_axis_sensor_calib_save(steer);
-    sensor_axis_sensor_calib_save(apps1);
-    sensor_axis_sensor_calib_save(apps2);
-    sensor_axis_sensor_calib_save(bse1);
-    sensor_axis_sensor_calib_save(bse2);
-  }
 
   k_mutex_unlock(&g_ctx.lock);
 }
@@ -225,28 +208,79 @@ static void dashboard_display(const struct dashboard_setting_ctx *ctx) {
 }
 
 static void dashboard_modify(const struct dashboard_setting_ctx *ctx,
-                             enum dashboard_setting_mode mode, bool increase) {
+                             enum dashboard_setting_mode mode, bool is_up) {
   switch (mode) {
     case SET_BRIGHTNESS: {
       int brightness = dashboard_brightness_get();
-      brightness += increase ? 1 : -1;
+      brightness += is_up ? 1 : -1;
       dashboard_brightness_set(CLAMP(brightness, 0, 100));
+
+      if (IS_ENABLED(CONFIG_VCU_DASHBOARD_SETTINGS)) {
+        dashboard_settings_save();
+      }
+
       break;
     }
 
     case SET_INV_RL: {
       int torq = ctrl_inv_torq_rl_get();
-      torq += increase ? 1 : -1;
+      torq += is_up ? 1 : -1;
       ctrl_inv_torq_rl_set(CLAMP(torq, 0, 100));
+
+      ctrl_settings_save();
+
       break;
     }
 
     case SET_INV_RR: {
       int torq = ctrl_inv_torq_rr_get();
-      torq += increase ? 1 : -1;
+      torq += is_up ? 1 : -1;
       ctrl_inv_torq_rr_set(CLAMP(torq, 0, 100));
+
+      ctrl_settings_save();
+
       break;
     }
+
+    case SET_STEER:
+      if (is_up) {
+        sensor_axis_channel_range_set_curr(steer, CALIB_TIMES, CALIB_INTERVAL,
+                                           false);
+      } else {
+        sensor_axis_channel_center_set_curr(steer, CALIB_TIMES, CALIB_INTERVAL);
+      }
+
+      if (IS_ENABLED(CONFIG_INPUT_SENSOR_AXIS_SETTINGS)) {
+        sensor_axis_channel_calib_save(steer);
+      }
+
+      break;
+
+    case SET_ACCEL:
+      if (is_up) {
+        sensor_axis_channel_max_set_curr(accel, CALIB_TIMES, CALIB_INTERVAL);
+      } else {
+        sensor_axis_channel_min_set_curr(accel, CALIB_TIMES, CALIB_INTERVAL);
+      }
+
+      if (IS_ENABLED(CONFIG_INPUT_SENSOR_AXIS_SETTINGS)) {
+        sensor_axis_channel_calib_save(accel);
+      }
+
+      break;
+
+    case SET_BRAKE:
+      if (is_up) {
+        sensor_axis_channel_max_set_curr(brake, CALIB_TIMES, CALIB_INTERVAL);
+      } else {
+        sensor_axis_channel_min_set_curr(brake, CALIB_TIMES, CALIB_INTERVAL);
+      }
+
+      if (IS_ENABLED(CONFIG_INPUT_SENSOR_AXIS_SETTINGS)) {
+        sensor_axis_channel_calib_save(brake);
+      }
+
+      break;
 
     default:
       break;
@@ -264,95 +298,53 @@ static void input_cb(struct input_event *evt, void *user_data) {
     goto out;
   }
 
-  // change mode
-  if (evt->value &&
-      (evt->code == INPUT_BTN_LEFT || evt->code == INPUT_BTN_RIGHT)) {
-    if (evt->code == INPUT_BTN_RIGHT) {
-      g_ctx.mode = (g_ctx.mode - 1 + NUM_MODE) % NUM_MODE;
-    } else {
-      g_ctx.mode = (g_ctx.mode + 1) % NUM_MODE;
+  if (evt->value) {
+    switch (evt->code) {
+      case INPUT_BTN_LEFT:
+      case INPUT_BTN_RIGHT:
+        if (evt->code == INPUT_BTN_RIGHT) {
+          g_ctx.mode = (g_ctx.mode - 1 + NUM_MODE) % NUM_MODE;
+        } else {
+          g_ctx.mode = (g_ctx.mode + 1) % NUM_MODE;
+        }
+
+        ctx->states[MODIFY_HOLDING] = false;
+        k_work_cancel_delayable(&ctx->modify_dwork);
+        dashboard_display(ctx);
+
+        break;
+
+      case INPUT_BTN_UP_HOLD:
+        ctx->states[MODIFY_HOLDING] = true;
+
+      case INPUT_BTN_UP:
+        ctx->states[MODIFY_UP] = true;
+        sys_work_schedule(&ctx->modify_dwork, K_NO_WAIT);
+        break;
+
+      case INPUT_BTN_DOWN_HOLD:
+        ctx->states[MODIFY_HOLDING] = true;
+
+      case INPUT_BTN_DOWN:
+        ctx->states[MODIFY_UP] = false;
+        sys_work_schedule(&ctx->modify_dwork, K_NO_WAIT);
+        break;
+
+      default:
+        break;
     }
 
-    k_work_cancel_delayable(&ctx->modify_dwork);
-    dashboard_display(ctx);
-    goto out;
-  }
-
-  switch (ctx->mode) {
-    case SET_BRIGHTNESS:
-    case SET_INV_RL:
-    case SET_INV_RR:
-      if (evt->value) {
-        switch (evt->code) {
-          case INPUT_BTN_UP:
-            dashboard_modify(ctx, ctx->mode, true);
-            break;
-
-          case INPUT_BTN_DOWN:
-            dashboard_modify(ctx, ctx->mode, false);
-            break;
-
-          case INPUT_BTN_UP_HOLD:
-            ctx->states[MODIFY_INCREASING] = true;
-            k_work_schedule(&ctx->modify_dwork, K_NO_WAIT);
-            break;
-
-          case INPUT_BTN_DOWN_HOLD:
-            ctx->states[MODIFY_INCREASING] = false;
-            k_work_schedule(&ctx->modify_dwork, K_NO_WAIT);
-            break;
-
-          default:
-            break;
-        }
-
-      } else if (evt->code == INPUT_BTN_UP_HOLD ||
-                 evt->code == INPUT_BTN_DOWN_HOLD) {
+  } else {
+    switch (evt->code) {
+      case INPUT_BTN_UP_HOLD:
+      case INPUT_BTN_DOWN_HOLD:
+        ctx->states[MODIFY_HOLDING] = false;
         k_work_cancel_delayable(&ctx->modify_dwork);
-      }
+        break;
 
-      break;
-
-    case SET_STEER:
-      if (evt->value) {
-        if (evt->code == INPUT_BTN_UP) {
-          sensor_axis_sensor_range_set_curr(steer, 10, K_MSEC(10), false);
-        } else if (evt->code == INPUT_BTN_DOWN) {
-          sensor_axis_sensor_center_set_curr(steer, 10, K_MSEC(10));
-        }
-      }
-
-      break;
-
-    case SET_ACCEL:
-      if (evt->value) {
-        if (evt->code == INPUT_BTN_UP) {
-          sensor_axis_sensor_max_set_curr(apps1, 10, K_MSEC(10));
-          sensor_axis_sensor_max_set_curr(apps2, 10, K_MSEC(10));
-
-        } else if (evt->code == INPUT_BTN_DOWN) {
-          sensor_axis_sensor_min_set_curr(apps1, 10, K_MSEC(10));
-          sensor_axis_sensor_min_set_curr(apps2, 10, K_MSEC(10));
-        }
-      }
-
-      break;
-
-    case SET_BRAKE:
-      if (evt->value) {
-        if (evt->code == INPUT_BTN_UP) {
-          sensor_axis_sensor_max_set_curr(bse1, 10, K_MSEC(10));
-          sensor_axis_sensor_max_set_curr(bse2, 10, K_MSEC(10));
-
-        } else if (evt->code == INPUT_BTN_DOWN) {
-          sensor_axis_sensor_min_set_curr(bse1, 10, K_MSEC(10));
-          sensor_axis_sensor_min_set_curr(bse2, 10, K_MSEC(10));
-        }
-      }
-      break;
-
-    default:
-      break;
+      default:
+        break;
+    }
   }
 
 out:
@@ -380,22 +372,21 @@ static void err_cb(uint32_t errcode, bool set, void *user_data) {
   switch (errcode) {
     case ERR_CODE_STEER:
       ctx->states[ERROR_STEER] = set;
-      dashboard_display(ctx);
       break;
 
     case ERR_CODE_ACCEL:
       ctx->states[ERROR_ACCEL] = set;
-      dashboard_display(ctx);
       break;
 
     case ERR_CODE_BRAKE:
       ctx->states[ERROR_BRAKE] = set;
-      dashboard_display(ctx);
       break;
 
     default:
       break;
   }
+
+  dashboard_display(ctx);
 
   k_mutex_unlock(&ctx->lock);
 }
@@ -405,12 +396,13 @@ static void blink_work(struct k_work *work) {
   struct dashboard_setting_ctx *ctx =
       CONTAINER_OF(dwork, struct dashboard_setting_ctx, blink_dwork);
 
-  k_mutex_lock(&ctx->lock, K_MSEC(5));
+  k_mutex_lock(&ctx->lock, K_FOREVER);
 
   ctx->states[BLINK_OFF] = !ctx->states[BLINK_OFF];
   dashboard_display(ctx);
 
-  k_work_reschedule(&ctx->blink_dwork, LED_BLINK_PERIOD);
+  sys_work_reschedule(&ctx->blink_dwork, LED_BLINK_PERIOD);
+
   k_mutex_unlock(&ctx->lock);
 }
 
@@ -419,10 +411,13 @@ static void modify_work(struct k_work *work) {
   struct dashboard_setting_ctx *ctx =
       CONTAINER_OF(dwork, struct dashboard_setting_ctx, modify_dwork);
 
-  k_mutex_lock(&ctx->lock, K_MSEC(5));
+  k_mutex_lock(&ctx->lock, K_FOREVER);
 
-  dashboard_modify(ctx, ctx->mode, ctx->states[MODIFY_INCREASING]);
+  dashboard_modify(ctx, ctx->mode, ctx->states[MODIFY_UP]);
 
-  k_work_reschedule(&ctx->modify_dwork, K_MSEC(100));
+  if (ctx->states[MODIFY_HOLDING]) {
+    sys_work_reschedule(&ctx->modify_dwork, HOLD_MODIFY_INTERVAL);
+  }
+
   k_mutex_unlock(&ctx->lock);
 }
