@@ -176,26 +176,55 @@ static void thread(void *arg1, void *arg2, void *arg3) {
   (void)arg2;
   (void)arg3;
 
+  int ret = 0;
+
   while (true) {
     k_sleep(K_MSEC(10));
 
     struct msg_sensor_cockpit _msg;
-    zbus_chan_read(&msg_sensor_cockpit_chan, &_msg, K_MSEC(5));
+    ret = zbus_chan_read(&msg_sensor_cockpit_chan, &_msg, K_MSEC(5));
+    if (ret < 0) {
+      LOG_WRN("Failed to read cockpit message: %s", strerror(-ret));
+      continue;
+    }
+
+    struct msg_sensor_wheel msg_wheel;
+    ret = zbus_chan_read(&msg_sensor_wheel_chan, &msg_wheel, K_MSEC(5));
+    if (ret < 0) {
+      LOG_WRN("Failed to read wheel message: %s", strerror(-ret));
+      continue;
+    }
 
     struct msg_ctrl_torque msg;
     msg_header_init(&msg.header);
 
-    int ret = k_mutex_lock(&ctx->lock, K_MSEC(5));
+    ret = k_mutex_lock(&ctx->lock, K_MSEC(5));
     if (ret < 0) {
       LOG_WRN("Failed to lock: %s", strerror(-ret));
       continue;
     }
 
+    float factor = 1.0F;
+    float speed = (-msg_wheel.speed.rl + msg_wheel.speed.rr) / 2.0F;
+    if (speed > 8000.0F) {
+      factor = 0.0F;
+    } else if (speed > 3000.0F) {
+      factor = (speed - 3000.0F) / 5000.0F;
+    }
+
+    struct err *err;
+    ERR_FOREACH_SET(err) {
+      if (err->errcode == ERR_CODE_INV_RL || err->errcode == ERR_CODE_INV_RR) {
+        factor = 0.0F;
+        break;
+      }
+    }
+
     for (int i = 0; i < 4; i++) {
       if (states_get() & STATE_RUNNING) {
         msg.torque.values[i] =
-            (float)(i % 2 == 0 ? -ctx->torq[i] : ctx->torq[i]) / 100.0F *
-            _msg.accel_pedal_plaus;
+            factor * (float)(i % 2 == 0 ? -ctx->torq[i] : ctx->torq[i]) /
+            100.0F * _msg.accel_pedal_plaus;
       } else {
         msg.torque.values[i] = 0.0F;
       }

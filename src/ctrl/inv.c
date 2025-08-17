@@ -61,8 +61,10 @@ ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
 
 ERR_DEFINE(inv_fl, ERR_CODE_INV_FL, ERR_SEV_FATAL, "Inverter FL error");
 ERR_DEFINE(inv_fr, ERR_CODE_INV_FR, ERR_SEV_FATAL, "Inverter FR error");
-ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_FATAL, "Inverter RL error");
-ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_FATAL, "Inverter RR error");
+// ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_FATAL, "Inverter RL error");
+// ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_FATAL, "Inverter RR error");
+ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_WARN, "Inverter RL error");
+ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_WARN, "Inverter RR error");
 
 ERR_DEFINE(inv_fl_no_power, ERR_CODE_INV_FL_HV_LOW, ERR_SEV_WARN,
            "Inverter FL HV low voltage");
@@ -83,10 +85,10 @@ STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, &g_ctx);
 
 /* function definition -------------------------------------------------------*/
 int ctrl_inv_fault_reset() {
-  if (states_get() & STATE_RUNNING) {
-    LOG_ERR("Cannot reset inverter fault while running");
-    return -EBUSY;
-  }
+  // if (states_get() & STATE_RUNNING) {
+  //   LOG_ERR("Cannot reset inverter fault while running");
+  //   return -EBUSY;
+  // }
 
   ctrl_inv_word_set_and_pub(&g_ctx, CTRL_WORD_FAULT_RESET, true);
 
@@ -123,6 +125,14 @@ static void msg_cb(const struct zbus_channel *chan) {
 
   for (int i = 2; i < 4; i++) {
     if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
+      if (msg->status.values[i] & STATUS_WORD_FAULT) {
+        struct msg_sensor_wheel msg_wheel;
+        int ret = zbus_chan_read(&msg_sensor_wheel_chan, &msg_wheel, K_NO_WAIT);
+        if (ret == 0 && msg_wheel.speed.values[i] < 500.0F) {
+          ctrl_inv_fault_reset();
+        }
+      }
+
       err_report(ERR_CODE_INV_FL + i,
                  msg->status.values[i] & STATUS_WORD_FAULT);
       err_report(ERR_CODE_INV_FL_HV_LOW + i,
@@ -155,12 +165,6 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   };
 
   can_send(can, &frame, K_MSEC(10), NULL, NULL);
-
-  // struct msg_sensor_cockpit msg;
-  // zbus_chan_read(&msg_sensor_cockpit_chan, &msg, K_MSEC(5));
-
-  // ctrl_inv_word_set_and_pub(&g_ctx, CTRL_WORD_ENABLE,
-  //                           !(msg.brake > INV_DISABLE_BRAKE_THRES));
 }
 
 static void fault_reset_work(struct k_work *work) {
