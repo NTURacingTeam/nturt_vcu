@@ -33,7 +33,7 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x1010_storeParameters = {1, 1, 1, 1},
     .x1011_restoreDefaultParameters_sub0 = 0x04,
     .x1011_restoreDefaultParameters = {1, 1, 1, 1},
-    .x2000_VCUStates = 0x00000000,
+    .x2000_VCUStates = 0x00,
     .x2001_VCUErrors_sub0 = 0x00,
     .x2001_VCUErrors = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
     .x2080_steerAngle = 0,
@@ -446,7 +446,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1801_TPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x06,
-        .COB_IDUsedByTPDO = 0xC0000280,
+        .COB_IDUsedByTPDO = 0x00000280,
         .transmissionType = 0xFE,
         .inhibitTime = 0x0000,
         .eventTimer = 0x0000,
@@ -496,8 +496,8 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x1A01_TPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x00,
-        .applicationObject1 = 0x00000000,
+        .numberOfMappedApplicationObjectsInPDO = 0x01,
+        .applicationObject1 = 0x20000008,
         .applicationObject2 = 0x00000000,
         .applicationObject3 = 0x00000000,
         .applicationObject4 = 0x00000000,
@@ -2679,8 +2679,8 @@ static CO_PROGMEM ODObjs_t ODObjs = {
     },
     .o_2000_VCUStates = {
         .dataOrig = &OD_RAM.x2000_VCUStates,
-        .attribute = ODA_SDO_R | ODA_RPDO | ODA_MB,
-        .dataLength = 4
+        .attribute = ODA_SDO_R | ODA_TPDO,
+        .dataLength = 1
     },
     .o_2001_VCUErrors = {
         .dataOrig0 = &OD_RAM.x2001_VCUErrors_sub0,

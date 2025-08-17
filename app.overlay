@@ -23,15 +23,15 @@
 
         steer: steer {
             zephyr,axis = <INPUT_ABS_WHEEL>;
-            out-min = <(-127)>;
-            out-max = <127>;
+            out-min = <(-130)>;
+            out-max = <130>;
             noise = <1000>; // 1%
 
             steer_sensor_axis: steer_encoder {
                 sensor = <&steer_encoder>;
                 zephyr,channel = <SENSOR_CHAN_ROTATION>;
-                in-min = <(-180) 0>;
-                in-max = <180 0>;
+                in-min = <(-130) 0>;
+                in-max = <130 0>;
                 range-tolerance = <10>; // 10%
             };
         };

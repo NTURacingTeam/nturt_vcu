@@ -34,11 +34,23 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data);
 
 /* static variable -----------------------------------------------------------*/
 const struct zbus_channel *logged_chans[] = {
-    &msg_sensor_cockpit_chan, &msg_sensor_wheel_chan, &msg_sensor_pow_chan,
-    &msg_ctrl_torque_chan,    &msg_ctrl_word_chan,    &msg_states_chan,
+    &msg_sensor_cockpit_chan, &msg_sensor_wheel_chan, &msg_sensor_imu_chan,
+    &msg_sensor_pow_chan,     &msg_ctrl_torque_chan,  &msg_ctrl_word_chan,
+    &msg_states_chan,
 };
 
 MSG_CHAN_DEFINE(MSG_VCU_LIST);
+
+// clang-format off
+
+MSG_AGG_TO_MSG_DEFINE(msg_sensor_wheel_agg, msg_sensor_wheel,
+    AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
+    AGG_MEMBER(speed.rl), AGG_MEMBER(speed.rr),
+    AGG_MEMBER(torque.rl), AGG_MEMBER(torque.rr),
+    AGG_MEMBER(susp_travel.fl), AGG_MEMBER(susp_travel.rl)
+);
+
+// clang-format on
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, NULL);
 
