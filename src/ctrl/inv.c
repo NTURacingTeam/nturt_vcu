@@ -1,4 +1,5 @@
 // glibc includes
+#include <math.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -128,7 +129,7 @@ static void msg_cb(const struct zbus_channel *chan) {
       if (msg->status.values[i] & STATUS_WORD_FAULT) {
         struct msg_sensor_wheel msg_wheel;
         int ret = zbus_chan_read(&msg_sensor_wheel_chan, &msg_wheel, K_NO_WAIT);
-        if (ret == 0 && msg_wheel.speed.values[i] < 500.0F) {
+        if (ret == 0 && fabsf(msg_wheel.speed.values[i]) < 1000.0F) {
           ctrl_inv_fault_reset();
         }
       }

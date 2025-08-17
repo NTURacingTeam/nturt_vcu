@@ -159,6 +159,9 @@ static int ctrl_settings_load(const char *key, size_t len,
   }
 
   ret = read_cb(cb_arg, target, len);
+  if (ret >= 0) {
+    ret = 0;
+  }
 
 out:
   k_mutex_unlock(&g_ctx.lock);
@@ -209,7 +212,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
     if (speed > 8000.0F) {
       factor = 0.0F;
     } else if (speed > 3000.0F) {
-      factor = (speed - 3000.0F) / 5000.0F;
+      factor = 1.0F - (speed - 3000.0F) / 5000.0F;
     }
 
     struct err *err;
