@@ -16,7 +16,7 @@
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2025/8/10 下午 12:15:21
+        Modified:     2025/8/15 下午 10:43:08
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
@@ -77,7 +77,7 @@ typedef struct {
     int32_t x1010_storeParameters[OD_CNT_ARR_1010];
     uint8_t x1011_restoreDefaultParameters_sub0;
     int32_t x1011_restoreDefaultParameters[OD_CNT_ARR_1011];
-    uint32_t x2000_VCUStates;
+    uint8_t x2000_VCUStates;
     uint8_t x2001_VCUErrors_sub0;
     uint32_t x2001_VCUErrors[OD_CNT_ARR_2001];
     int16_t x2080_steerAngle;
