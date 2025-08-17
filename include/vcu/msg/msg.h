@@ -13,6 +13,7 @@
 
 // nturt includes
 #include <nturt/msg/msg.h>
+#include <nturt/msg/aggregation.h>
 
 // project includes
 #include "vcu/msg/interfaces/interfaces.h"
@@ -28,6 +29,8 @@
 
 /* exported variable ---------------------------------------------------------*/
 MSG_CHAN_DECLARE(MSG_VCU_LIST);
+
+extern struct agg_typed msg_sensor_wheel_agg;
 
 /**
  * @} // msg

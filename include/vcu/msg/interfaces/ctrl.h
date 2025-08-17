@@ -119,7 +119,7 @@ struct msg_ctrl_word {
 struct msg_ctrl_torque {
   struct msg_header header;
 
-  /** Inverter target torque. */
+  /** Inverter target torque. Unit: Nm */
   union msg_4wheel_data torque;
 };
 
