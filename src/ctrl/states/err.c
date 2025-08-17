@@ -13,17 +13,11 @@
 #define ON_SEVERITY (ERR_SEV_WARNING)
 #endif
 
-#define MONITORED_ERROR                                             \
-  ERR_CODE_ACCEL, ERR_CODE_BRAKE, ERR_CODE_INV_FL, ERR_CODE_INV_FR, \
-      ERR_CODE_INV_RL, ERR_CODE_INV_RR
-
 /* static function declaration -----------------------------------------------*/
 static void err_handler(uint32_t errcode, bool set, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
-static const uint32_t codes[] = {MONITORED_ERROR};
-
-ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_CODE(MONITORED_ERROR));
+ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(ON_SEVERITY));
 
 /* static function definition ------------------------------------------------*/
 static void err_handler(uint32_t errcode, bool set, void* user_data) {
@@ -31,8 +25,9 @@ static void err_handler(uint32_t errcode, bool set, void* user_data) {
   (void)set;
   (void)user_data;
 
-  for (int i = 0; i < ARRAY_SIZE(codes); i++) {
-    if (err_is_set(codes[i])) {
+  struct err* err;
+  ERR_FOREACH_SET(err) {
+    if (err->flags & ON_SEVERITY) {
       if (states_get() & STATE_ERR_FREE) {
         states_transition(TRANS_CMD_ERR);
       }
