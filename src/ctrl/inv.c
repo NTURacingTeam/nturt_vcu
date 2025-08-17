@@ -71,7 +71,8 @@ ERR_DEFINE(inv_rr_no_power, ERR_CODE_INV_RR_HV_LOW, ERR_SEV_WARN,
            "Inverter RR HV low voltage");
 
 ERR_CALLBACK_DEFINE(err_cb, NULL,
-                    ERR_FILTER_CODE(ERR_CODE_INV_FL_HV_LOW, ERR_CODE_INV_FR_HV_LOW,
+                    ERR_FILTER_CODE(ERR_CODE_INV_FL_HV_LOW,
+                                    ERR_CODE_INV_FR_HV_LOW,
                                     ERR_CODE_INV_RL_HV_LOW,
                                     ERR_CODE_INV_RR_HV_LOW));
 
