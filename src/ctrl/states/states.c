@@ -289,14 +289,16 @@ static void states_run_state(struct states_ctx *ctx) {
 
   states_t after = ctx->states;
 
-  struct msg_states msg = {
-      .cmd = cmd,
-      .before = before,
-      .after = after,
-  };
-  msg_header_init(&msg.header);
+  if (IS_ENABLED(CONFIG_VCU_STATES_MSG)) {
+    struct msg_states msg = {
+        .cmd = cmd,
+        .before = before,
+        .after = after,
+    };
+    msg_header_init(&msg.header);
 
-  zbus_chan_pub(&msg_states_chan, &msg, K_FOREVER);
+    zbus_chan_pub(&msg_states_chan, &msg, K_FOREVER);
+  }
 
   LOG_INF("Processed transition command %s: 0x%X -> 0x%X",
           states_transition_info(cmd)->name, before, after);

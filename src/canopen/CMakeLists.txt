@@ -10,7 +10,13 @@ file(GLOB OBJDICT_FILES
 
 target_sources(app PRIVATE
     ${OBJDICT_FILES}
+)
+
+target_sources_ifdef(CONFIG_VCU_CANOPEN_MSG app PRIVATE
     msg.c
+)
+
+target_sources_ifdef(CONFIG_VCU_CANOPEN_TM app PRIVATE
     telemetry.c
 )
 

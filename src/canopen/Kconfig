@@ -1,9 +1,17 @@
 menuconfig VCU_CANOPEN
 	bool "CANopen support"
 	select NTURT_CANOPEN
-	select VCU_TM
-	select VCU_MSG
 
 if VCU_CANOPEN
+
+config VCU_CANOPEN_MSG
+	bool "Publish messages from CANOPEN writes (RPDO or SDO)"
+	depends on VCU_MSG
+	default y
+
+config VCU_CANOPEN_TM
+	bool "Publish TPDO from the update of telemetry data"
+	depends on VCU_TM
+	default y
 
 endif # VCU_CANOPEN

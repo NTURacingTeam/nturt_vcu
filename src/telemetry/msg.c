@@ -1,5 +1,3 @@
-#include "vcu/telemetry.h"
-
 // glibc includes
 #include <stdint.h>
 
@@ -13,6 +11,7 @@
 
 // project includes
 #include "vcu/msg/msg.h"
+#include "vcu/telemetry.h"
 
 /* static function declaration -----------------------------------------------*/
 static void msg_cb(const struct zbus_channel *chan);

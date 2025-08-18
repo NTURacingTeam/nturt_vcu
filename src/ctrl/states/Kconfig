@@ -4,8 +4,6 @@ menuconfig VCU_STATES
 	select SMF
 	select SMF_ANCESTOR_SUPPORT
 	select SMF_INITIAL_TRANSITION
-	select NTURT_ERR
-	select VCU_MSG
 
 if VCU_STATES
 
@@ -21,21 +19,6 @@ config VCU_STATES_CHECK_PEDAL
 	help
 	  When enabled, only when accelerator is not engaged and brake is engaged
 	  can start RTD.
-
-choice VCU_STATES_TRANS_TO_ERROR_ON_SEVERITY
-	prompt "Error severity to transition to error state"
-	default VCU_STATES_TRANS_TO_ERROR_ON_FATAL
-
-config VCU_STATES_TRANS_TO_ERROR_DISABLED
-	bool "Disable transition to error state on errors"
-
-config VCU_STATES_TRANS_TO_ERROR_ON_FATAL
-	bool "Transition to error state on fatal errors"
-
-config VCU_STATES_TRANS_TO_ERROR_ON_WARNING
-	bool "Transition to error state on warning errors"
-
-endchoice
 
 choice VCU_STATES_TRANS_MODE
 	prompt "Control system state transition process mode"
@@ -74,9 +57,35 @@ config VCU_STATES_THREAD_PRIORITY
 
 endif # VCU_STATES_TRANS_THREAD
 
+config VCU_STATES_ERR
+	bool "State machine error handling support"
+	depends on NTURT_ERR
+	default y
+
+if VCU_STATES_ERR
+
+choice VCU_STATES_TRANS_TO_ERROR_ON_SEVERITY
+	prompt "Error severity to transition to error state"
+	default VCU_STATES_TRANS_TO_ERROR_ON_FATAL
+
+config VCU_STATES_TRANS_TO_ERROR_ON_FATAL
+	bool "Transition to error state on fatal errors"
+
+config VCU_STATES_TRANS_TO_ERROR_ON_WARNING
+	bool "Transition to error state on warning errors"
+
+endchoice
+
+endif # VCU_STATES_ERR
+
+config VCU_STATES_MSG
+	bool "Control system state machine message support"
+	depends on VCU_MSG
+	default y
+
 config VCU_STATES_SHELL
 	bool "Control system state machine shell support"
-	default y
 	depends on VCU_SHELL
+	default y
 
 endif # VCU_STATES

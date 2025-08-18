@@ -1,8 +1,12 @@
 menuconfig VCU_TM
 	bool "Telemetry support"
 	select NTURT_TM
-	select VCU_MSG
 
 if VCU_TM
+
+config VCU_TM_MSG
+	bool "Update telemetry data from message"
+	depends on VCU_MSG
+	default y
 
 endif # VCU_TM
