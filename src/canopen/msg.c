@@ -80,4 +80,9 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_ts_inv,
     )
 );
 
+CANOPEN_OD_TO_MSG_DEFINE(msg_ts_emcy_stop,
+    AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
+    OD_TO_MSG_ENTRY(0x2088, OD_TO_MSG_DATA(0x0, uint8_t, IDENTITY, AGG_MEMBER(emcy_stop)))
+);
+
 // clang-format on

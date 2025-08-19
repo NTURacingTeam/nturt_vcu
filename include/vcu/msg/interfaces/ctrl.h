@@ -74,8 +74,7 @@
   CSV_PRImsg_header_header "," CSV_PRImsg_4wheel_flags_header(ctrl)
 
 /// @brief Insert @ref msg_ctrl_word CSV format string.
-#define CSV_PRImsg_ctrl_word \
-  CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_flags
+#define CSV_PRImsg_ctrl_word CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_flags
 
 /**
  * @brief Insert @ref msg_ctrl_word arguments to CSV print format.
@@ -90,8 +89,7 @@
   CSV_PRImsg_header_header "," CSV_PRImsg_4wheel_data_header(torque)
 
 /// @brief Insert @ref msg_ctrl_torque CSV format string.
-#define CSV_PRImsg_ctrl_torque \
-  CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_data
+#define CSV_PRImsg_ctrl_torque CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_data
 
 /**
  * @brief Insert @ref msg_ctrl_torque arguments to CSV print format.
