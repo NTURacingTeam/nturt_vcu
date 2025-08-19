@@ -107,6 +107,7 @@
 /* type ----------------------------------------------------------------------*/
 /// @brief Inverter control word message.
 struct msg_ctrl_word {
+  /** Message header. */
   struct msg_header header;
 
   /** Inverter control word. */
@@ -115,6 +116,7 @@ struct msg_ctrl_word {
 
 /// @brief Inverter target torque message.
 struct msg_ctrl_torque {
+  /** Message header. */
   struct msg_header header;
 
   /** Inverter target torque. Unit: Nm */

@@ -9,6 +9,7 @@
 // nturt includes
 #include <nturt/msg/aggregation.h>
 #include <nturt/sys/sys.h>
+#include <nturt/sys/util.h>
 
 // project includes
 #include "vcu/msg/msg.h"
@@ -88,7 +89,8 @@ static void read_work(struct k_work *work) {
 #ifdef CONFIG_VCU_HAS_SUSP_FL
   ret = sensor_sample_fetch(susp_fl);
   if (ret < 0) {
-    LOG_ERR("Failed to fetch suspension front left data: %d", ret);
+    LOG_ERR_THROTTLE(K_MSEC(500),
+                     "Failed to fetch suspension front left data: %d", ret);
   }
 
   ret = sensor_channel_get(susp_fl, SENSOR_CHAN_DISTANCE, &val);
@@ -103,7 +105,8 @@ static void read_work(struct k_work *work) {
 #ifdef CONFIG_VCU_HAS_SUSP_FR
   ret = sensor_sample_fetch(susp_fr);
   if (ret < 0) {
-    LOG_ERR("Failed to fetch suspension front right data: %d", ret);
+    LOG_ERR_THROTTLE(K_MSEC(500),
+                     "Failed to fetch suspension front right data: %d", ret);
   }
 
   ret = sensor_channel_get(susp_fr, SENSOR_CHAN_DISTANCE, &val);
@@ -118,7 +121,8 @@ static void read_work(struct k_work *work) {
 #ifdef CONFIG_VCU_HAS_SUSP_RL
   ret = sensor_sample_fetch(susp_rl);
   if (ret < 0) {
-    LOG_ERR("Failed to fetch suspension rear left data: %d", ret);
+    LOG_ERR_THROTTLE(K_MSEC(500),
+                     "Failed to fetch suspension rear left data: %d", ret);
   }
 
   ret = sensor_channel_get(susp_rl, SENSOR_CHAN_DISTANCE, &val);
@@ -133,7 +137,8 @@ static void read_work(struct k_work *work) {
 #ifdef CONFIG_VCU_HAS_SUSP_RR
   ret = sensor_sample_fetch(susp_rr);
   if (ret < 0) {
-    LOG_ERR("Failed to fetch suspension rear right data: %d", ret);
+    LOG_ERR_THROTTLE(K_MSEC(500),
+                     "Failed to fetch suspension rear right data: %d", ret);
   }
 
   ret = sensor_channel_get(susp_rr, SENSOR_CHAN_DISTANCE, &val);

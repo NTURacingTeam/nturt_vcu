@@ -16,7 +16,7 @@
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2025/8/15 下午 10:43:08
+        Modified:     2025/8/19 上午 11:22:28
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
@@ -44,7 +44,7 @@
 #define OD_CNT_HB_PROD 1
 #define OD_CNT_SDO_SRV 1
 #define OD_CNT_SDO_CLI 1
-#define OD_CNT_RPDO 16
+#define OD_CNT_RPDO 19
 #define OD_CNT_TPDO 6
 
 
@@ -54,7 +54,7 @@
 #define OD_CNT_ARR_1003 16
 #define OD_CNT_ARR_1010 4
 #define OD_CNT_ARR_1011 4
-#define OD_CNT_ARR_1016 2
+#define OD_CNT_ARR_1016 3
 #define OD_CNT_ARR_2001 16
 #define OD_CNT_ARR_2240 3
 #define OD_CNT_ARR_2241 3
@@ -93,6 +93,7 @@ typedef struct {
         uint8_t raw1;
         uint8_t raw2;
     } x2082_brake;
+    uint8_t x2088_emergencyStop;
     int16_t x2090_speed;
     uint8_t x2100_accumulatorStatus;
     uint32_t x2101_accumulatorVoltage;
@@ -145,6 +146,18 @@ typedef struct {
         uint8_t I_5;
         uint8_t I_5rpi;
     } x2200_power;
+    struct {
+        uint8_t highestSub_indexSupported;
+        int16_t speed;
+        int16_t torque;
+        uint8_t tireTemperature;
+    } x2210_wheelFL;
+    struct {
+        uint8_t highestSub_indexSupported;
+        int16_t speed;
+        int16_t torque;
+        uint8_t tireTemperature;
+    } x2211_wheelFR;
     struct {
         uint8_t highestSub_indexSupported;
         int16_t speed;
@@ -304,6 +317,24 @@ typedef struct {
         uint8_t transmissionType;
         uint16_t eventTimer;
     } x140F_RPDOCommunicationParameter;
+    struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t COB_IDUsedByRPDO;
+        uint8_t transmissionType;
+        uint16_t eventTimer;
+    } x1410_RPDOCommunicationParameter;
+    struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t COB_IDUsedByRPDO;
+        uint8_t transmissionType;
+        uint16_t eventTimer;
+    } x1411_RPDOCommunicationParameter;
+    struct {
+        uint8_t highestSub_indexSupported;
+        uint32_t COB_IDUsedByRPDO;
+        uint8_t transmissionType;
+        uint16_t eventTimer;
+    } x1412_RPDOCommunicationParameter;
     struct {
         uint8_t numberOfMappedApplicationObjectsInPDO;
         uint32_t applicationObject1;
@@ -481,6 +512,39 @@ typedef struct {
         uint32_t applicationObject8;
     } x160F_RPDOMappingParameter;
     struct {
+        uint8_t numberOfMappedApplicationObjectsInPDO;
+        uint32_t applicationObject1;
+        uint32_t applicationObject2;
+        uint32_t applicationObject3;
+        uint32_t applicationObject4;
+        uint32_t applicationObject5;
+        uint32_t applicationObject6;
+        uint32_t applicationObject7;
+        uint32_t applicationObject8;
+    } x1610_RPDOMappingParameter;
+    struct {
+        uint8_t numberOfMappedApplicationObjectsInPDO;
+        uint32_t applicationObject1;
+        uint32_t applicationObject2;
+        uint32_t applicationObject3;
+        uint32_t applicationObject4;
+        uint32_t applicationObject5;
+        uint32_t applicationObject6;
+        uint32_t applicationObject7;
+        uint32_t applicationObject8;
+    } x1611_RPDOMappingParameter;
+    struct {
+        uint8_t numberOfMappedApplicationObjectsInPDO;
+        uint32_t applicationObject1;
+        uint32_t applicationObject2;
+        uint32_t applicationObject3;
+        uint32_t applicationObject4;
+        uint32_t applicationObject5;
+        uint32_t applicationObject6;
+        uint32_t applicationObject7;
+        uint32_t applicationObject8;
+    } x1612_RPDOMappingParameter;
+    struct {
         uint8_t highestSub_indexSupported;
         uint32_t COB_IDUsedByTPDO;
         uint8_t transmissionType;
@@ -655,68 +719,77 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H140D &OD->list[32]
 #define OD_ENTRY_H140E &OD->list[33]
 #define OD_ENTRY_H140F &OD->list[34]
-#define OD_ENTRY_H1600 &OD->list[35]
-#define OD_ENTRY_H1601 &OD->list[36]
-#define OD_ENTRY_H1602 &OD->list[37]
-#define OD_ENTRY_H1603 &OD->list[38]
-#define OD_ENTRY_H1604 &OD->list[39]
-#define OD_ENTRY_H1605 &OD->list[40]
-#define OD_ENTRY_H1606 &OD->list[41]
-#define OD_ENTRY_H1607 &OD->list[42]
-#define OD_ENTRY_H1608 &OD->list[43]
-#define OD_ENTRY_H1609 &OD->list[44]
-#define OD_ENTRY_H160A &OD->list[45]
-#define OD_ENTRY_H160B &OD->list[46]
-#define OD_ENTRY_H160C &OD->list[47]
-#define OD_ENTRY_H160D &OD->list[48]
-#define OD_ENTRY_H160E &OD->list[49]
-#define OD_ENTRY_H160F &OD->list[50]
-#define OD_ENTRY_H1800 &OD->list[51]
-#define OD_ENTRY_H1801 &OD->list[52]
-#define OD_ENTRY_H1802 &OD->list[53]
-#define OD_ENTRY_H1803 &OD->list[54]
-#define OD_ENTRY_H1804 &OD->list[55]
-#define OD_ENTRY_H1805 &OD->list[56]
-#define OD_ENTRY_H1A00 &OD->list[57]
-#define OD_ENTRY_H1A01 &OD->list[58]
-#define OD_ENTRY_H1A02 &OD->list[59]
-#define OD_ENTRY_H1A03 &OD->list[60]
-#define OD_ENTRY_H1A04 &OD->list[61]
-#define OD_ENTRY_H1A05 &OD->list[62]
-#define OD_ENTRY_H2000 &OD->list[63]
-#define OD_ENTRY_H2001 &OD->list[64]
-#define OD_ENTRY_H2080 &OD->list[65]
-#define OD_ENTRY_H2081 &OD->list[66]
-#define OD_ENTRY_H2082 &OD->list[67]
-#define OD_ENTRY_H2090 &OD->list[68]
-#define OD_ENTRY_H2100 &OD->list[69]
-#define OD_ENTRY_H2101 &OD->list[70]
-#define OD_ENTRY_H2102 &OD->list[71]
-#define OD_ENTRY_H2103 &OD->list[72]
-#define OD_ENTRY_H2104 &OD->list[73]
-#define OD_ENTRY_H2105 &OD->list[74]
-#define OD_ENTRY_H2130 &OD->list[75]
-#define OD_ENTRY_H2131 &OD->list[76]
-#define OD_ENTRY_H2132 &OD->list[77]
-#define OD_ENTRY_H2133 &OD->list[78]
-#define OD_ENTRY_H2134 &OD->list[79]
-#define OD_ENTRY_H2135 &OD->list[80]
-#define OD_ENTRY_H2140 &OD->list[81]
-#define OD_ENTRY_H2141 &OD->list[82]
-#define OD_ENTRY_H2142 &OD->list[83]
-#define OD_ENTRY_H2143 &OD->list[84]
-#define OD_ENTRY_H2144 &OD->list[85]
-#define OD_ENTRY_H2145 &OD->list[86]
-#define OD_ENTRY_H2200 &OD->list[87]
-#define OD_ENTRY_H2212 &OD->list[88]
-#define OD_ENTRY_H2213 &OD->list[89]
-#define OD_ENTRY_H2220 &OD->list[90]
-#define OD_ENTRY_H2221 &OD->list[91]
-#define OD_ENTRY_H2240 &OD->list[92]
-#define OD_ENTRY_H2241 &OD->list[93]
-#define OD_ENTRY_H2243 &OD->list[94]
-#define OD_ENTRY_H2250 &OD->list[95]
-#define OD_ENTRY_H2251 &OD->list[96]
+#define OD_ENTRY_H1410 &OD->list[35]
+#define OD_ENTRY_H1411 &OD->list[36]
+#define OD_ENTRY_H1412 &OD->list[37]
+#define OD_ENTRY_H1600 &OD->list[38]
+#define OD_ENTRY_H1601 &OD->list[39]
+#define OD_ENTRY_H1602 &OD->list[40]
+#define OD_ENTRY_H1603 &OD->list[41]
+#define OD_ENTRY_H1604 &OD->list[42]
+#define OD_ENTRY_H1605 &OD->list[43]
+#define OD_ENTRY_H1606 &OD->list[44]
+#define OD_ENTRY_H1607 &OD->list[45]
+#define OD_ENTRY_H1608 &OD->list[46]
+#define OD_ENTRY_H1609 &OD->list[47]
+#define OD_ENTRY_H160A &OD->list[48]
+#define OD_ENTRY_H160B &OD->list[49]
+#define OD_ENTRY_H160C &OD->list[50]
+#define OD_ENTRY_H160D &OD->list[51]
+#define OD_ENTRY_H160E &OD->list[52]
+#define OD_ENTRY_H160F &OD->list[53]
+#define OD_ENTRY_H1610 &OD->list[54]
+#define OD_ENTRY_H1611 &OD->list[55]
+#define OD_ENTRY_H1612 &OD->list[56]
+#define OD_ENTRY_H1800 &OD->list[57]
+#define OD_ENTRY_H1801 &OD->list[58]
+#define OD_ENTRY_H1802 &OD->list[59]
+#define OD_ENTRY_H1803 &OD->list[60]
+#define OD_ENTRY_H1804 &OD->list[61]
+#define OD_ENTRY_H1805 &OD->list[62]
+#define OD_ENTRY_H1A00 &OD->list[63]
+#define OD_ENTRY_H1A01 &OD->list[64]
+#define OD_ENTRY_H1A02 &OD->list[65]
+#define OD_ENTRY_H1A03 &OD->list[66]
+#define OD_ENTRY_H1A04 &OD->list[67]
+#define OD_ENTRY_H1A05 &OD->list[68]
+#define OD_ENTRY_H2000 &OD->list[69]
+#define OD_ENTRY_H2001 &OD->list[70]
+#define OD_ENTRY_H2080 &OD->list[71]
+#define OD_ENTRY_H2081 &OD->list[72]
+#define OD_ENTRY_H2082 &OD->list[73]
+#define OD_ENTRY_H2088 &OD->list[74]
+#define OD_ENTRY_H2090 &OD->list[75]
+#define OD_ENTRY_H2100 &OD->list[76]
+#define OD_ENTRY_H2101 &OD->list[77]
+#define OD_ENTRY_H2102 &OD->list[78]
+#define OD_ENTRY_H2103 &OD->list[79]
+#define OD_ENTRY_H2104 &OD->list[80]
+#define OD_ENTRY_H2105 &OD->list[81]
+#define OD_ENTRY_H2130 &OD->list[82]
+#define OD_ENTRY_H2131 &OD->list[83]
+#define OD_ENTRY_H2132 &OD->list[84]
+#define OD_ENTRY_H2133 &OD->list[85]
+#define OD_ENTRY_H2134 &OD->list[86]
+#define OD_ENTRY_H2135 &OD->list[87]
+#define OD_ENTRY_H2140 &OD->list[88]
+#define OD_ENTRY_H2141 &OD->list[89]
+#define OD_ENTRY_H2142 &OD->list[90]
+#define OD_ENTRY_H2143 &OD->list[91]
+#define OD_ENTRY_H2144 &OD->list[92]
+#define OD_ENTRY_H2145 &OD->list[93]
+#define OD_ENTRY_H2200 &OD->list[94]
+#define OD_ENTRY_H2210 &OD->list[95]
+#define OD_ENTRY_H2211 &OD->list[96]
+#define OD_ENTRY_H2212 &OD->list[97]
+#define OD_ENTRY_H2213 &OD->list[98]
+#define OD_ENTRY_H2220 &OD->list[99]
+#define OD_ENTRY_H2221 &OD->list[100]
+#define OD_ENTRY_H2240 &OD->list[101]
+#define OD_ENTRY_H2241 &OD->list[102]
+#define OD_ENTRY_H2243 &OD->list[103]
+#define OD_ENTRY_H2250 &OD->list[104]
+#define OD_ENTRY_H2251 &OD->list[105]
 
 
 /*******************************************************************************
@@ -757,68 +830,77 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H140D_RPDOCommunicationParameter &OD->list[32]
 #define OD_ENTRY_H140E_RPDOCommunicationParameter &OD->list[33]
 #define OD_ENTRY_H140F_RPDOCommunicationParameter &OD->list[34]
-#define OD_ENTRY_H1600_RPDOMappingParameter &OD->list[35]
-#define OD_ENTRY_H1601_RPDOMappingParameter &OD->list[36]
-#define OD_ENTRY_H1602_RPDOMappingParameter &OD->list[37]
-#define OD_ENTRY_H1603_RPDOMappingParameter &OD->list[38]
-#define OD_ENTRY_H1604_RPDOMappingParameter &OD->list[39]
-#define OD_ENTRY_H1605_RPDOMappingParameter &OD->list[40]
-#define OD_ENTRY_H1606_RPDOMappingParameter &OD->list[41]
-#define OD_ENTRY_H1607_RPDOMappingParameter &OD->list[42]
-#define OD_ENTRY_H1608_RPDOMappingParameter &OD->list[43]
-#define OD_ENTRY_H1609_RPDOMappingParameter &OD->list[44]
-#define OD_ENTRY_H160A_RPDOMappingParameter &OD->list[45]
-#define OD_ENTRY_H160B_RPDOMappingParameter &OD->list[46]
-#define OD_ENTRY_H160C_RPDOMappingParameter &OD->list[47]
-#define OD_ENTRY_H160D_RPDOMappingParameter &OD->list[48]
-#define OD_ENTRY_H160E_RPDOMappingParameter &OD->list[49]
-#define OD_ENTRY_H160F_RPDOMappingParameter &OD->list[50]
-#define OD_ENTRY_H1800_TPDOCommunicationParameter &OD->list[51]
-#define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[52]
-#define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[53]
-#define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[54]
-#define OD_ENTRY_H1804_TPDOCommunicationParameter &OD->list[55]
-#define OD_ENTRY_H1805_TPDOCommunicationParameter &OD->list[56]
-#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[57]
-#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[58]
-#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[59]
-#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[60]
-#define OD_ENTRY_H1A04_TPDOMappingParameter &OD->list[61]
-#define OD_ENTRY_H1A05_TPDOMappingParameter &OD->list[62]
-#define OD_ENTRY_H2000_VCUStates &OD->list[63]
-#define OD_ENTRY_H2001_VCUErrors &OD->list[64]
-#define OD_ENTRY_H2080_steerAngle &OD->list[65]
-#define OD_ENTRY_H2081_accelerator &OD->list[66]
-#define OD_ENTRY_H2082_brake &OD->list[67]
-#define OD_ENTRY_H2090_speed &OD->list[68]
-#define OD_ENTRY_H2100_accumulatorStatus &OD->list[69]
-#define OD_ENTRY_H2101_accumulatorVoltage &OD->list[70]
-#define OD_ENTRY_H2102_accumulatorCurrent &OD->list[71]
-#define OD_ENTRY_H2103_accumulatorTemperature &OD->list[72]
-#define OD_ENTRY_H2104_accumulatorStateOfCharge &OD->list[73]
-#define OD_ENTRY_H2105_accumulatorCapacity &OD->list[74]
-#define OD_ENTRY_H2130_invRLControlWord &OD->list[75]
-#define OD_ENTRY_H2131_invRLStatusWord &OD->list[76]
-#define OD_ENTRY_H2132_invRLTargetTorque &OD->list[77]
-#define OD_ENTRY_H2133_invRL_Motor &OD->list[78]
-#define OD_ENTRY_H2134_invRL_DCBus &OD->list[79]
-#define OD_ENTRY_H2135_invRLTemperature &OD->list[80]
-#define OD_ENTRY_H2140_invRRControlWord &OD->list[81]
-#define OD_ENTRY_H2141_invRRStatusWord &OD->list[82]
-#define OD_ENTRY_H2142_invRRTargetTorque &OD->list[83]
-#define OD_ENTRY_H2143_invRR_Motor &OD->list[84]
-#define OD_ENTRY_H2144_invRR_DCBus &OD->list[85]
-#define OD_ENTRY_H2145_invRRTemperature &OD->list[86]
-#define OD_ENTRY_H2200_power &OD->list[87]
-#define OD_ENTRY_H2212_wheelRL &OD->list[88]
-#define OD_ENTRY_H2213_wheelRR &OD->list[89]
-#define OD_ENTRY_H2220_suspensionF &OD->list[90]
-#define OD_ENTRY_H2221_suspensionR &OD->list[91]
-#define OD_ENTRY_H2240_IMUAcceleration &OD->list[92]
-#define OD_ENTRY_H2241_IMUGyration &OD->list[93]
-#define OD_ENTRY_H2243_IMUEuler &OD->list[94]
-#define OD_ENTRY_H2250_GPSPosition &OD->list[95]
-#define OD_ENTRY_H2251_GPSVelocity &OD->list[96]
+#define OD_ENTRY_H1410_RPDOCommunicationParameter &OD->list[35]
+#define OD_ENTRY_H1411_RPDOCommunicationParameter &OD->list[36]
+#define OD_ENTRY_H1412_RPDOCommunicationParameter &OD->list[37]
+#define OD_ENTRY_H1600_RPDOMappingParameter &OD->list[38]
+#define OD_ENTRY_H1601_RPDOMappingParameter &OD->list[39]
+#define OD_ENTRY_H1602_RPDOMappingParameter &OD->list[40]
+#define OD_ENTRY_H1603_RPDOMappingParameter &OD->list[41]
+#define OD_ENTRY_H1604_RPDOMappingParameter &OD->list[42]
+#define OD_ENTRY_H1605_RPDOMappingParameter &OD->list[43]
+#define OD_ENTRY_H1606_RPDOMappingParameter &OD->list[44]
+#define OD_ENTRY_H1607_RPDOMappingParameter &OD->list[45]
+#define OD_ENTRY_H1608_RPDOMappingParameter &OD->list[46]
+#define OD_ENTRY_H1609_RPDOMappingParameter &OD->list[47]
+#define OD_ENTRY_H160A_RPDOMappingParameter &OD->list[48]
+#define OD_ENTRY_H160B_RPDOMappingParameter &OD->list[49]
+#define OD_ENTRY_H160C_RPDOMappingParameter &OD->list[50]
+#define OD_ENTRY_H160D_RPDOMappingParameter &OD->list[51]
+#define OD_ENTRY_H160E_RPDOMappingParameter &OD->list[52]
+#define OD_ENTRY_H160F_RPDOMappingParameter &OD->list[53]
+#define OD_ENTRY_H1610_RPDOMappingParameter &OD->list[54]
+#define OD_ENTRY_H1611_RPDOMappingParameter &OD->list[55]
+#define OD_ENTRY_H1612_RPDOMappingParameter &OD->list[56]
+#define OD_ENTRY_H1800_TPDOCommunicationParameter &OD->list[57]
+#define OD_ENTRY_H1801_TPDOCommunicationParameter &OD->list[58]
+#define OD_ENTRY_H1802_TPDOCommunicationParameter &OD->list[59]
+#define OD_ENTRY_H1803_TPDOCommunicationParameter &OD->list[60]
+#define OD_ENTRY_H1804_TPDOCommunicationParameter &OD->list[61]
+#define OD_ENTRY_H1805_TPDOCommunicationParameter &OD->list[62]
+#define OD_ENTRY_H1A00_TPDOMappingParameter &OD->list[63]
+#define OD_ENTRY_H1A01_TPDOMappingParameter &OD->list[64]
+#define OD_ENTRY_H1A02_TPDOMappingParameter &OD->list[65]
+#define OD_ENTRY_H1A03_TPDOMappingParameter &OD->list[66]
+#define OD_ENTRY_H1A04_TPDOMappingParameter &OD->list[67]
+#define OD_ENTRY_H1A05_TPDOMappingParameter &OD->list[68]
+#define OD_ENTRY_H2000_VCUStates &OD->list[69]
+#define OD_ENTRY_H2001_VCUErrors &OD->list[70]
+#define OD_ENTRY_H2080_steerAngle &OD->list[71]
+#define OD_ENTRY_H2081_accelerator &OD->list[72]
+#define OD_ENTRY_H2082_brake &OD->list[73]
+#define OD_ENTRY_H2088_emergencyStop &OD->list[74]
+#define OD_ENTRY_H2090_speed &OD->list[75]
+#define OD_ENTRY_H2100_accumulatorStatus &OD->list[76]
+#define OD_ENTRY_H2101_accumulatorVoltage &OD->list[77]
+#define OD_ENTRY_H2102_accumulatorCurrent &OD->list[78]
+#define OD_ENTRY_H2103_accumulatorTemperature &OD->list[79]
+#define OD_ENTRY_H2104_accumulatorStateOfCharge &OD->list[80]
+#define OD_ENTRY_H2105_accumulatorCapacity &OD->list[81]
+#define OD_ENTRY_H2130_invRLControlWord &OD->list[82]
+#define OD_ENTRY_H2131_invRLStatusWord &OD->list[83]
+#define OD_ENTRY_H2132_invRLTargetTorque &OD->list[84]
+#define OD_ENTRY_H2133_invRL_Motor &OD->list[85]
+#define OD_ENTRY_H2134_invRL_DCBus &OD->list[86]
+#define OD_ENTRY_H2135_invRLTemperature &OD->list[87]
+#define OD_ENTRY_H2140_invRRControlWord &OD->list[88]
+#define OD_ENTRY_H2141_invRRStatusWord &OD->list[89]
+#define OD_ENTRY_H2142_invRRTargetTorque &OD->list[90]
+#define OD_ENTRY_H2143_invRR_Motor &OD->list[91]
+#define OD_ENTRY_H2144_invRR_DCBus &OD->list[92]
+#define OD_ENTRY_H2145_invRRTemperature &OD->list[93]
+#define OD_ENTRY_H2200_power &OD->list[94]
+#define OD_ENTRY_H2210_wheelFL &OD->list[95]
+#define OD_ENTRY_H2211_wheelFR &OD->list[96]
+#define OD_ENTRY_H2212_wheelRL &OD->list[97]
+#define OD_ENTRY_H2213_wheelRR &OD->list[98]
+#define OD_ENTRY_H2220_suspensionF &OD->list[99]
+#define OD_ENTRY_H2221_suspensionR &OD->list[100]
+#define OD_ENTRY_H2240_IMUAcceleration &OD->list[101]
+#define OD_ENTRY_H2241_IMUGyration &OD->list[102]
+#define OD_ENTRY_H2243_IMUEuler &OD->list[103]
+#define OD_ENTRY_H2250_GPSPosition &OD->list[104]
+#define OD_ENTRY_H2251_GPSVelocity &OD->list[105]
 
 
 /*******************************************************************************

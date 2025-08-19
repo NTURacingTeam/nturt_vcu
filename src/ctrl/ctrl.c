@@ -159,6 +159,9 @@ static int ctrl_settings_load(const char *key, size_t len,
   }
 
   ret = read_cb(cb_arg, target, len);
+  if (ret >= 0) {
+    ret = 0;
+  }
 
 out:
   k_mutex_unlock(&g_ctx.lock);
