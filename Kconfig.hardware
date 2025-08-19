@@ -5,11 +5,11 @@ config VCU_HAS_IMU
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_IMU))
 	default y
 
-DT_CHOSEN_NTURT_GNSS := nturt,gnss
+DT_CHOSEN_NTURT_GPS := nturt,gps
 
-config VCU_HAS_GNSS
+config VCU_HAS_GPS
 	bool
-	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_GNSS))
+	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_GPS))
 	default y
 
 DT_CHOSEN_NTURT_SUSP_FL := nturt,susp-fl

@@ -59,6 +59,7 @@ static struct ctrl_inv_ctx g_ctx = {
 
 ZBUS_LISTENER_DEFINE(ctrl_inv_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ts_emcy_stop_chan, ctrl_inv_listener, 0);
 
 ERR_DEFINE(inv_fl, ERR_CODE_INV_FL, ERR_SEV_FATAL, "Inverter FL error");
 ERR_DEFINE(inv_fr, ERR_CODE_INV_FR, ERR_SEV_FATAL, "Inverter FR error");
@@ -75,6 +76,8 @@ ERR_DEFINE(inv_rl_no_power, ERR_CODE_INV_RL_HV_LOW, ERR_SEV_WARN,
            "Inverter RL HV low voltage");
 ERR_DEFINE(inv_rr_no_power, ERR_CODE_INV_RR_HV_LOW, ERR_SEV_WARN,
            "Inverter RR HV low voltage");
+
+ERR_DEFINE(emcy_stop, ERR_CODE_EMCY_STOP, ERR_SEV_FATAL, "Emergency stop");
 
 ERR_CALLBACK_DEFINE(err_cb, NULL,
                     ERR_FILTER_CODE(ERR_CODE_INV_FL_HV_LOW,
@@ -122,23 +125,31 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
-  const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
+  if (chan == &msg_ts_inv_chan) {
+    const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
 
-  for (int i = 2; i < 4; i++) {
-    if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
-      if (msg->status.values[i] & STATUS_WORD_FAULT) {
-        struct msg_sensor_wheel msg_wheel;
-        int ret = zbus_chan_read(&msg_sensor_wheel_chan, &msg_wheel, K_NO_WAIT);
-        if (ret == 0 && fabsf(msg_wheel.speed.values[i]) < 1000.0F) {
-          ctrl_inv_fault_reset();
+    for (int i = 2; i < 4; i++) {
+      if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
+        if (msg->status.values[i] & STATUS_WORD_FAULT) {
+          struct msg_sensor_wheel msg_wheel;
+          int ret =
+              zbus_chan_read(&msg_sensor_wheel_chan, &msg_wheel, K_NO_WAIT);
+          if (ret == 0 && fabsf(msg_wheel.speed.values[i]) < 1000.0F) {
+            ctrl_inv_fault_reset();
+          }
         }
-      }
 
-      err_report(ERR_CODE_INV_FL + i,
-                 msg->status.values[i] & STATUS_WORD_FAULT);
-      err_report(ERR_CODE_INV_FL_HV_LOW + i,
-                 !(msg->status.values[i] & STATUS_WORD_POWER));
+        err_report(ERR_CODE_INV_FL + i,
+                   msg->status.values[i] & STATUS_WORD_FAULT);
+        err_report(ERR_CODE_INV_FL_HV_LOW + i,
+                   !(msg->status.values[i] & STATUS_WORD_POWER));
+      }
     }
+
+  } else if (chan == &msg_ts_emcy_stop_chan) {
+    const struct msg_ts_emcy_stop *msg = zbus_chan_const_msg(chan);
+
+    err_report(ERR_CODE_EMCY_STOP, msg->emcy_stop);
   }
 }
 

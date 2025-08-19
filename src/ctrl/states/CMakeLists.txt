@@ -1,6 +1,9 @@
 target_sources(app PRIVATE
-    err.c
     states.c
+)
+
+target_sources_ifdef(CONFIG_VCU_STATES_ERR app PRIVATE
+    err.c
 )
 
 target_sources_ifdef(CONFIG_VCU_STATES_SHELL app PRIVATE

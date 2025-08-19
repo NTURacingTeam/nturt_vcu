@@ -1,3 +1,5 @@
+rsource "states/Kconfig"
+
 menuconfig VCU_CTRL
 	bool "Control system"
 	select VCU_SYS
@@ -5,7 +7,5 @@ menuconfig VCU_CTRL
 	select VCU_STATES
 
 if VCU_CTRL
-
-rsource "states/Kconfig"
 
 endif # VCU_CTRL

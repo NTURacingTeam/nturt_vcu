@@ -8,7 +8,7 @@
 // nturt includes
 #include <nturt/msg/msg.h>
 
-LOG_MODULE_REGISTER(sensors_gnss);
+LOG_MODULE_REGISTER(sensors_gps);
 
 /* static variable -----------------------------------------------------------*/
-static const struct device *gnss = DEVICE_DT_GET(DT_CHOSEN(nturt_gnss));
+static const struct device *gps = DEVICE_DT_GET(DT_CHOSEN(nturt_gps));

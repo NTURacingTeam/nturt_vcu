@@ -74,8 +74,7 @@
   CSV_PRImsg_header_header "," CSV_PRImsg_4wheel_flags_header(ctrl)
 
 /// @brief Insert @ref msg_ctrl_word CSV format string.
-#define CSV_PRImsg_ctrl_word \
-  CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_flags
+#define CSV_PRImsg_ctrl_word CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_flags
 
 /**
  * @brief Insert @ref msg_ctrl_word arguments to CSV print format.
@@ -90,8 +89,7 @@
   CSV_PRImsg_header_header "," CSV_PRImsg_4wheel_data_header(torque)
 
 /// @brief Insert @ref msg_ctrl_torque CSV format string.
-#define CSV_PRImsg_ctrl_torque \
-  CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_data
+#define CSV_PRImsg_ctrl_torque CSV_PRImsg_header ",%" CSV_PRImsg_4wheel_data
 
 /**
  * @brief Insert @ref msg_ctrl_torque arguments to CSV print format.
@@ -109,6 +107,7 @@
 /* type ----------------------------------------------------------------------*/
 /// @brief Inverter control word message.
 struct msg_ctrl_word {
+  /** Message header. */
   struct msg_header header;
 
   /** Inverter control word. */
@@ -117,6 +116,7 @@ struct msg_ctrl_word {
 
 /// @brief Inverter target torque message.
 struct msg_ctrl_torque {
+  /** Message header. */
   struct msg_header header;
 
   /** Inverter target torque. Unit: Nm */

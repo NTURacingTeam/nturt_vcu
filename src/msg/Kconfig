@@ -4,10 +4,21 @@ menuconfig VCU_MSG
 
 if VCU_MSG
 
+config VCU_MSG_LOGGING
+	bool "Start logging messages when running"
+	depends on NTURT_FS
+	depends on NTURT_MSG_LOGGING
+	depends on VCU_STATES
+	default y
+
+if VCU_MSG_LOGGING
+
 config VCU_MSG_LOGGING_DIR
 	string "VCU message logging directory"
 	default "/SD:/msg_logs"
 	help
 	  Directory where VCU message logs will be stored.
+
+endif # VCU_MSG_LOGGING
 
 endif # VCU_MSG
