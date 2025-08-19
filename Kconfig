@@ -1,7 +1,3 @@
-menu "Zephyr"
-source "Kconfig.zephyr"
-endmenu # "Zephyr"
-
 menuconfig VCU
 	bool "NTURT Vehicle Control Unit (VCU)"
 	default y
@@ -19,4 +15,83 @@ rsource "src/perception/Kconfig"
 rsource "src/sys/Kconfig"
 rsource "src/telemetry/Kconfig"
 
+config VCU_HAL
+	bool "VCU hardware in a loop test"
+	depends on VCU_CANOPEN
+
+if VCU_HAL
+
+choice VCU_SOURCE_COCKPIT
+	default VCU_SOURCE_COCKPIT_CANOPEN
+endchoice
+choice VCU_SOURCE_IMU
+	default VCU_SOURCE_IMU_CANOPEN
+endchoice
+choice VCU_SOURCE_GPS
+	default VCU_SOURCE_GPS_CANOPEN
+endchoice
+
+endif # VCU_HAL
+
+choice VCU_SOURCE_COCKPIT
+	prompt "Cockpit data source"
+	default VCU_SOURCE_COCKPIT_NATIVE if VCU_SENSORS
+	default VCU_SOURCE_COCKPIT_CANOPEN if VCU_CANOPEN
+	default VCU_SOURCE_COCKPIT_DISABLED
+
+config VCU_SOURCE_COCKPIT_DISABLED
+	bool "Cockpit data disabled"
+
+config VCU_SOURCE_COCKPIT_NATIVE
+	bool "Cockpit data from natively controlled sensors"
+	depends on VCU_SENSORS
+
+config VCU_SOURCE_COCKPIT_CANOPEN
+	bool "Cockpit data from CAN open"
+	depends on VCU_CANOPEN
+
+endchoice # VCU_SOURCE_COCKPIT
+
+choice VCU_SOURCE_IMU
+	prompt "IMU data source"
+	default VCU_SOURCE_IMU_NATIVE if VCU_HAS_IMU
+	default VCU_SOURCE_IMU_CANOPEN if VCU_CANOPEN
+	default VCU_SOURCE_IMU_DISABLED
+
+config VCU_SOURCE_IMU_DISABLED
+	bool "IMU data disabled"
+
+config VCU_SOURCE_IMU_NATIVE
+	bool "IMU data from natively controlled sensors"
+	depends on VCU_HAS_IMU
+
+config VCU_SOURCE_IMU_CANOPEN
+	bool "IMU data from CAN open"
+	depends on VCU_CANOPEN
+
+endchoice # VCU_SOURCE_IMU
+
+choice VCU_SOURCE_GPS
+	prompt "GPS data source"
+	default VCU_SOURCE_GPS_NATIVE if VCU_HAS_GPS
+	default VCU_SOURCE_GPS_CANOPEN if VCU_CANOPEN
+	default VCU_SOURCE_GPS_DISABLED
+
+config VCU_SOURCE_GPS_DISABLED
+	bool "GPS data disabled"
+
+config VCU_SOURCE_GPS_NATIVE
+	bool "GPS data from natively controlled sensors"
+	depends on VCU_HAS_GPS
+
+config VCU_SOURCE_GPS_CANOPEN
+	bool "GPS data from CAN open"
+	depends on VCU_CANOPEN
+
+endchoice # VCU_SOURCE_GPS
+
 endif # VCU
+
+menu "Zephyr"
+source "Kconfig.zephyr"
+endmenu # "Zephyr"
