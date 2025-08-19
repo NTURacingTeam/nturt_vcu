@@ -7,12 +7,16 @@
 
 // zephyr includes
 #include <zephyr/init.h>
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/smf.h>
 #include <zephyr/sys/__assert.h>
 #include <zephyr/sys/iterable_sections.h>
 #include <zephyr/sys/util.h>
 #include <zephyr/zbus/zbus.h>
+
+// nturt includes
+#include <nturt/sys/sys.h>
 
 // project includes
 #include "vcu/msg/msg.h"
@@ -108,21 +112,17 @@ struct states_ctx {
 
   bool initialized;
 
-  /**
-   * Thread ID currently processing transition command. Used to prevent
-   * transition callbacks from requesting state transitions.
-   */
-  k_tid_t transitiong_thread;
+  bool deferred;
 
   struct k_sem sem;
-
-  struct k_event event;
 
   /** Current states of the state machine. */
   states_t states;
 
   /** Transition command to be executed, @ref TRANS_CMD_INVALID if none. */
   enum states_trans_cmd cmd;
+
+  struct k_work run_state_work;
 };
 
 /* static function declaration -----------------------------------------------*/
@@ -134,6 +134,8 @@ static void states_process_trans(struct states_ctx *ctx,
 static void states_run_state(struct states_ctx *ctx);
 
 static int init();
+
+static void run_state_work(struct k_work *work);
 
 /* static varaible -----------------------------------------------------------*/
 /// @brief State transition informations.
@@ -171,9 +173,10 @@ SMF_STATES_DEFINE(g_smf_states, g_state_names,
 /// @brief State module context.
 static struct states_ctx g_ctx = {
     .initialized = false,
-    .transitiong_thread = NULL,
+    .deferred = false,
     .states = 0,
     .cmd = TRANS_CMD_INVALID,
+    .run_state_work = Z_WORK_INITIALIZER(run_state_work),
 };
 
 SYS_INIT(init, APPLICATION, CONFIG_VCU_STATES_INIT_PRIORITY);
@@ -190,11 +193,11 @@ bool states_valid_transition(enum states_trans_cmd cmd) {
 }
 
 void states_transition(enum states_trans_cmd cmd) {
-  __ASSERT(!k_is_in_isr(), "Must not be called from ISR");
   __ASSERT(g_ctx.initialized, "States module not yet initialized");
-  __ASSERT(
-      !g_ctx.transitiong_thread || k_current_get() != g_ctx.transitiong_thread,
-      "Transition must not be requested wthin state transition callbacks");
+
+  if (IS_ENABLED(CONFIG_VCU_STATES_TRANS_SYNC)) {
+    __ASSERT(!k_is_in_isr(), "Must not be called from ISR");
+  }
 
   k_sem_take(&g_ctx.sem, K_FOREVER);
 
@@ -206,11 +209,10 @@ void states_transition(enum states_trans_cmd cmd) {
 
   g_ctx.cmd = cmd;
 
-  if (IS_ENABLED(CONFIG_VCU_STATES_TRANS_SYNC)) {
+  if (IS_ENABLED(CONFIG_VCU_STATES_TRANS_SYNC) || !g_ctx.deferred) {
     states_run_state(&g_ctx);
-
-  } else if (IS_ENABLED(CONFIG_VCU_STATES_TRANS_THREAD)) {
-    k_event_set(&g_ctx.event, true);
+  } else {
+    sys_work_submit(&g_ctx.run_state_work);
   }
 }
 
@@ -247,7 +249,6 @@ const struct states_trans_cmd_info *states_transition_info(
 /* static function definition ------------------------------------------------*/
 static void states_init(struct states_ctx *ctx) {
   k_sem_init(&ctx->sem, 1, 1);
-  k_event_init(&ctx->event);
 
   // also runs all entry functions
   smf_set_initial(&ctx->smf_ctx, &g_smf_states[STATE_ERR_FREE]);
@@ -284,7 +285,6 @@ static void states_run_state(struct states_ctx *ctx) {
   states_t before = ctx->states;
   enum states_trans_cmd cmd = ctx->cmd;
 
-  ctx->transitiong_thread = k_current_get();
   smf_run_state(&ctx->smf_ctx);
 
   states_t after = ctx->states;
@@ -313,7 +313,6 @@ static void states_run_state(struct states_ctx *ctx) {
   states_states_str(buf, sizeof(buf), before & after);
   LOG_DBG("\tSame: 0x%X (%s)", before & after, buf);
 
-  ctx->transitiong_thread = NULL;
   k_sem_give(&ctx->sem);
 }
 
@@ -323,22 +322,21 @@ static int init() {
   return 0;
 }
 
-#if CONFIG_VCU_STATES_TRANS_THREAD
+static void run_state_work(struct k_work *work) {
+  struct states_ctx *ctx =
+      CONTAINER_OF(work, struct states_ctx, run_state_work);
 
-static void thread(void *arg1, void *arg2, void *arg3) {
-  (void)arg2;
-  (void)arg3;
-
-  struct states_ctx *ctx = arg1;
-
-  while (true) {
-    k_event_wait(&ctx->event, true, true, K_FOREVER);
-
-    states_run_state(ctx);
-  }
+  states_run_state(ctx);
 }
 
-K_THREAD_DEFINE(states_thread, CONFIG_VCU_STATES_THREAD_STACK_SIZE, thread,
-                &g_ctx, NULL, NULL, CONFIG_VCU_STATES_THREAD_PRIORITY, 0, 0);
+#ifndef CONFIG_VCU_STATES_TRANS_SYNC
 
-#endif  // CONFIG_VCU_STATE_TRANS_THREAD
+static int defer_init() {
+  g_ctx.deferred = true;
+
+  return 0;
+}
+
+SYS_INIT(defer_init, APPLICATION, CONFIG_VCU_STATES_TRANS_DEFER_PRIORITY);
+
+#endif  // CONFIG_VCU_STATES_TRANS_SYNC
