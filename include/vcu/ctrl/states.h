@@ -79,29 +79,36 @@ typedef void (*states_handler_t)(enum states_state state, bool is_entry,
 enum states_state {
   STATE_INVALID = 0,
 
-  STATE_ERR_FREE = BIT(0),
-  STATE_READY = BIT(1),
-  STATE_RTD_BLINK = BIT(2),
-  STATE_RTD_STEADY = BIT(3),
-  STATE_RTD_READY = BIT(4),
-  STATE_RTD_SOUND = BIT(5),
-  STATE_RUNNING = BIT(6),
-  STATE_ERR = BIT(7),
+  STATE_READY = BIT(0),
+  STATE_RTD_BLINK = BIT(1),
+  STATE_RTD_STEADY = BIT(2),
+  STATE_RTD_READY = BIT(3),
+  STATE_RTD_SOUND = BIT(4),
+
+  STATE_RUNNING = BIT(5),
+  STATE_RUNNING_OK = BIT(6),
+  STATE_RUNNING_ERROR = BIT(7),
+
+  STATE_ERROR = BIT(8),
 
   STATE_ALL = UINT32_MAX,
 
-  NUM_STATE = 8,
+  NUM_STATE = 9,
 };
 
 /// @brief State transition commands.
 enum states_trans_cmd {
   TRANS_CMD_INVALID = 0,
-  TRANS_CMD_ERR,
-  TRANS_CMD_ERR_CLEAR,
   TRANS_CMD_PEDAL,
   TRANS_CMD_PEDAL_CLEAR,
   TRANS_CMD_RTD,
+  TRANS_CMD_RTD_FORCED,
   TRANS_CMD_RTD_FINISH,
+  TRANS_CMD_ERROR,
+  TRANS_CMD_ERROR_CLEARED,
+  TRANS_CMD_ERROR_RUNNING,
+  TRANS_CMD_ERROR_CLEARED_RUNNING,
+  TRANS_CMD_FATAL_ERROR,
   TRANS_CMD_DISABLE,
 
   NUM_TRANS_CMD,
@@ -109,8 +116,8 @@ enum states_trans_cmd {
 
 /// @brief State transition command information.
 struct states_trans_cmd_info {
-  /** Source state to transition from. */
-  enum states_state src;
+  /** Source states to transition from. */
+  states_t src;
 
   /** Destination state to transition to. */
   enum states_state dst;

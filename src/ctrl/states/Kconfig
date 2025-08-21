@@ -12,13 +12,6 @@ config VCU_STATES_INIT_PRIORITY
 	help
 	  Control system state machine initialization priority.
 
-config VCU_STATES_CHECK_PEDAL
-	bool "Check pedal states for RTD readiness"
-	default y
-	help
-	  When enabled, only when accelerator is not engaged and brake is engaged
-	  can start RTD.
-
 choice VCU_STATES_TRANS_MODE
 	prompt "Control system state transition process mode"
 	default VCU_STATES_TRANS_SYS_WORKQUEUE if VCU_SYS
@@ -47,9 +40,10 @@ config VCU_STATES_TRANS_DEFER_PRIORITY
 	int "Init priority to start processing state transitions asynchronously"
 	default 95
 	help
-	  Start processing state transitions asynchronously to ensure a consistent
-	  view of the state machine during initialization and to prevent blocking
-	  due to the sys workqueue not starting yet.
+	  Start processing state transitions asynchronously later in the
+	  initialization phase to ensure a consistent view of the state machine
+	  during initialization and to prevent blocking due to the sys workqueue not
+	  starting yet.
 
 endif # !VCU_STATES_TRANS_SYNC
 
@@ -57,22 +51,40 @@ config VCU_STATES_ERR
 	bool "State machine error handling support"
 	depends on NTURT_ERR
 	default y
+	help
+	  When enabled, the state machine will transition from ready or running ok
+	  state to error state or running error state, respectively, when any error
+	  of the specified severity occurs. And transition from any state to error
+	  state when any error of fatal severity occurs.
+	  After all errors of the specified severity are cleared, state machine
+	  transition back to ready state if current state is error, or running ok
+	  state if current state is running error.
 
 if VCU_STATES_ERR
 
 choice VCU_STATES_TRANS_TO_ERROR_ON_SEVERITY
-	prompt "Error severity to transition to error state"
-	default VCU_STATES_TRANS_TO_ERROR_ON_FATAL
+	prompt "Error severity to transition to error or running error state"
+	default VCU_STATES_TRANS_TO_ERROR_ON_ERROR
 
 config VCU_STATES_TRANS_TO_ERROR_ON_FATAL
-	bool "Transition to error state on fatal errors"
+	bool "Transition to error state when errors with fatal severity"
+
+config VCU_STATES_TRANS_TO_ERROR_ON_ERROR
+	bool "Transition to error state when errors with error severity or higher"
 
 config VCU_STATES_TRANS_TO_ERROR_ON_WARNING
-	bool "Transition to error state on warning errors"
+	bool "Transition to error state on errors with warning severity or higher"
 
 endchoice
 
 endif # VCU_STATES_ERR
+
+config VCU_STATES_CHECK_PEDAL
+	bool "Check pedal states for RTD readiness"
+	default y
+	help
+	  When enabled, only when accelerator is not engaged and brake is engaged
+	  can start RTD process.
 
 config VCU_STATES_MSG
 	bool "Control system state machine message support"

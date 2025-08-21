@@ -155,41 +155,76 @@ static int init();
 static void run_state_work(struct k_work *work);
 
 /* static varaible -----------------------------------------------------------*/
+// clang-format off
+
 /// @brief State transition informations.
 static const struct states_trans_cmd_info g_trans_cmd_infos[] = {
-    TRANS_CMD_INFO(TRANS_CMD_INVALID, STATE_INVALID, STATE_INVALID,
-                   "Invalid state stransition command, internal use only."),
-    TRANS_CMD_INFO(TRANS_CMD_ERR, STATE_ERR_FREE, STATE_ERR, "Error happened."),
-    TRANS_CMD_INFO(TRANS_CMD_ERR_CLEAR, STATE_ERR, STATE_ERR_FREE,
-                   "Error cleared."),
-    TRANS_CMD_INFO(TRANS_CMD_PEDAL, STATE_RTD_BLINK, STATE_RTD_STEADY,
-                   "Brake pressed and accelerator released."),
-    TRANS_CMD_INFO(TRANS_CMD_PEDAL_CLEAR, STATE_RTD_STEADY, STATE_RTD_BLINK,
-                   "Brake released or accelerator pressed."),
-    TRANS_CMD_INFO(TRANS_CMD_RTD, STATE_RTD_STEADY, STATE_RTD_SOUND,
-                   "Start RTD sound."),
-    TRANS_CMD_INFO(TRANS_CMD_RTD_FINISH, STATE_RTD_SOUND, STATE_RUNNING,
-                   "RTD sound finished."),
-    TRANS_CMD_INFO(TRANS_CMD_DISABLE, STATE_RUNNING, STATE_READY,
-                   "Disable system."),
+    TRANS_CMD_INFO(TRANS_CMD_INVALID,
+        STATE_INVALID, STATE_INVALID,
+        "Invalid state stransition command, internal use only."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_PEDAL,
+        STATE_RTD_BLINK, STATE_RTD_STEADY,
+        "Brake pressed and accelerator released."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_PEDAL_CLEAR,
+        STATE_RTD_STEADY, STATE_RTD_BLINK,
+        "Brake released or accelerator pressed."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_RTD,
+        STATE_RTD_STEADY, STATE_RTD_SOUND,
+        "Start RTD process."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_RTD_FORCED,
+        STATE_RTD_BLINK | STATE_RTD_READY | STATE_ERROR, STATE_RTD_SOUND,
+        "Forcely start RTD process."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_RTD_FINISH,
+        STATE_RTD_SOUND, STATE_RUNNING,
+        "RTD process finished."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_ERROR,
+        STATE_READY, STATE_ERROR,
+        "Error happened."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_ERROR_CLEARED,
+        STATE_ERROR, STATE_READY,
+        "Error cleared."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_ERROR_RUNNING,
+        STATE_RUNNING_OK, STATE_RUNNING_ERROR,
+        "Error happened during running state."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_ERROR_CLEARED_RUNNING,
+        STATE_RUNNING_ERROR, STATE_RUNNING_OK,
+        "Error cleared during running state."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_FATAL_ERROR,
+        STATE_READY | STATE_RUNNING, STATE_ERROR,
+        "Fatal error happened."
+    ),
+    TRANS_CMD_INFO(TRANS_CMD_DISABLE,
+        STATE_RUNNING, STATE_READY,
+        "Disable system."
+    ),
 };
-
-// clang-format off
 
 /// @brief State machine framework states and their names.
 SMF_STATES_DEFINE(g_smf_states, g_state_names,
-    SMF_STATE(STATE_ERR_FREE, NO_STATE, STATE_READY),
-    SMF_STATE(
-        STATE_READY,
-        STATE_ERR_FREE,
+    SMF_STATE(STATE_READY,
+        NO_STATE,
         COND_CODE_1(CONFIG_VCU_STATES_CHECK_PEDAL, (STATE_RTD_BLINK), (STATE_RTD_STEADY))
     ),
     SMF_STATE(STATE_RTD_BLINK, STATE_READY, NO_STATE),
     SMF_STATE(STATE_RTD_STEADY, STATE_READY, STATE_RTD_READY),
     SMF_STATE(STATE_RTD_READY, STATE_RTD_STEADY, NO_STATE),
     SMF_STATE(STATE_RTD_SOUND, STATE_RTD_STEADY, NO_STATE),
-    SMF_STATE(STATE_RUNNING, STATE_ERR_FREE, NO_STATE),
-    SMF_STATE(STATE_ERR, NO_STATE, NO_STATE)
+
+    SMF_STATE(STATE_RUNNING, NO_STATE, STATE_RUNNING_OK),
+    SMF_STATE(STATE_RUNNING_OK, STATE_RUNNING, NO_STATE),
+    SMF_STATE(STATE_RUNNING_ERROR, STATE_RUNNING, NO_STATE),
+
+    SMF_STATE(STATE_ERROR, NO_STATE, NO_STATE)
 );
 
 // clang-format on
@@ -198,6 +233,7 @@ SMF_STATES_DEFINE(g_smf_states, g_state_names,
 static struct states_ctx g_ctx = {
     .initialized = false,
     .deferred = false,
+    .sem = Z_SEM_INITIALIZER(g_ctx.sem, 1, 1),
     .states = 0,
     .cmd = TRANS_CMD_INVALID,
     .run_state_work = Z_WORK_INITIALIZER(run_state_work),
@@ -272,10 +308,8 @@ const struct states_trans_cmd_info *states_transition_info(
 
 /* static function definition ------------------------------------------------*/
 static void states_init(struct states_ctx *ctx) {
-  k_sem_init(&ctx->sem, 1, 1);
-
-  // also runs all entry functions
-  smf_set_initial(&ctx->smf_ctx, &g_smf_states[STATE_ERR_FREE]);
+  // this also runs all entry functions
+  smf_set_initial(&ctx->smf_ctx, &g_smf_states[STATE_READY]);
 
   ctx->initialized = true;
 }
