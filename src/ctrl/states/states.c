@@ -30,63 +30,80 @@ BUILD_ASSERT(NUM_STATE <= 32, "Number of states must not exceed 32");
 /// transition when defining states using @ref SMF_STATES_DEFINE.
 #define NO_STATE 0
 
-#define __SMF_STATE_FUNCTIONS_DEFINE(_state)                           \
-  static void CONCAT(__, _state, _, entry)(void *obj) {                \
-    struct states_ctx *ctx = obj;                                      \
-                                                                       \
-    ctx->states |= _state;                                             \
-                                                                       \
-    states_process_trans(ctx, _state, true);                           \
-  }                                                                    \
-                                                                       \
-  static enum smf_state_result CONCAT(__, _state, _, run)(void *obj) { \
-    struct states_ctx *ctx = obj;                                      \
-                                                                       \
-    return states_process_cmd(ctx, _state);                            \
-  }                                                                    \
-                                                                       \
-  static void CONCAT(__, _state, _, exit)(void *obj) {                 \
-    struct states_ctx *ctx = obj;                                      \
-                                                                       \
-    ctx->states &= ~_state;                                            \
-                                                                       \
-    states_process_trans(ctx, _state, false);                          \
+/**
+ * @brief Specify a state machine state. Used in @ref SMF_STATES_DEFINE.
+ *
+ * If the parent state or the initial transition is not defined,
+ * @ref NO_STATE should be used.
+ *
+ * @param[in] state State.
+ * @param[in] parent Parent state.
+ * @param[in] init_trans Child state to initially transition to.
+ */
+#define SMF_STATE(state, parent, init_trans) (state, parent, init_trans)
+
+#define _SMF_STATE_STATE(state) GET_ARG_N(1, __DEBRACKET state)
+#define _SMF_STATE_PARENT(state) GET_ARG_N(2, __DEBRACKET state)
+#define _SMF_STATE_INIT_TRANS(state) GET_ARG_N(3, __DEBRACKET state)
+
+#define _SMF_STATE_ENTRY(state) CONCAT(__, state, _, entry)
+#define _SMF_STATE_RUN(state) CONCAT(__, state, _, run)
+#define _SMF_STATE_EXIT(state) CONCAT(__, state, _, exit)
+
+#define _SMF_STATE_FUNCTIONS_DEFINE(_state)                        \
+  static void _SMF_STATE_ENTRY(_state)(void *obj) {                \
+    struct states_ctx *ctx = obj;                                  \
+                                                                   \
+    ctx->states |= _state;                                         \
+                                                                   \
+    states_process_trans(ctx, _state, true);                       \
+  }                                                                \
+                                                                   \
+  static enum smf_state_result _SMF_STATE_RUN(_state)(void *obj) { \
+    struct states_ctx *ctx = obj;                                  \
+                                                                   \
+    return states_process_cmd(ctx, _state);                        \
+  }                                                                \
+                                                                   \
+  static void _SMF_STATE_EXIT(_state)(void *obj) {                 \
+    struct states_ctx *ctx = obj;                                  \
+                                                                   \
+    ctx->states &= ~_state;                                        \
+                                                                   \
+    states_process_trans(ctx, _state, false);                      \
   }
 
-#define _SMF_STATE_FUNCTIONS_DEFINE(args) \
-  __SMF_STATE_FUNCTIONS_DEFINE(GET_ARG_N(1, __DEBRACKET args))
+#define _SMF_STATE(state, name)                                     \
+  [LOG2(_SMF_STATE_STATE(state))] = SMF_CREATE_STATE(               \
+      _SMF_STATE_ENTRY(_SMF_STATE_STATE(state)),                    \
+      _SMF_STATE_RUN(_SMF_STATE_STATE(state)),                      \
+      _SMF_STATE_EXIT(_SMF_STATE_STATE(state)),                     \
+      COND_CODE_0(IS_EQ(_SMF_STATE_PARENT(state), NO_STATE),        \
+                  (&name[LOG2(_SMF_STATE_PARENT(state))]), (NULL)), \
+      COND_CODE_0(IS_EQ(_SMF_STATE_INIT_TRANS(state), NO_STATE),    \
+                  (&name[LOG2(_SMF_STATE_INIT_TRANS(state))]), (NULL)))
 
-#define __SMF_STATE(name, state, parent, initial)                          \
-  [LOG2(state)] = SMF_CREATE_STATE(                                        \
-      CONCAT(__, state, _, entry), CONCAT(__, state, _, run),              \
-      CONCAT(__, state, _, exit),                                          \
-      COND_CODE_0(IS_EQ(parent, NO_STATE), (&name[LOG2(parent)]), (NULL)), \
-      COND_CODE_0(IS_EQ(initial, NO_STATE), (&name[LOG2(initial)]), (NULL)))
-
-#define _SMF_STATE(args, name)                      \
-  __SMF_STATE(name, GET_ARG_N(1, __DEBRACKET args), \
-              GET_ARG_N(2, __DEBRACKET args), GET_ARG_N(3, __DEBRACKET args))
-
-#define __STATE_STR(state) [LOG2(state)] = STRINGIFY(state)
-
-#define _STATE_STR(args) __STATE_STR(GET_ARG_N(1, __DEBRACKET args))
+#define _STATE_STR(state) \
+  [LOG2(_SMF_STATE_STATE(state))] = STRINGIFY(_SMF_STATE_STATE(state))
 
 /**
  * @brief Define state machine framework states and its string representation.
  *
  * @param name Name of the state machine framework states.
  * @param str_name Name of the states' string representations.
- * @param ... List of states in the format of (state, parent state, initial
- * transition). If the parent state or the initial transition is not defined,
- * @ref NO_STATE should be used.
+ * @param ... States in the the state machine, must be specified by
+ * @ref SMF_STATE.
  */
 #define SMF_STATES_DEFINE(name, str_name, ...)                  \
-  FOR_EACH(_SMF_STATE_FUNCTIONS_DEFINE, (), __VA_ARGS__);       \
+  FOR_EACH(_SMF_STATE_FUNCTIONS_DEFINE, (),                     \
+           FOR_EACH(_SMF_STATE_STATE, (, ), __VA_ARGS__));      \
                                                                 \
   static const struct smf_state name[] = {                      \
       FOR_EACH_FIXED_ARG(_SMF_STATE, (, ), name, __VA_ARGS__)}; \
                                                                 \
-  static const char *str_name[] = {FOR_EACH(_STATE_STR, (, ), __VA_ARGS__)}
+  static const char *str_name[] = {                             \
+      FOR_EACH(_STATE_STR, (, ), __VA_ARGS__),                  \
+  }
 
 /**
  * @brief Define a state transition command info.
@@ -157,18 +174,25 @@ static const struct states_trans_cmd_info g_trans_cmd_infos[] = {
                    "Disable system."),
 };
 
+// clang-format off
+
 /// @brief State machine framework states and their names.
 SMF_STATES_DEFINE(g_smf_states, g_state_names,
-                  (STATE_ERR_FREE, NO_STATE, STATE_READY),
-                  (STATE_READY, STATE_ERR_FREE,
-                   COND_CODE_1(CONFIG_VCU_STATES_CHECK_PEDAL, (STATE_RTD_BLINK),
-                               (STATE_RTD_STEADY))),
-                  (STATE_RTD_BLINK, STATE_READY, NO_STATE),
-                  (STATE_RTD_STEADY, STATE_READY, STATE_RTD_READY),
-                  (STATE_RTD_READY, STATE_RTD_STEADY, NO_STATE),
-                  (STATE_RTD_SOUND, STATE_RTD_STEADY, NO_STATE),
-                  (STATE_RUNNING, STATE_ERR_FREE, NO_STATE),
-                  (STATE_ERR, NO_STATE, NO_STATE));
+    SMF_STATE(STATE_ERR_FREE, NO_STATE, STATE_READY),
+    SMF_STATE(
+        STATE_READY,
+        STATE_ERR_FREE,
+        COND_CODE_1(CONFIG_VCU_STATES_CHECK_PEDAL, (STATE_RTD_BLINK), (STATE_RTD_STEADY))
+    ),
+    SMF_STATE(STATE_RTD_BLINK, STATE_READY, NO_STATE),
+    SMF_STATE(STATE_RTD_STEADY, STATE_READY, STATE_RTD_READY),
+    SMF_STATE(STATE_RTD_READY, STATE_RTD_STEADY, NO_STATE),
+    SMF_STATE(STATE_RTD_SOUND, STATE_RTD_STEADY, NO_STATE),
+    SMF_STATE(STATE_RUNNING, STATE_ERR_FREE, NO_STATE),
+    SMF_STATE(STATE_ERR, NO_STATE, NO_STATE)
+);
+
+// clang-format on
 
 /// @brief State module context.
 static struct states_ctx g_ctx = {
@@ -261,7 +285,7 @@ static enum smf_state_result states_process_cmd(struct states_ctx *ctx,
   if (ctx->cmd == TRANS_CMD_INVALID) {
     return SMF_EVENT_HANDLED;
 
-  } else if (g_trans_cmd_infos[ctx->cmd].src == state) {
+  } else if (g_trans_cmd_infos[ctx->cmd].src & state) {
     smf_set_state(&ctx->smf_ctx,
                   &g_smf_states[LOG2(g_trans_cmd_infos[ctx->cmd].dst)]);
     ctx->cmd = TRANS_CMD_INVALID;
