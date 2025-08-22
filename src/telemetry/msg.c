@@ -50,7 +50,9 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_ctrl_torque_chan) {
     const struct msg_ctrl_torque *msg = zbus_chan_const_msg(chan);
 
-    TM_DATA_UPDATE(inv_rl_target_torque, INV_TORQUE_PHY_TO_CAN(msg->torque.rl));
-    TM_DATA_UPDATE(inv_rr_target_torque, INV_TORQUE_PHY_TO_CAN(msg->torque.rr));
+    TM_DATA_UPDATE(inv_rl_target_torque,
+                   INV_TORQUE_PHY_TO_CAN_L(msg->torque.rl));
+    TM_DATA_UPDATE(inv_rr_target_torque,
+                   INV_TORQUE_PHY_TO_CAN_R(msg->torque.rr));
   }
 }

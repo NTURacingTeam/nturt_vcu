@@ -6,23 +6,24 @@
 #include <string.h>
 
 // zephyr includes
+#include <zephyr/init.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/settings/settings.h>
+#include <zephyr/sys/util.h>
 #include <zephyr/zbus/zbus.h>
 
 // nturt includes
+#include <nturt/canbus/convert.h>
 #include <nturt/err/err.h>
 
 // project includes
+#include "simulink/sensor_fusion.h"
+#include "simulink/vehicle_control.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/msg/msg.h"
 
 LOG_MODULE_REGISTER(vcu_ctrl);
-
-/* macro ---------------------------------------------------------------------*/
-#define INV_TORQ_DEFAULT 50
-#define INV_TORQ_SETTINGS_ROOT "inv_torq"
 
 /* type ----------------------------------------------------------------------*/
 enum ctrl_state {
@@ -38,12 +39,22 @@ struct ctrl_ctx {
 
   enum ctrl_state state;
 
-  uint8_t torq[4];
+  struct msg_sensor_cockpit cockpit;
+  struct msg_sensor_wheel wheel;
+  struct msg_sensor_imu imu;
+  struct msg_sensor_gps gps;
+  struct msg_ctrl_cmd cmd_last;
+
+  sensor_fusion_RT_MODEL sensor_fusion_model;
+
+  vehicle_control_RT_MODEL vehicle_control_model;
 };
 
 /* static function declaration -----------------------------------------------*/
-static int ctrl_settings_load(const char *key, size_t len_rd,
-                              settings_read_cb read_cb, void *cb_arg);
+static void ctrl_init(struct ctrl_ctx *ctx);
+
+static int init();
+
 static void msg_cb(const struct zbus_channel *chan);
 static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void thread(void *arg1, void *arg2, void *arg3);
@@ -52,138 +63,138 @@ static void thread(void *arg1, void *arg2, void *arg3);
 static struct ctrl_ctx g_ctx = {
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
     .state = CTRL_STATE_IDLE,
-    .torq = {INV_TORQ_DEFAULT, INV_TORQ_DEFAULT, INV_TORQ_DEFAULT,
-             INV_TORQ_DEFAULT},
 };
 
-SETTINGS_STATIC_HANDLER_DEFINE(inv_torq, INV_TORQ_SETTINGS_ROOT, NULL,
-                               ctrl_settings_load, NULL, NULL);
+SYS_INIT(init, APPLICATION, CONFIG_VCU_CTRL_INIT_PRIORITY);
+K_THREAD_DEFINE(ctrl_thread, CONFIG_VCU_CTRL_STACK_SIZE, thread, &g_ctx, NULL,
+                NULL, CONFIG_VCU_CTRL_THREAD_PRIORITY, 0, 0);
 
 ZBUS_LISTENER_DEFINE(ctrl_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_imu_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_gps_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_vehicle_state_chan, ctrl_listener, 0);
+
 ZBUS_CHAN_ADD_OBS(msg_ctrl_cmd_chan, ctrl_listener, 0);
+
+ERR_DEFINE(emcy_stop, ERR_CODE_EMCY_STOP, ERR_SEV_FATAL, "Emergency stop");
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_RUNNING_OK | STATE_RUNNING_ERROR,
                        states_cb, &g_ctx);
 
-K_THREAD_DEFINE(ctrl_thread, 1024, thread, &g_ctx, NULL, NULL, 0, 0, 0);
-
 /* function definition -------------------------------------------------------*/
-uint8_t ctrl_inv_torq_fl_get() { return g_ctx.torq[0]; }
-uint8_t ctrl_inv_torq_fr_get() { return g_ctx.torq[1]; }
-uint8_t ctrl_inv_torq_rl_get() { return g_ctx.torq[2]; }
-uint8_t ctrl_inv_torq_rr_get() { return g_ctx.torq[3]; }
-
-void ctrl_inv_torq_fl_set(uint8_t torq) {
-  k_mutex_lock(&g_ctx.lock, K_FOREVER);
-
-  g_ctx.torq[0] = torq;
-
-  k_mutex_unlock(&g_ctx.lock);
-}
-
-void ctrl_inv_torq_fr_set(uint8_t torq) {
-  k_mutex_lock(&g_ctx.lock, K_FOREVER);
-
-  g_ctx.torq[1] = torq;
-
-  k_mutex_unlock(&g_ctx.lock);
-}
-
-void ctrl_inv_torq_rl_set(uint8_t torq) {
-  k_mutex_lock(&g_ctx.lock, K_FOREVER);
-
-  g_ctx.torq[2] = torq;
-
-  k_mutex_unlock(&g_ctx.lock);
-}
-
-void ctrl_inv_torq_rr_set(uint8_t torq) {
-  k_mutex_lock(&g_ctx.lock, K_FOREVER);
-
-  g_ctx.torq[3] = torq;
-
-  k_mutex_unlock(&g_ctx.lock);
-}
-
-int ctrl_settings_save() {
-  int ret;
-
-  k_mutex_lock(&g_ctx.lock, K_FOREVER);
-
-  ret = settings_save_one(INV_TORQ_SETTINGS_ROOT "/fl", &g_ctx.torq[0],
-                          sizeof(uint8_t));
-  if (ret < 0) {
-    goto err;
-  }
-
-  ret = settings_save_one(INV_TORQ_SETTINGS_ROOT "/fr", &g_ctx.torq[1],
-                          sizeof(uint8_t));
-  if (ret < 0) {
-    goto err;
-  }
-
-  ret = settings_save_one(INV_TORQ_SETTINGS_ROOT "/rl", &g_ctx.torq[2],
-                          sizeof(uint8_t));
-  if (ret < 0) {
-    goto err;
-  }
-
-  ret = settings_save_one(INV_TORQ_SETTINGS_ROOT "/rr", &g_ctx.torq[3],
-                          sizeof(uint8_t));
-  if (ret < 0) {
-    goto err;
-  }
-
-  goto out;
-
-err:
-  LOG_ERR("settings_save failed: %s", strerror(-ret));
-
-out:
-  k_mutex_unlock(&g_ctx.lock);
-  return ret;
-}
+CTRL_PARAM_DEFINE(CTRL_PARAM_LIST);
 
 /* static function definition ------------------------------------------------*/
-static int ctrl_settings_load(const char *key, size_t len,
-                              settings_read_cb read_cb, void *cb_arg) {
-  const char *next;
-  int ret;
+static void ctrl_init(struct ctrl_ctx *ctx) {
+  sensor_fusion_initialize(&ctx->sensor_fusion_model);
 
-  k_mutex_lock(&g_ctx.lock, K_FOREVER);
+  // send torque command once to start publishing
+  struct msg_ctrl_torque msg = {0};
+  msg_header_init(&msg.header);
 
-  uint8_t *target;
-  if (settings_name_steq(key, "fl", &next) && !next) {
-    target = &g_ctx.torq[0];
-  } else if (settings_name_steq(key, "fr", &next) && !next) {
-    target = &g_ctx.torq[1];
-  } else if (settings_name_steq(key, "rl", &next) && !next) {
-    target = &g_ctx.torq[2];
-  } else if (settings_name_steq(key, "rr", &next) && !next) {
-    target = &g_ctx.torq[3];
-  } else {
-    ret = -ENOENT;
-    goto out;
+  zbus_chan_pub(&msg_ctrl_torque_chan, &msg, K_FOREVER);
+}
+
+static int init() {
+  ctrl_init(&g_ctx);
+
+  return 0;
+}
+
+static void thread(void *arg1, void *arg2, void *arg3) {
+  struct ctrl_ctx *ctx = arg1;
+
+  (void)arg2;
+  (void)arg3;
+
+  while (true) {
+    k_sleep(K_MSEC(10));
+
+    int ret = k_mutex_lock(&ctx->lock, K_MSEC(5));
+    if (ret < 0) {
+      LOG_WRN("Failed to lock: %s", strerror(-ret));
+      continue;
+    }
+
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+
+    sensor_fusion_ExtU input = {
+        .cockpit = ctx->cockpit,
+        .wheel = ctx->wheel,
+        .imu = ctx->imu,
+        .gps = ctx->gps,
+    };
+    sensor_fusion_ExtY output;
+    sensor_fusion_step(&ctx->sensor_fusion_model, &input, &output);
+
+    struct msg_ctrl_vehicle_state *msg = &output.vehicle_state;
+    msg_header_init(&msg->header);
+    zbus_chan_pub(&msg_ctrl_vehicle_state_chan, msg, K_MSEC(5));
+
+#endif  // CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+
+    switch (ctx->state) {
+      case CTRL_STATE_ERROR:
+      case CTRL_STATE_OK: {
+        vehicle_control_ExtU input = {
+            .cockpit = ctx->cockpit,
+            .wheel = ctx->wheel,
+            .imu = ctx->imu,
+            .gps = ctx->gps,
+        };
+
+        if (ctx->state == CTRL_STATE_ERROR) {
+          input.cockpit.accel = 0.0F;
+        }
+
+        vehicle_control_ExtY output;
+        vehicle_control_step(&ctx->vehicle_control_model, &input, &output);
+
+        struct msg_ctrl_torque *msg = &output.torq;
+        float limit = ctx->state == CTRL_STATE_ERROR ? 0.0F : INV_RATED_TORQUE;
+        for (int i = 0; i < 4; i++) {
+          msg->torque.values[i] = MIN(msg->torque.values[i], limit);
+        }
+
+        msg_header_init(&msg->header);
+
+        zbus_chan_pub(&msg_ctrl_torque_chan, msg, K_MSEC(5));
+      } break;
+
+      default:
+        break;
+    }
+
+    k_mutex_unlock(&ctx->lock);
   }
-
-  if (len != sizeof(uint8_t)) {
-    ret = -EINVAL;
-    goto out;
-  }
-
-  ret = read_cb(cb_arg, target, len);
-  if (ret >= 0) {
-    ret = 0;
-  }
-
-out:
-  k_mutex_unlock(&g_ctx.lock);
-  return ret;
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
   if (chan == &msg_sensor_cockpit_chan) {
+    g_ctx.cockpit =
+        *(const struct msg_sensor_cockpit *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_sensor_wheel_chan) {
+    g_ctx.wheel = *(const struct msg_sensor_wheel *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_sensor_imu_chan) {
+    g_ctx.imu = *(const struct msg_sensor_imu *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_sensor_gps_chan) {
+    g_ctx.gps = *(const struct msg_sensor_gps *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_cmd_chan) {
+    const struct msg_ctrl_cmd *msg = zbus_chan_const_msg(chan);
+
+    if (g_ctx.cmd_last.rtd != msg->rtd) {
+      if (states_valid_transition(TRANS_CMD_RTD_FORCED)) {
+        states_valid_transition(TRANS_CMD_RTD_FORCED);
+      }
+    }
+
+    if (g_ctx.cmd_last.emcy_stop != msg->emcy_stop) {
+      err_report(ERR_CODE_EMCY_STOP, msg->emcy_stop);
+    }
+
+    g_ctx.cmd_last = *msg;
   }
 }
 
@@ -195,8 +206,14 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   switch (state) {
     case STATE_RUNNING:
       if (is_entry) {
-        // initialize
+        vehicle_control_initialize(&ctx->vehicle_control_model);
+
       } else {
+        struct msg_ctrl_torque msg = {0};
+        msg_header_init(&msg.header);
+
+        zbus_chan_pub(&msg_ctrl_torque_chan, &msg, K_FOREVER);
+
         ctx->state = CTRL_STATE_IDLE;
       }
       break;
@@ -218,50 +235,4 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   }
 
   k_mutex_unlock(&ctx->lock);
-}
-
-static void thread(void *arg1, void *arg2, void *arg3) {
-  struct ctrl_ctx *ctx = arg1;
-
-  (void)arg2;
-  (void)arg3;
-
-  while (true) {
-    k_sleep(K_MSEC(10));
-
-    struct msg_sensor_cockpit _msg;
-    zbus_chan_read(&msg_sensor_cockpit_chan, &_msg, K_MSEC(5));
-
-    struct msg_ctrl_torque msg;
-    msg_header_init(&msg.header);
-
-    int ret = k_mutex_lock(&ctx->lock, K_MSEC(5));
-    if (ret < 0) {
-      LOG_WRN("Failed to lock: %s", strerror(-ret));
-      continue;
-    }
-
-    switch (ctx->state) {
-      case CTRL_STATE_ERROR:
-        _msg.accel = 0.0F;
-
-      case CTRL_STATE_OK:
-        for (int i = 0; i < 4; i++) {
-          msg.torque.values[i] =
-              (float)(i % 2 == 0 ? -ctx->torq[i] : ctx->torq[i]) / 100.0F *
-              _msg.accel;
-        }
-        break;
-
-      default:
-        for (int i = 0; i < 4; i++) {
-          msg.torque.values[i] = 0.0F;
-        }
-        break;
-    }
-
-    zbus_chan_pub(&msg_ctrl_torque_chan, &msg, K_MSEC(5));
-
-    k_mutex_unlock(&ctx->lock);
-  }
 }

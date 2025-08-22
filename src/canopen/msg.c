@@ -134,8 +134,8 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_sensor_gps,
 CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_vehicle_state,
     AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
     OD_TO_MSG_ENTRY(0x2090,
-        OD_TO_MSG_DATA(0x1, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, AGG_MEMBER(velocity.x)),
-        OD_TO_MSG_DATA(0x2, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, AGG_MEMBER(velocity.y))
+        OD_TO_MSG_DATA(0x1, int16_t, VELOCITY_CAN_TO_PHY, AGG_MEMBER(velocity.x)),
+        OD_TO_MSG_DATA(0x2, int16_t, VELOCITY_CAN_TO_PHY, AGG_MEMBER(velocity.y))
     )
 );
 

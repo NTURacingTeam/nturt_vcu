@@ -33,8 +33,24 @@ endchoice
 
 endif # VCU_HAL
 
+choice VCU_SOURCE_VEHICLE_STATE
+	prompt "Vehicle states data source"
+	default VCU_SOURCE_VEHICLE_STATE_FUSION
+
+config VCU_SOURCE_VEHICLE_STATE_DISABLED
+	bool "Vehicle states data disabled"
+
+config VCU_SOURCE_VEHICLE_STATE_FUSION
+	bool "Vehicle states data from sensor fusion"
+
+config VCU_SOURCE_VEHICLE_STATE_CANOPEN
+	bool "Vehicle states data from CAN open"
+	depends on VCU_CANOPEN
+
+endchoice # VCU_SOURCE_VEHICLE_STATE
+
 choice VCU_SOURCE_COCKPIT
-	prompt "Cockpit data source"
+	prompt "Cockpit sensors data source"
 	default VCU_SOURCE_COCKPIT_NATIVE if VCU_SENSORS
 	default VCU_SOURCE_COCKPIT_CANOPEN if VCU_CANOPEN
 	default VCU_SOURCE_COCKPIT_DISABLED

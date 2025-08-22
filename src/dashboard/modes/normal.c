@@ -21,6 +21,10 @@
 #include "vcu/ctrl/inv.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/dashboard.h"
+#include "vcu/msg/msg.h"
+
+/* macro ---------------------------------------------------------------------*/
+#define M_S_TO_KM_H(x) ((x) * 3.6F)
 
 /* type ----------------------------------------------------------------------*/
 enum dashboard_normal_state {
@@ -68,7 +72,7 @@ INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
 
 ZBUS_LISTENER_DEFINE(dashboard_normal_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, dashboard_normal_listener, 0);
-ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, dashboard_normal_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_vehicle_state_chan, dashboard_normal_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ts_acc_chan, dashboard_normal_listener, 0);
 
 ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
@@ -209,11 +213,12 @@ static void msg_cb(const struct zbus_channel *chan) {
       dashboard_set_level(DASHBOARD_BRAKE, msg->brake);
     }
 
-  } else if (chan == &msg_sensor_wheel_chan) {
-    const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_vehicle_state_chan) {
+    const struct msg_ctrl_vehicle_state *msg = zbus_chan_const_msg(chan);
 
-    if (!g_ctx.states[ERROR_HB_INV_RL] && !g_ctx.states[ERROR_HB_INV_RR]) {
-      int speed = roundf((-msg->speed.rl + msg->speed.rr) / 2.0F * 0.0964F);
+    if (!g_ctx.states[ERROR_HB_INV]) {
+      int speed = roundf(M_S_TO_KM_H(sqrtf(msg->velocity.x * msg->velocity.x +
+                                           msg->velocity.y * msg->velocity.y)));
       dashboard_set_level(DASHBOARD_SPEED, speed);
     }
 
