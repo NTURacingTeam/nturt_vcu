@@ -184,9 +184,9 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_ctrl_cmd_chan) {
     const struct msg_ctrl_cmd *msg = zbus_chan_const_msg(chan);
 
-    if (g_ctx.cmd_last.rtd != msg->rtd) {
+    if (g_ctx.cmd_last.rtd != msg->rtd && msg->rtd) {
       if (states_valid_transition(TRANS_CMD_RTD_FORCED)) {
-        states_valid_transition(TRANS_CMD_RTD_FORCED);
+        states_transition(TRANS_CMD_RTD_FORCED);
       }
     }
 

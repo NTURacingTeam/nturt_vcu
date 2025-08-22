@@ -18,7 +18,8 @@
 LOG_MODULE_DECLARE(vcu_ctrl);
 
 /* macro ---------------------------------------------------------------------*/
-#define CTRL_SETTINGS_ROOT "ctrl"
+#define _CTRL_SETTINGS_ROOT ctrl
+#define CTRL_SETTINGS_ROOT STRINGIFY(_CTRL_SETTINGS_ROOT)
 
 /* static function definition ------------------------------------------------*/
 static int ctrl_settings_load(const char* key, size_t len_rd,
@@ -28,7 +29,7 @@ static int ctrl_settings_export(int (*export_func)(const char* name,
                                                    size_t val_len));
 
 /* static variable -----------------------------------------------------------*/
-SETTINGS_STATIC_HANDLER_DEFINE(ctrl, CTRL_SETTINGS_ROOT, NULL,
+SETTINGS_STATIC_HANDLER_DEFINE(_CTRL_SETTINGS_ROOT, CTRL_SETTINGS_ROOT, NULL,
                                ctrl_settings_load, NULL, ctrl_settings_export);
 
 /* function definition -------------------------------------------------------*/

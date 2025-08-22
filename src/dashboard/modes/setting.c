@@ -149,12 +149,12 @@ static void dashboard_display(const struct dashboard_setting_ctx *ctx) {
   switch (ctx->mode) {
     case SET_INV_RL:
       dashboard_led_set(LED_NUM_INV_RL, true);
-      dashboard_set_level(DASHBOARD_SPEED, ctrl_torq_rl_get());
+      dashboard_set_level(DASHBOARD_SPEED, ctrl_param_torq_rl_get());
       break;
 
     case SET_INV_RR:
       dashboard_led_set(LED_NUM_INV_RR, true);
-      dashboard_set_level(DASHBOARD_SPEED, ctrl_torq_rr_get());
+      dashboard_set_level(DASHBOARD_SPEED, ctrl_param_torq_rr_get());
       break;
 
     default:
@@ -223,9 +223,9 @@ static void dashboard_modify(const struct dashboard_setting_ctx *ctx,
     }
 
     case SET_INV_RL: {
-      int torq = ctrl_torq_rl_get();
+      int torq = ctrl_param_torq_rl_get();
       torq += is_up ? 1 : -1;
-      ctrl_torq_rl_set(CLAMP(torq, 0, 100));
+      ctrl_param_torq_rl_set(CLAMP(torq, 0, 100));
 
       ctrl_settings_save();
 
@@ -233,9 +233,9 @@ static void dashboard_modify(const struct dashboard_setting_ctx *ctx,
     }
 
     case SET_INV_RR: {
-      int torq = ctrl_torq_rr_get();
+      int torq = ctrl_param_torq_rr_get();
       torq += is_up ? 1 : -1;
-      ctrl_torq_rr_set(CLAMP(torq, 0, 100));
+      ctrl_param_torq_rr_set(CLAMP(torq, 0, 100));
 
       ctrl_settings_save();
 

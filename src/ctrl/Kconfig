@@ -13,7 +13,7 @@ config VCU_CTRL_INIT_PRIORITY
 	default 40
 
 config VCU_CTRL_STACK_SIZE
-	int "Control system stack size"
+	int "Control system thread stack size"
 	default 4096
 
 config VCU_CTRL_THREAD_PRIORITY
