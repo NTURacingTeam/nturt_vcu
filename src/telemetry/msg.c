@@ -29,7 +29,7 @@ static void msg_cb(const struct zbus_channel *chan) {
     const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
     TM_DATA_UPDATE(steer, STEER_PHY_TO_CAN(msg->steer));
-    TM_DATA_UPDATE(accel, PEDAL_TRAV_PHY_TO_CAN(msg->accel_pedal_plaus));
+    TM_DATA_UPDATE(accel, PEDAL_TRAV_PHY_TO_CAN(msg->accel));
     TM_DATA_UPDATE(apps1, APPS_RAW_PHY_TO_CAN(msg->apps1));
     TM_DATA_UPDATE(apps2, APPS_RAW_PHY_TO_CAN(msg->apps2));
     TM_DATA_UPDATE(brake, PEDAL_TRAV_PHY_TO_CAN(msg->brake));
@@ -50,7 +50,9 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_ctrl_torque_chan) {
     const struct msg_ctrl_torque *msg = zbus_chan_const_msg(chan);
 
-    TM_DATA_UPDATE(inv_rl_target_torque, INV_TORQUE_PHY_TO_CAN(msg->torque.rl));
-    TM_DATA_UPDATE(inv_rr_target_torque, INV_TORQUE_PHY_TO_CAN(msg->torque.rr));
+    TM_DATA_UPDATE(inv_rl_target_torque,
+                   INV_TORQUE_PHY_TO_CAN_L(msg->torque.rl));
+    TM_DATA_UPDATE(inv_rr_target_torque,
+                   INV_TORQUE_PHY_TO_CAN_R(msg->torque.rr));
   }
 }

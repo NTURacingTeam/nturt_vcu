@@ -1,5 +1,4 @@
 // glibc includes
-#include <math.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -11,6 +10,7 @@
 #include <zephyr/zbus/zbus.h>
 
 // nturt includes
+#include <nturt/canbus/convert.h>
 #include <nturt/err/err.h>
 #include <nturt/sys/sys.h>
 
@@ -37,6 +37,8 @@ struct ctrl_inv_ctx {
 
   struct k_mutex lock;
 
+  bool low_speed;
+
   struct msg_ctrl_word msg;
 };
 
@@ -58,15 +60,15 @@ static struct ctrl_inv_ctx g_ctx = {
 };
 
 ZBUS_LISTENER_DEFINE(ctrl_inv_listener, msg_cb);
+ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, ctrl_inv_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
-ZBUS_CHAN_ADD_OBS(msg_ts_emcy_stop_chan, ctrl_inv_listener, 0);
 
 ERR_DEFINE(inv_fl, ERR_CODE_INV_FL, ERR_SEV_FATAL, "Inverter FL error");
 ERR_DEFINE(inv_fr, ERR_CODE_INV_FR, ERR_SEV_FATAL, "Inverter FR error");
 // ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_FATAL, "Inverter RL error");
 // ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_FATAL, "Inverter RR error");
-ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_WARN, "Inverter RL error");
-ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_WARN, "Inverter RR error");
+ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_ERROR, "Inverter RL error");
+ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_ERROR, "Inverter RR error");
 
 ERR_DEFINE(inv_fl_no_power, ERR_CODE_INV_FL_HV_LOW, ERR_SEV_WARN,
            "Inverter FL HV low voltage");
@@ -76,8 +78,6 @@ ERR_DEFINE(inv_rl_no_power, ERR_CODE_INV_RL_HV_LOW, ERR_SEV_WARN,
            "Inverter RL HV low voltage");
 ERR_DEFINE(inv_rr_no_power, ERR_CODE_INV_RR_HV_LOW, ERR_SEV_WARN,
            "Inverter RR HV low voltage");
-
-ERR_DEFINE(emcy_stop, ERR_CODE_EMCY_STOP, ERR_SEV_FATAL, "Emergency stop");
 
 ERR_CALLBACK_DEFINE(err_cb, NULL,
                     ERR_FILTER_CODE(ERR_CODE_INV_FL_HV_LOW,
@@ -125,16 +125,24 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
-  if (chan == &msg_ts_inv_chan) {
+  if (chan == &msg_sensor_wheel_chan) {
+    const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
+
+    g_ctx.low_speed = true;
+    for (int i = 2; i < 4; i++) {
+      if (MOTOR_REDUCTION_RATIO * msg->speed.values[i] > 1000.0F) {
+        g_ctx.low_speed = false;
+        break;
+      }
+    }
+
+  } else if (chan == &msg_ts_inv_chan) {
     const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
 
     for (int i = 2; i < 4; i++) {
       if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
         if (msg->status.values[i] & STATUS_WORD_FAULT) {
-          struct msg_sensor_wheel msg_wheel;
-          int ret =
-              zbus_chan_read(&msg_sensor_wheel_chan, &msg_wheel, K_NO_WAIT);
-          if (ret == 0 && fabsf(msg_wheel.speed.values[i]) < 1000.0F) {
+          if (g_ctx.low_speed) {
             ctrl_inv_fault_reset();
           }
         }
@@ -145,11 +153,6 @@ static void msg_cb(const struct zbus_channel *chan) {
                    !(msg->status.values[i] & STATUS_WORD_POWER));
       }
     }
-
-  } else if (chan == &msg_ts_emcy_stop_chan) {
-    const struct msg_ts_emcy_stop *msg = zbus_chan_const_msg(chan);
-
-    err_report(ERR_CODE_EMCY_STOP, msg->emcy_stop);
   }
 }
 

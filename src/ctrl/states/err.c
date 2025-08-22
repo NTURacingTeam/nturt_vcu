@@ -1,3 +1,6 @@
+// zephyr includes
+#include <zephyr/sys/util.h>
+
 // nturt includes
 #include <nturt/err/err.h>
 
@@ -6,16 +9,20 @@
 
 /* macro ---------------------------------------------------------------------*/
 #ifdef CONFIG_VCU_STATES_TRANS_TO_ERROR_ON_FATAL
-#define ON_SEVERITY (ERR_SEV_FATAL)
+#define FILTERED_ERRORS ERR_SEV_FATAL
+#elif defined(CONFIG_VCU_STATES_TRANS_TO_ERROR_ON_ERROR)
+#define FILTERED_ERRORS ERR_SEV_FATAL, ERR_SEV_ERROR
 #elif defined(CONFIG_VCU_STATES_TRANS_TO_ERROR_ON_WARNING)
-#define ON_SEVERITY (ERR_SEV_WARNING)
+#define FILTERED_ERRORS ERR_SEV_FATAL, ERR_SEV_ERROR, ERR_SEV_WARNING
 #endif
+
+#define ON_SEVERITY (FOR_EACH(IDENTITY, (|), FILTERED_ERRORS))
 
 /* static function declaration -----------------------------------------------*/
 static void err_handler(uint32_t errcode, bool set, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
-ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(ON_SEVERITY));
+ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(FILTERED_ERRORS));
 
 /* static function definition ------------------------------------------------*/
 static void err_handler(uint32_t errcode, bool set, void* user_data) {
@@ -23,18 +30,30 @@ static void err_handler(uint32_t errcode, bool set, void* user_data) {
   (void)set;
   (void)user_data;
 
+  int max_severity = 0;
+
   struct err* err;
   ERR_FOREACH_SET(err) {
-    if (err->flags & ON_SEVERITY) {
-      if (states_get() & STATE_ERR_FREE) {
-        states_transition(TRANS_CMD_ERR);
-      }
-
-      return;
-    }
+    max_severity = MAX(max_severity, err->flags & ON_SEVERITY);
   }
 
-  if (states_get() & STATE_ERR) {
-    states_transition(TRANS_CMD_ERR_CLEAR);
+  if (max_severity == ERR_SEV_FATAL) {
+    if (states_valid_transition(TRANS_CMD_FATAL_ERROR)) {
+      states_transition(TRANS_CMD_FATAL_ERROR);
+    }
+
+  } else if (max_severity != 0) {
+    if (states_valid_transition(TRANS_CMD_ERROR)) {
+      states_transition(TRANS_CMD_ERROR);
+    } else if (states_valid_transition(TRANS_CMD_ERROR_RUNNING)) {
+      states_transition(TRANS_CMD_ERROR_RUNNING);
+    }
+
+  } else {
+    if (states_valid_transition(TRANS_CMD_ERROR_CLEARED)) {
+      states_transition(TRANS_CMD_ERROR_CLEARED);
+    } else if (states_valid_transition(TRANS_CMD_ERROR_CLEARED_RUNNING)) {
+      states_transition(TRANS_CMD_ERROR_CLEARED_RUNNING);
+    }
   }
 }

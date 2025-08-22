@@ -28,7 +28,7 @@
 /* type ----------------------------------------------------------------------*/
 /// @brief Telemetry data address for VCU. Currently the addresses are not used
 /// and can be changed to match those used in future protocols.
-enum vcu_td_data_addr {
+enum vcu_tm_data_addr {
   TM_STEER_ANGLE,
   TM_ACCELERATOR,
   TM_APPS1,

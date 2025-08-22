@@ -26,7 +26,6 @@
 /* type ----------------------------------------------------------------------*/
 struct cockpit_ctx {
   bool accel_engaged;
-  bool accel_error_reported;
   bool brake_engaged;
 };
 
@@ -36,7 +35,6 @@ static void states_update(struct cockpit_ctx* ctx);
 static int init();
 
 static void input_cb(struct input_event* evt, void* user_data);
-
 static void raw_cb(const struct device* dev, const struct sensor_value* val,
                    void* user_data);
 
@@ -60,7 +58,6 @@ static const struct device* accel_pedal_plaus =
 
 static struct cockpit_ctx g_ctx = {
     .accel_engaged = false,
-    .accel_error_reported = false,
     .brake_engaged = false,
 };
 
@@ -70,15 +67,15 @@ INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
 
 ERR_DEFINE(steer, ERR_CODE_STEER, ERR_SEV_WARN, "Steering encoder error");
 
-ERR_DEFINE(accel, ERR_CODE_ACCEL, ERR_SEV_FATAL, "Accelerator error");
+ERR_DEFINE(accel, ERR_CODE_ACCEL, ERR_SEV_ERROR, "Accelerator error");
 ERR_DEFINE(apps1, ERR_CODE_APPS1, ERR_SEV_INFO, "APPS1 error");
 ERR_DEFINE(apps2, ERR_CODE_APPS2, ERR_SEV_INFO, "APPS2 error");
 
-ERR_DEFINE(brake, ERR_CODE_BRAKE, ERR_SEV_FATAL, "Brake error");
+ERR_DEFINE(brake, ERR_CODE_BRAKE, ERR_SEV_ERROR, "Brake error");
 ERR_DEFINE(bse1, ERR_CODE_BSE1, ERR_SEV_INFO, "BSE1 error");
 ERR_DEFINE(bse2, ERR_CODE_BSE2, ERR_SEV_INFO, "BSE2 error");
 
-ERR_DEFINE(pedal_plaus, ERR_CODE_PEDAL_PLAUS, ERR_SEV_WARN,
+ERR_DEFINE(pedal_plaus, ERR_CODE_PEDAL_PLAUS, ERR_SEV_ERROR,
            "Pedal plausibility error");
 
 // clang-format off
@@ -90,7 +87,6 @@ static MSG_AGG_TO_MSG_DEFINE(msg_sensor_cockpit_agg,
     AGG_MEMBER(steer),
 
     AGG_MEMBER(accel),
-    AGG_MEMBER(accel_pedal_plaus),
     AGG_MEMBER(apps1, AGG_MEMBER_FLAG_IGNORED),
     AGG_MEMBER(apps2, AGG_MEMBER_FLAG_IGNORED),
 
@@ -141,29 +137,10 @@ static void input_cb(struct input_event* evt, void* user_data) {
       AGG_TYPED_UPDATE(&msg_sensor_cockpit_agg, struct msg_sensor_cockpit,
                        accel, evt->value);
 
-      if (!IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
-        AGG_TYPED_UPDATE(&msg_sensor_cockpit_agg, struct msg_sensor_cockpit,
-                         accel_pedal_plaus, evt->value);
-      }
-
       ctx->accel_engaged = evt->value > 0;
 
     } else if (evt->type == INPUT_EV_ERROR) {
       err_report(ERR_CODE_ACCEL, evt->value);
-
-      if (evt->value && !ctx->accel_error_reported) {
-        AGG_TYPED_UPDATE(&msg_sensor_cockpit_agg, struct msg_sensor_cockpit,
-                         accel, 0);
-
-        if (!IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
-          AGG_TYPED_UPDATE(&msg_sensor_cockpit_agg, struct msg_sensor_cockpit,
-                           accel_pedal_plaus, 0);
-        }
-
-        ctx->accel_error_reported = true;
-      } else if (!evt->value && ctx->accel_error_reported) {
-        ctx->accel_error_reported = false;
-      }
 
       if (evt->value) {
         ctx->accel_engaged = false;
@@ -208,15 +185,9 @@ static void input_cb(struct input_event* evt, void* user_data) {
       err_report(ERR_CODE_BSE2, evt->value);
     }
 
-  } else if (evt->dev == accel_pedal_plaus) {
-    if (evt->type == INPUT_EV_ABS && evt->code == INPUT_ABS_THROTTLE) {
-      if (IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS)) {
-        AGG_TYPED_UPDATE(&msg_sensor_cockpit_agg, struct msg_sensor_cockpit,
-                         accel_pedal_plaus, evt->value);
-      }
-
-    } else if (evt->type == INPUT_EV_ERROR &&
-               evt->code == INPUT_ERROR_PEDAL_PLAUS) {
+  } else if (IS_ENABLED(CONFIG_VCU_SENSORS_PEDAL_PLAUS) &&
+             evt->dev == accel_pedal_plaus) {
+    if (evt->type == INPUT_EV_ERROR && evt->code == INPUT_ERROR_PEDAL_PLAUS) {
       err_report(ERR_CODE_PEDAL_PLAUS, evt->value);
     }
   }
