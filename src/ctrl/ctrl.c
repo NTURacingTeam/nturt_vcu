@@ -25,8 +25,18 @@ LOG_MODULE_REGISTER(vcu_ctrl);
 #define INV_TORQ_SETTINGS_ROOT "inv_torq"
 
 /* type ----------------------------------------------------------------------*/
+enum ctrl_state {
+  CTRL_STATE_IDLE,
+  CTRL_STATE_OK,
+  CTRL_STATE_ERROR,
+
+  NUM_CTRL_STATE,
+};
+
 struct ctrl_ctx {
   struct k_mutex lock;
+
+  enum ctrl_state state;
 
   uint8_t torq[4];
 };
@@ -34,14 +44,14 @@ struct ctrl_ctx {
 /* static function declaration -----------------------------------------------*/
 static int ctrl_settings_load(const char *key, size_t len_rd,
                               settings_read_cb read_cb, void *cb_arg);
-
 static void msg_cb(const struct zbus_channel *chan);
-
+static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void thread(void *arg1, void *arg2, void *arg3);
 
 /* static variable -----------------------------------------------------------*/
 static struct ctrl_ctx g_ctx = {
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
+    .state = CTRL_STATE_IDLE,
     .torq = {INV_TORQ_DEFAULT, INV_TORQ_DEFAULT, INV_TORQ_DEFAULT,
              INV_TORQ_DEFAULT},
 };
@@ -51,6 +61,10 @@ SETTINGS_STATIC_HANDLER_DEFINE(inv_torq, INV_TORQ_SETTINGS_ROOT, NULL,
 
 ZBUS_LISTENER_DEFINE(ctrl_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_cmd_chan, ctrl_listener, 0);
+
+STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_RUNNING_OK | STATE_RUNNING_ERROR,
+                       states_cb, &g_ctx);
 
 K_THREAD_DEFINE(ctrl_thread, 1024, thread, &g_ctx, NULL, NULL, 0, 0, 0);
 
@@ -173,6 +187,39 @@ static void msg_cb(const struct zbus_channel *chan) {
   }
 }
 
+static void states_cb(enum states_state state, bool is_entry, void *user_data) {
+  struct ctrl_ctx *ctx = user_data;
+
+  k_mutex_lock(&ctx->lock, K_FOREVER);
+
+  switch (state) {
+    case STATE_RUNNING:
+      if (is_entry) {
+        // initialize
+      } else {
+        ctx->state = CTRL_STATE_IDLE;
+      }
+      break;
+
+    case STATE_RUNNING_OK:
+      if (is_entry) {
+        ctx->state = CTRL_STATE_OK;
+      }
+      break;
+
+    case STATE_RUNNING_ERROR:
+      if (is_entry) {
+        ctx->state = CTRL_STATE_ERROR;
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  k_mutex_unlock(&ctx->lock);
+}
+
 static void thread(void *arg1, void *arg2, void *arg3) {
   struct ctrl_ctx *ctx = arg1;
 
@@ -194,14 +241,23 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       continue;
     }
 
-    for (int i = 0; i < 4; i++) {
-      if (states_get() & STATE_RUNNING) {
-        msg.torque.values[i] =
-            (float)(i % 2 == 0 ? -ctx->torq[i] : ctx->torq[i]) / 100.0F *
-            _msg.accel_pedal_plaus;
-      } else {
-        msg.torque.values[i] = 0.0F;
-      }
+    switch (ctx->state) {
+      case CTRL_STATE_ERROR:
+        _msg.accel = 0.0F;
+
+      case CTRL_STATE_OK:
+        for (int i = 0; i < 4; i++) {
+          msg.torque.values[i] =
+              (float)(i % 2 == 0 ? -ctx->torq[i] : ctx->torq[i]) / 100.0F *
+              _msg.accel;
+        }
+        break;
+
+      default:
+        for (int i = 0; i < 4; i++) {
+          msg.torque.values[i] = 0.0F;
+        }
+        break;
     }
 
     zbus_chan_pub(&msg_ctrl_torque_chan, &msg, K_MSEC(5));

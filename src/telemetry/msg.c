@@ -29,7 +29,7 @@ static void msg_cb(const struct zbus_channel *chan) {
     const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
     TM_DATA_UPDATE(steer, STEER_PHY_TO_CAN(msg->steer));
-    TM_DATA_UPDATE(accel, PEDAL_TRAV_PHY_TO_CAN(msg->accel_pedal_plaus));
+    TM_DATA_UPDATE(accel, PEDAL_TRAV_PHY_TO_CAN(msg->accel));
     TM_DATA_UPDATE(apps1, APPS_RAW_PHY_TO_CAN(msg->apps1));
     TM_DATA_UPDATE(apps2, APPS_RAW_PHY_TO_CAN(msg->apps2));
     TM_DATA_UPDATE(brake, PEDAL_TRAV_PHY_TO_CAN(msg->brake));

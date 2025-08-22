@@ -21,6 +21,7 @@
  * @{
  */
 
+/* function declaration ------------------------------------------------------*/
 uint8_t ctrl_inv_torq_fl_get();
 uint8_t ctrl_inv_torq_fr_get();
 uint8_t ctrl_inv_torq_rl_get();

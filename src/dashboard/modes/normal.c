@@ -29,6 +29,8 @@ enum dashboard_normal_state {
   ERROR_ACCEL,
   ERROR_BRAKE,
   ERROR_PEDAL_PLAUS,
+
+  ERROR_HB_INV,
   ERROR_HB_INV_RL,
   ERROR_HB_INV_RR,
   ERROR_HB_ACC,
@@ -75,7 +77,8 @@ ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
                                     ERR_CODE_HB_INV_RR, ERR_CODE_HB_ACC,
                                     ERR_CODE_INV_RL, ERR_CODE_INV_RR));
 
-STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_ERR, states_cb, &g_ctx);
+STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_ERROR | STATE_RUNNING_ERROR,
+                       states_cb, &g_ctx);
 
 /* function definition -------------------------------------------------------*/
 void dashboard_normal_start() {
@@ -124,7 +127,10 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
 
     case ERROR_HB_INV_RL:
     case ERROR_HB_INV_RR:
-      if (g_ctx.states[ERROR_HB_INV_RL] || g_ctx.states[ERROR_HB_INV_RR]) {
+      ctx->states[ERROR_HB_INV] =
+          ctx->states[ERROR_HB_INV_RL] || ctx->states[ERROR_HB_INV_RR];
+
+      if (ctx->states[ERROR_HB_INV]) {
         dashboard_set_error(DASHBOARD_SPEED);
       }
       break;
@@ -161,13 +167,24 @@ static void input_cb(struct input_event *evt, void *user_data) {
 
   k_mutex_lock(&ctx->lock, K_FOREVER);
 
-  if (!ctx->states[ACTIVE] || evt->type != INPUT_EV_KEY) {
+  if (!ctx->states[ACTIVE] || evt->type != INPUT_EV_KEY || !evt->value) {
     k_mutex_unlock(&ctx->lock);
     return;
   }
 
-  if (evt->value && evt->code == INPUT_BTN_FAULT_RESET) {
-    ctrl_inv_fault_reset();
+  switch (evt->code) {
+    case INPUT_BTN_FAULT_RESET:
+      ctrl_inv_fault_reset();
+      break;
+
+    case INPUT_BTN_DOWN_HOLD:
+      if (states_valid_transition(TRANS_CMD_RTD_FORCED)) {
+        states_transition(TRANS_CMD_RTD_FORCED);
+      }
+      break;
+
+    default:
+      break;
   }
 
   k_mutex_unlock(&ctx->lock);
@@ -266,7 +283,8 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
       dashboard_state_update(ctx, STAT_RUNNING, is_entry);
       break;
 
-    case STATE_ERR:
+    case STATE_ERROR:
+    case STATE_RUNNING_ERROR:
       dashboard_state_update(ctx, STAT_ERROR, is_entry);
       break;
 
