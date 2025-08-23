@@ -20,6 +20,11 @@ config VCU_CTRL_THREAD_PRIORITY
 	int "Control system thread priority"
 	default 0
 
+config VCU_CTRL_SHELL
+	bool "Control system shell support"
+	depends on VCU_SHELL
+	default y
+
 config VCU_CTRL_SETTINGS
 	bool "Control system settings support"
 	depends on SETTINGS

@@ -12,6 +12,10 @@ target_sources(app PRIVATE
     inv.c
 )
 
+target_sources_ifdef(CONFIG_VCU_CTRL_SHELL app PRIVATE
+    shell.c
+)
+
 target_sources_ifdef(CONFIG_VCU_CTRL_SETTINGS app PRIVATE
     settings.c
 )

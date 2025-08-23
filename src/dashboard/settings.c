@@ -19,11 +19,15 @@ LOG_MODULE_DECLARE(vcu_dashboard);
 /* static function definition ------------------------------------------------*/
 static int dashboard_settings_load(const char* key, size_t len_rd,
                                    settings_read_cb read_cb, void* cb_arg);
+static int dashboard_settings_export(int (*export_func)(const char* name,
+                                                        const void* val,
+                                                        size_t val_len));
 
 /* static variable -----------------------------------------------------------*/
 SETTINGS_STATIC_HANDLER_DEFINE(_DASHBOARD_SETTINGS_ROOT,
                                DASHBOARD_SETTINGS_ROOT, NULL,
-                               dashboard_settings_load, NULL, NULL);
+                               dashboard_settings_load, NULL,
+                               dashboard_settings_export);
 
 /* function definition -------------------------------------------------------*/
 int dashboard_settings_save() {

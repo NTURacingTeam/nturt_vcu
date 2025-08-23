@@ -1,5 +1,3 @@
-#include "vcu/dashboard.h"
-
 // glibc includes
 #include <stddef.h>
 #include <stdint.h>
@@ -10,6 +8,9 @@
 #include <zephyr/shell/shell.h>
 #include <zephyr/sys/util.h>
 
+// project includes
+#include "vcu/dashboard.h"
+
 /* static function -----------------------------------------------------------*/
 static int dashboard_brightness_get_cmd_handler(const struct shell *sh,
                                                 size_t argc, char **argv,
@@ -18,8 +19,9 @@ static int dashboard_brightness_set_cmd_handler(const struct shell *sh,
                                                 size_t argc, char **argv,
                                                 void *data);
 
-static void dashboard_mode_set_get_handler(size_t idx,
+static void ctrl_param_set_get_handler(size_t idx,
                                            struct shell_static_entry *entry);
+
 static int dashboard_mode_get_cmd_handler(const struct shell *sh, size_t argc,
                                           char **argv, void *data);
 static int dashboard_mode_set_cmd_handler(const struct shell *sh, size_t argc,
@@ -29,7 +31,7 @@ static int dashboard_mode_set_cmd_handler(const struct shell *sh, size_t argc,
 SHELL_STATIC_SUBCMD_SET_CREATE(
     dashboard_brightness_cmd,
     SHELL_CMD_ARG(get, NULL, "Get brightness level.",
-                  dashboard_brightness_get_cmd_handler, 0, 0),
+                  dashboard_brightness_get_cmd_handler, 1, 0),
     SHELL_CMD_ARG(set, NULL,
                   "Set brightness level.\n"
                   "Usage: set <level>",
@@ -37,7 +39,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
     SHELL_SUBCMD_SET_END);
 
 SHELL_DYNAMIC_CMD_CREATE(dashboard_mode_set_subcmd,
-                         dashboard_mode_set_get_handler);
+                         ctrl_param_set_get_handler);
 
 SHELL_STATIC_SUBCMD_SET_CREATE(
     dashboard_mode_cmd,
@@ -98,7 +100,7 @@ static int dashboard_brightness_set_cmd_handler(const struct shell *sh,
   return 0;
 }
 
-static void dashboard_mode_set_get_handler(size_t idx,
+static void ctrl_param_set_get_handler(size_t idx,
                                            struct shell_static_entry *entry) {
   if (idx >= NUM_DASHBOARD_MODE) {
     entry->syntax = NULL;
