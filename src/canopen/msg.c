@@ -13,6 +13,7 @@
 #include <nturt/msg/msg.h>
 
 // project includes
+#include "vcu/canbus/convert.h"
 #include "vcu/msg/msg.h"
 
 // clang-format off
@@ -26,12 +27,12 @@ CANOPEN_OD_TO_AGG_DEFINE(0x2211, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
 );
 
 CANOPEN_OD_TO_AGG_DEFINE(0x2133, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_PHY_L, torque.rl),
-    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_PHY_L, speed.rl)
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_L, torque.rl),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_L, speed.rl)
 );
 CANOPEN_OD_TO_AGG_DEFINE(0x2143, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_PHY_R, torque.rr),
-    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_PHY_R, speed.rr)
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_R, torque.rr),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_R, speed.rr)
 );
 
 CANOPEN_OD_TO_MSG_DEFINE(msg_ts_acc,

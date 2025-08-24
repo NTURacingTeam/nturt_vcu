@@ -10,6 +10,7 @@
 #include <nturt/telemetry.h>
 
 // project includes
+#include "vcu/canbus/convert.h"
 #include "vcu/msg/msg.h"
 #include "vcu/telemetry.h"
 
