@@ -9,7 +9,7 @@
  *
  * Model version                  : 5.0
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Mon Aug 25 15:26:30 2025
+ * C/C++ source code generated on : Mon Aug 25 16:21:45 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -63,13 +63,13 @@ void sensor_fusion_step(sensor_fusion_RT_MODEL *const rtM, sensor_fusion_ExtU
   /* Unit Conversion - from: rpm to: rad/s
      Expression: output = (0.10472*input) + (0) */
   rtY->vehicle_state.velocity.x = (((rtU->wheel.speed.fl + rtU->wheel.speed.fr)
-    + rtU->wheel.speed.rl) + rtU->wheel.speed.rr) * 0.25F * 0.104719758F *
-    0.254F;
+    + rtU->wheel.speed.rl) + rtU->wheel.speed.rr) * 0.25 * 0.10471975511965977 *
+    0.254;
 
   /* BusCreator generated from: '<Root>/vehicle_state_BusCreator' incorporates:
    *  Constant: '<Root>/Constant2'
    */
-  rtY->vehicle_state.velocity.y = 0.0F;
+  rtY->vehicle_state.velocity.y = 0.0;
 
   /* BusCreator generated from: '<Root>/vehicle_state_BusCreator' incorporates:
    *  Constant: '<Root>/Constant1'

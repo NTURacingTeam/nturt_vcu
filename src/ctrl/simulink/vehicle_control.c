@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 1.6
+ * Model version                  : 5.0
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Mon Aug 25 16:01:00 2025
+ * C/C++ source code generated on : Mon Aug 25 22:13:10 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -56,10 +56,10 @@
 void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
   vehicle_control_ExtU *rtU, vehicle_control_ExtY *rtY)
 {
-  float rtb_Gain;
+  double rtb_Gain;
 
   /* Gain: '<Root>/Gain' */
-  rtb_Gain = 0.01F * rtU->cockpit.accel;
+  rtb_Gain = 0.01 * rtU->cockpit.accel;
 
   /* Gain: '<Root>/Gain2' */
   rtY->torq.torque.rl = torq_limit_rl * rtb_Gain;
@@ -71,8 +71,8 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
    *  Constant: '<Root>/Constant1'
    *  Constant: '<Root>/Constant2'
    */
-  rtY->torq.torque.fl = 0.0F;
-  rtY->torq.torque.fr = 0.0F;
+  rtY->torq.torque.fl = 0.0;
+  rtY->torq.torque.fr = 0.0;
 
   /* BusCreator generated from: '<Root>/torq_BusCreator' incorporates:
    *  Constant: '<Root>/Constant'
