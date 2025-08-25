@@ -29,37 +29,37 @@
 #include "vcu/ctrl/params.h"
 
 /* Physical to CAN -----------------------------------------------------------*/
-/// @brief Left inverter torque physical data in Nm (float), convert to 0.001
+/// @brief Left inverter torque physical data in Nm (double), convert to 0.001
 /// rated torque (int16_t).
 #define INV_TORQUE_PHY_TO_CAN_L(phy) \
   INV_TORQ_PHY_TO_CAN(PARAM_MOTOR_DIR_L*(phy / PARAM_MOTOR_RATED_TORQUE))
 
-/// @brief Right inverter torque physical data in Nm (float), convert to 0.001
+/// @brief Right inverter torque physical data in Nm (double), convert to 0.001
 /// rated torque (int16_t).
 #define INV_TORQUE_PHY_TO_CAN_R(phy) \
   INV_TORQ_PHY_TO_CAN(PARAM_MOTOR_DIR_R*(phy / PARAM_MOTOR_RATED_TORQUE))
 
 /* CAN to physical -----------------------------------------------------------*/
 /// @brief Left inverter speed CAN data in RPM (int16_t), convert to wheel speed
-/// in RPM (float) after reduction.
+/// in RPM (double) after reduction.
 #define INV_SPEED_CAN_TO_WHEEL_PHY_L(can)                 \
   (PARAM_MOTOR_DIR_L * ANGULAR_VELOCITY_CAN_TO_PHY(can) / \
    PARAM_MOTOR_REDUCTION_RATIO)
 
 /// @brief Right inverter speed CAN data in RPM (int16_t), convert to wheel
-/// speed in RPM (float) after reduction.
+/// speed in RPM (double) after reduction.
 #define INV_SPEED_CAN_TO_WHEEL_PHY_R(can)                 \
   (PARAM_MOTOR_DIR_R * ANGULAR_VELOCITY_CAN_TO_PHY(can) / \
    PARAM_MOTOR_REDUCTION_RATIO)
 
 /// @brief Left inverter torque CAN data in 0.001 rated torque (int16_t),
-/// convert to wheel torque in Nm (float).
+/// convert to wheel torque in Nm (double).
 #define INV_TORQUE_CAN_TO_WHEEL_PHY_L(can)           \
   (PARAM_MOTOR_DIR_L * PARAM_MOTOR_REDUCTION_RATIO * \
    PARAM_MOTOR_RATED_TORQUE * INV_TORQUE_CAN_TO_PHY(can))
 
 /// @brief Right inverter torque CAN data in 0.001 rated torque (int16_t),
-/// convert to wheel torque in Nm (float).
+/// convert to wheel torque in Nm (double).
 #define INV_TORQUE_CAN_TO_WHEEL_PHY_R(can)           \
   (PARAM_MOTOR_DIR_R * PARAM_MOTOR_REDUCTION_RATIO * \
    PARAM_MOTOR_RATED_TORQUE * INV_TORQUE_CAN_TO_PHY(can))

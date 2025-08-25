@@ -26,9 +26,9 @@ typedef double real64_T;
 typedef double time_T;
 typedef float real32_T;
 typedef char char_T;
+typedef unsigned char uchar_T;
 typedef char byte_T;
 typedef int int_T;
-typedef unsigned char uchar_T;
 typedef unsigned int uint_T;
 typedef unsigned long ulong_T;
 

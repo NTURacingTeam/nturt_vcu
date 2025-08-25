@@ -169,7 +169,7 @@ static int ctrl_param_get_cmd_handler(const struct shell *sh, size_t argc,
 #define _CTRL_PARAM_SET_CMD(param)                                           \
   else if (strcmp(argv[1], STRINGIFY(_CTRL_PARAM_NAME(param))) == 0) {       \
     _CTRL_PARAM_TYPE(param) val;                                             \
-    if (sscanf(argv[2], PRI(val), &val) != 1) {                              \
+    if (sscanf(argv[2], SCN(val), &val) != 1) {                              \
       shell_error(sh,                                                        \
                   "Invalid " STRINGIFY(_CTRL_PARAM_NAME(param)) "value: %s", \
                   argv[2]);                                                  \

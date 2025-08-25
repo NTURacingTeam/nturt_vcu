@@ -6,7 +6,7 @@
  *
  */
 
-/* Copyright 1990-2021 The MathWorks, Inc. */
+/* Copyright 1990-2023 The MathWorks, Inc. */
 
 #ifndef RTW_SOLVER_H__
 #define RTW_SOLVER_H__
@@ -121,65 +121,67 @@ typedef struct _ssSolverInfo_tag {
     boolean_T isMinorTimeStepWithModeChange;
     int_T maxZcPerStep;
     real_T** zcSignalPtr;
+    boolean_T** contStateDisabledPtr;
+    boolean_T isContModeFrozen;
 } ssSolverInfo;
 
 /* Support old name RTWSolverInfo */
 typedef ssSolverInfo RTWSolverInfo;
 
 #define rtsiSetRTModelPtr(S, rtmp) ((S)->rtModelPtr = (rtmp))
-#define rtsiGetRTModelPtr(S) (S)->rtModelPtr
+#define rtsiGetRTModelPtr(S)       (S)->rtModelPtr
 
 #define rtsiSetSimTimeStepPtr(S, stp) ((S)->simTimeStepPtr = (stp))
-#define rtsiGetSimTimeStepPtr(S) ((S)->simTimeStepPtr)
-#define rtsiGetSimTimeStep(S) *((S)->simTimeStepPtr)
-#define rtsiSetSimTimeStep(S, st) (*((S)->simTimeStepPtr) = (st))
+#define rtsiGetSimTimeStepPtr(S)      ((S)->simTimeStepPtr)
+#define rtsiGetSimTimeStep(S)         *((S)->simTimeStepPtr)
+#define rtsiSetSimTimeStep(S, st)     (*((S)->simTimeStepPtr) = (st))
 
 #define rtsiSetSolverData(S, sd) ((S)->solverData = (sd))
-#define rtsiGetSolverData(S) (S)->solverData
+#define rtsiGetSolverData(S)     (S)->solverData
 
 #define rtsiSetSolverName(S, sn) ((S)->solverName = (sn))
-#define rtsiGetSolverName(S) (S)->solverName
+#define rtsiGetSolverName(S)     (S)->solverName
 
 #define rtsiSetVariableStepSolver(S, vs) ((S)->isVariableStepSolver = (vs))
-#define rtsiIsVariableStepSolver(S) (S)->isVariableStepSolver
+#define rtsiIsVariableStepSolver(S)      (S)->isVariableStepSolver
 
 #define rtsiSetSolverNeedsReset(S, sn) ((S)->solverNeedsReset = (sn))
-#define rtsiGetSolverNeedsReset(S) (S)->solverNeedsReset
+#define rtsiGetSolverNeedsReset(S)     (S)->solverNeedsReset
 
 #define rtsiSetContTimeOutputInconsistentWithStateAtMajorStep(S, sn) \
     ((S)->CTOutputIncnstWithState = (sn))
 #define rtsiGetContTimeOutputInconsistentWithStateAtMajorStep(S) (S)->CTOutputIncnstWithState
 
 #define rtsiSetBlkStateChange(S, sn) ((S)->CTOutputIncnstWithState = (sn))
-#define rtsiGetBlkStateChange(S) (S)->CTOutputIncnstWithState
+#define rtsiGetBlkStateChange(S)     (S)->CTOutputIncnstWithState
 
 #define rtsiSetBlockStateForSolverChangedAtMajorStep(S, sn) ((S)->solverNeedsReset = (sn))
-#define rtsiGetBlockStateForSolverChangedAtMajorStep(S) (S)->solverNeedsReset
+#define rtsiGetBlockStateForSolverChangedAtMajorStep(S)     (S)->solverNeedsReset
 
 #define rtsiSetSolverMode(S, sm) ((S)->solverMode = (sm))
-#define rtsiGetSolverMode(S) (S)->solverMode
+#define rtsiGetSolverMode(S)     (S)->solverMode
 
 #define rtsiSetSolverStopTime(S, st) ((S)->solverStopTime = (st))
-#define rtsiGetSolverStopTime(S) (S)->solverStopTime
+#define rtsiGetSolverStopTime(S)     (S)->solverStopTime
 
 #define rtsiSetStepSizePtr(S, ssp) ((S)->stepSizePtr = (ssp))
-#define rtsiSetStepSize(S, ss) (*((S)->stepSizePtr) = (ss))
-#define rtsiGetStepSize(S) *((S)->stepSizePtr)
+#define rtsiSetStepSize(S, ss)     (*((S)->stepSizePtr) = (ss))
+#define rtsiGetStepSize(S)         *((S)->stepSizePtr)
 
 #define rtsiSetMinStepSize(S, ss) (((S)->minStepSize = (ss)))
-#define rtsiGetMinStepSize(S) (S)->minStepSize
+#define rtsiGetMinStepSize(S)     (S)->minStepSize
 
 #define rtsiSetMaxStepSize(S, ss) ((S)->maxStepSize = (ss))
-#define rtsiGetMaxStepSize(S) (S)->maxStepSize
+#define rtsiGetMaxStepSize(S)     (S)->maxStepSize
 
 #define rtsiSetFixedStepSize(S, ss) ((S)->fixedStepSize = (ss))
-#define rtsiGetFixedStepSize(S) (S)->fixedStepSize
+#define rtsiGetFixedStepSize(S)     (S)->fixedStepSize
 
 #define rtsiSetMaxNumMinSteps(S, mns) ((S)->maxNumMinSteps = (mns))
-#define rtsiGetMaxNumMinSteps(S) (S)->maxNumMinSteps
+#define rtsiGetMaxNumMinSteps(S)      (S)->maxNumMinSteps
 
 #define rtsiSetSolverMaxOrder(S, smo) ((S)->solverMaxOrder = (smo))
-#define rtsiGetSolverMaxOrder(S) (S)->solverMaxOrder
+#define rtsiGetSolverMaxOrder(S)      (S)->solverMaxOrder
 
 #define rtsiSetSolverJacobianMethodControl(S, smcm) \
     (ssGetSolverInfo(S)->solverJacobianMethodControl = (smcm))
@@ -202,90 +204,97 @@ typedef ssSolverInfo RTWSolverInfo;
 #define rtsiGetSolverMaxConsecutiveMinStep(S) ssGetSolverInfo(S)->solverMaxConsecutiveMinStep
 
 #define rtsiSetSolverExtrapolationOrder(S, seo) ((S)->solverExtrapolationOrder = (seo))
-#define rtsiGetSolverExtrapolationOrder(S) (S)->solverExtrapolationOrder
+#define rtsiGetSolverExtrapolationOrder(S)      (S)->solverExtrapolationOrder
 
 #define rtsiSetSolverNumberNewtonIterations(S, nni) ((S)->solverNumberNewtonIterations = (nni))
-#define rtsiGetSolverNumberNewtonIterations(S) (S)->solverNumberNewtonIterations
+#define rtsiGetSolverNumberNewtonIterations(S)      (S)->solverNumberNewtonIterations
 
 #define rtsiSetSolverRefineFactor(S, smo) ((S)->solverRefineFactor = (smo))
-#define rtsiGetSolverRefineFactor(S) (S)->solverRefineFactor
+#define rtsiGetSolverRefineFactor(S)      (S)->solverRefineFactor
 
 #define rtsiSetSolverRelTol(S, smo) ((S)->solverRelTol = (smo))
-#define rtsiGetSolverRelTol(S) (S)->solverRelTol
+#define rtsiGetSolverRelTol(S)      (S)->solverRelTol
 
 #define rtsiSetSolverMassMatrixType(S, type) ((S)->massMatrixType = (type))
-#define rtsiGetSolverMassMatrixType(S) (S)->massMatrixType
+#define rtsiGetSolverMassMatrixType(S)       (S)->massMatrixType
 
 #define rtsiSetSolverMassMatrixNzMax(S, nzMax) ((S)->massMatrixNzMax = (nzMax))
-#define rtsiGetSolverMassMatrixNzMax(S) (S)->massMatrixNzMax
+#define rtsiGetSolverMassMatrixNzMax(S)        (S)->massMatrixNzMax
 
 #define rtsiSetSolverMassMatrixIr(S, ir) ((S)->massMatrixIr = (ir))
-#define rtsiGetSolverMassMatrixIr(S) (S)->massMatrixIr
+#define rtsiGetSolverMassMatrixIr(S)     (S)->massMatrixIr
 
 #define rtsiSetSolverMassMatrixJc(S, jc) ((S)->massMatrixJc = (jc))
-#define rtsiGetSolverMassMatrixJc(S) (S)->massMatrixJc
+#define rtsiGetSolverMassMatrixJc(S)     (S)->massMatrixJc
 
 #define rtsiSetSolverMassMatrixPr(S, pr) ((S)->massMatrixPr = (pr))
-#define rtsiGetSolverMassMatrixPr(S) (S)->massMatrixPr
+#define rtsiGetSolverMassMatrixPr(S)     (S)->massMatrixPr
 
 #define rtsiSetdXPtr(S, dxp) ((S)->dXPtr = (dxp))
-#define rtsiSetdX(S, dx) (*((S)->dXPtr) = (dx))
-#define rtsiGetdX(S) *((S)->dXPtr)
+#define rtsiSetdX(S, dx)     (*((S)->dXPtr) = (dx))
+#define rtsiGetdX(S)         *((S)->dXPtr)
 
 #define rtsiSetTPtr(S, tp) ((S)->tPtr = (tp))
-#define rtsiSetT(S, t) ((*((S)->tPtr))[0] = (t))
-#define rtsiGetT(S) (*((S)->tPtr))[0]
+#define rtsiSetT(S, t)     ((*((S)->tPtr))[0] = (t))
+#define rtsiGetT(S)        (*((S)->tPtr))[0]
 
 #define rtsiSetContStatesPtr(S, cp) ((S)->contStatesPtr = (cp))
-#define rtsiGetContStates(S) *((S)->contStatesPtr)
+#define rtsiGetContStates(S)        *((S)->contStatesPtr)
+
+#define rtsiSetContStateDisabledPtr(S, cdp) ((S)->contStateDisabledPtr = (cdp))
+#define rtsiGetContStateDisabledPtr(S)      *((S)->contStateDisabledPtr)
 
 #define rtsiSetNumContStatesPtr(S, cp) ((S)->numContStatesPtr = (cp))
-#define rtsiGetNumContStates(S) *((S)->numContStatesPtr)
+#define rtsiGetNumContStates(S)        *((S)->numContStatesPtr)
 
 #define rtsiSetNumPeriodicContStatesPtr(S, cp) ((S)->numPeriodicContStatesPtr = (cp))
-#define rtsiGetNumPeriodicContStates(S) *((S)->numPeriodicContStatesPtr)
+#define rtsiGetNumPeriodicContStates(S)        *((S)->numPeriodicContStatesPtr)
 
 #define rtsiSetPeriodicContStateIndicesPtr(S, cp) ((S)->periodicContStateIndicesPtr = (cp))
-#define rtsiGetPeriodicContStateIndices(S) *((S)->periodicContStateIndicesPtr)
+#define rtsiGetPeriodicContStateIndices(S)        *((S)->periodicContStateIndicesPtr)
 
 #define rtsiSetPeriodicContStateRangesPtr(S, cp) ((S)->periodicContStateRangesPtr = (cp))
-#define rtsiGetPeriodicContStateRanges(S) *((S)->periodicContStateRangesPtr)
+#define rtsiGetPeriodicContStateRanges(S)        *((S)->periodicContStateRangesPtr)
 
 #define rtsiSetErrorStatusPtr(S, esp) ((S)->errStatusPtr = (esp))
-#define rtsiSetErrorStatus(S, es) (*((S)->errStatusPtr) = (es))
-#define rtsiGetErrorStatus(S) *((S)->errStatusPtr)
+#define rtsiSetErrorStatus(S, es)     (*((S)->errStatusPtr) = (es))
+#define rtsiGetErrorStatus(S)         *((S)->errStatusPtr)
 
 #define rtsiSetModelMethodsPtr(S, mmp) ((S)->modelMethodsPtr = (mmp))
-#define rtsiGetModelMethodsPtr(S) (S)->modelMethodsPtr
+#define rtsiGetModelMethodsPtr(S)      (S)->modelMethodsPtr
 
 #define rtsiSetSolverComputingJacobian(S, val) ((S)->isComputingJacobian = (val))
-#define rtsiIsSolverComputingJacobian(S) (S)->isComputingJacobian
+#define rtsiIsSolverComputingJacobian(S)       (S)->isComputingJacobian
 
 #define rtsiSetSolverOutputComputed(S, val) ((S)->isOutputMethodComputed = (val))
-#define rtsiIsSolverOutputComputed(S) (S)->isOutputMethodComputed
+#define rtsiIsSolverOutputComputed(S)       (S)->isOutputMethodComputed
 
 #define rtsiSetIsMinorTimeStepWithModeChange(S, sn) ((S)->isMinorTimeStepWithModeChange = (sn))
-#define rtsiGetIsMinorTimeStepWithModeChange(S) (S)->isMinorTimeStepWithModeChange
+#define rtsiGetIsMinorTimeStepWithModeChange(S)     (S)->isMinorTimeStepWithModeChange
 
-#define rtsiIsModeUpdateTimeStep(S) \
-    (rtsiGetSimTimeStep(S) == MAJOR_TIME_STEP || rtsiGetIsMinorTimeStepWithModeChange(S))
+#define rtsiSetIsContModeFrozen(S, val) ((S)->isContModeFrozen = (val))
+#define rtsiGetIsContModeFrozen(S)      ((S)->isContModeFrozen)
 
-#define rtsiSetSolverZcSignalPtr(S, zcp) ((S)->zcSignalPtr = (zcp))
+#define rtsiIsModeUpdateTimeStep(S)                                                           \
+    ((rtsiGetSimTimeStep(S) == MAJOR_TIME_STEP || rtsiGetIsMinorTimeStepWithModeChange(S)) && \
+     (!rtsiGetIsContModeFrozen(S)))
+
+#define rtsiSetSolverZcSignalPtr(S, zcp)    ((S)->zcSignalPtr = (zcp))
 #define rtsiSetSolverZcSignalVector(S, zcp) (*((S)->zcSignalPtr) = (zcp))
-#define rtsiGetSolverZcSignalVector(S) *((S)->zcSignalPtr)
-
+#define rtsiGetSolverZcSignalVector(S)      *((S)->zcSignalPtr)
 
 #define rtsiSetSolverZcEventsVector(S, ptr) ((S)->zcEventsVector = (ptr))
-#define rtsiGetSolverZcEventsVector(S) ((S)->zcEventsVector)
+#define rtsiGetSolverZcEventsVector(S)      ((S)->zcEventsVector)
 
 #define rtsiSetSolverZcSignalAttrib(S, ptr) ((S)->zcSignalAttrib = (ptr))
-#define rtsiGetSolverZcSignalAttrib(S) ((S)->zcSignalAttrib)
+#define rtsiGetSolverZcSignalAttrib(S)      ((S)->zcSignalAttrib)
 
 #define rtsiSetSolverZcSignalVectorLength(S, n) ((S)->zcSignalVectorLength = (n))
-#define rtsiGetSolverZcSignalVectorLength(S) ((S)->zcSignalVectorLength)
+#define rtsiGetSolverZcSignalVectorLength(S)    ((S)->zcSignalVectorLength)
 
 #define rtsiSetSolverFoundContZcEvents(S, val) ((S)->foundContZcEvents = (val))
-#define rtsiGetSolverFoundContZcEvents(S) ((S)->foundContZcEvents)
+#define rtsiGetSolverFoundContZcEvents(S)      ((S)->foundContZcEvents)
+
 
 #endif /* !NO_FLOATS */
 

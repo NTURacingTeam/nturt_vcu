@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'sensor_fusion'.
  *
- * Model version                  : 1.6
- * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
- * C/C++ source code generated on : Fri Aug 22 15:57:37 2025
+ * Model version                  : 5.0
+ * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
+ * C/C++ source code generated on : Mon Aug 25 15:26:30 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -19,18 +19,18 @@
  * Validation result: Not run
  */
 
-#ifndef RTW_HEADER_sensor_fusion_h_
-#define RTW_HEADER_sensor_fusion_h_
+#ifndef sensor_fusion_h_
+#define sensor_fusion_h_
 #ifndef sensor_fusion_COMMON_INCLUDES_
 #define sensor_fusion_COMMON_INCLUDES_
 #include <stdbool.h>
 #include <stdint.h>
 #include "rtw_continuous.h"
 #include "rtw_solver.h"
+#include "math.h"
 #endif                                 /* sensor_fusion_COMMON_INCLUDES_ */
 
 #include "simulink_import.h"
-#include "rt_defines.h"
 
 /* Macros for accessing real-time model data structure */
 #ifndef rtmGetErrorStatus
@@ -84,7 +84,7 @@ extern void sensor_fusion_step(sensor_fusion_RT_MODEL *const rtM,
  * '<Root>' : 'sensor_fusion'
  * '<S1>'   : 'sensor_fusion/Angular Velocity Conversion'
  */
-#endif                                 /* RTW_HEADER_sensor_fusion_h_ */
+#endif                                 /* sensor_fusion_h_ */
 
 /*
  * File trailer for generated code.

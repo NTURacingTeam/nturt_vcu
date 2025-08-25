@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 1.4
- * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
- * C/C++ source code generated on : Fri Aug 22 19:15:03 2025
+ * Model version                  : 1.6
+ * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
+ * C/C++ source code generated on : Mon Aug 25 16:01:00 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -19,17 +19,16 @@
  * Validation result: Not run
  */
 
-#ifndef RTW_HEADER_vehicle_control_h_
-#define RTW_HEADER_vehicle_control_h_
+#ifndef vehicle_control_h_
+#define vehicle_control_h_
 #ifndef vehicle_control_COMMON_INCLUDES_
 #define vehicle_control_COMMON_INCLUDES_
 #include <stdbool.h>
 #include <stdint.h>
 #include "rtw_continuous.h"
 #include "rtw_solver.h"
-#endif                                 /* vehicle_control_COMMON_INCLUDES_ */
-
-#include "rt_defines.h"
+#include "math.h"
+#endif                               /* vehicle_control_COMMON_INCLUDES_ */
 
 /* Includes for objects with custom storage classes */
 #include "simulink_import.h"
@@ -86,7 +85,7 @@ extern void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
  *
  * '<Root>' : 'vehicle_control'
  */
-#endif                                 /* RTW_HEADER_vehicle_control_h_ */
+#endif                                 /* vehicle_control_h_ */
 
 /*
  * File trailer for generated code.

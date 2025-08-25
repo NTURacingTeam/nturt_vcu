@@ -18,7 +18,9 @@
 #include <nturt/err/err.h>
 
 // project includes
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
 #include "simulink/sensor_fusion.h"
+#endif
 #include "simulink/vehicle_control.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/msg/msg.h"
@@ -72,7 +74,9 @@ struct ctrl_ctx {
 
   struct msg_ctrl_cmd cmd_last;
 
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
   sensor_fusion_RT_MODEL sensor_fusion_model;
+#endif
 
   vehicle_control_RT_MODEL vehicle_control_model;
 };
@@ -115,7 +119,9 @@ CTRL_PARAM_DEFINE(CTRL_PARAM_LIST);
 
 /* static function definition ------------------------------------------------*/
 static void ctrl_init(struct ctrl_ctx *ctx) {
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
   sensor_fusion_initialize(&ctx->sensor_fusion_model);
+#endif
 
   // send torque command once to start publishing
   struct msg_ctrl_torque msg = {0};
@@ -165,11 +171,11 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
     if (ctx->state != CTRL_STATE_IDLE) {
       vehicle_control_ExtU input = {
+          .vehicle_state = ctx->vehicle_state,
           .cockpit = ctx->cockpit,
           .wheel = ctx->wheel,
           .imu = ctx->imu,
           .gps = ctx->gps,
-          .vehicle_state = ctx->vehicle_state,
       };
 
       if (ctx->state == CTRL_STATE_ERROR) {

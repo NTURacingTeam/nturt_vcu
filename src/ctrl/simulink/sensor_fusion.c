@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'sensor_fusion'.
  *
- * Model version                  : 1.6
- * Simulink Coder version         : 9.9 (R2023a) 19-Nov-2022
- * C/C++ source code generated on : Fri Aug 22 15:57:37 2025
+ * Model version                  : 5.0
+ * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
+ * C/C++ source code generated on : Mon Aug 25 15:26:30 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -20,6 +20,36 @@
  */
 
 #include "sensor_fusion.h"
+
+/*===========*
+ * Constants *
+ *===========*/
+#define RT_PI                          3.14159265358979323846
+#define RT_PIF                         3.1415927F
+#define RT_LN_10                       2.30258509299404568402
+#define RT_LN_10F                      2.3025851F
+#define RT_LOG10E                      0.43429448190325182765
+#define RT_LOG10EF                     0.43429449F
+#define RT_E                           2.7182818284590452354
+#define RT_EF                          2.7182817F
+
+/*
+ * UNUSED_PARAMETER(x)
+ *   Used to specify that a function parameter (argument) is required but not
+ *   accessed by the function body.
+ */
+#ifndef UNUSED_PARAMETER
+#if defined(__LCC__)
+#define UNUSED_PARAMETER(x)                                      /* do nothing */
+#else
+
+/*
+ * This is the semi-ANSI standard way of indicating that an
+ * unused function parameter is required.
+ */
+#define UNUSED_PARAMETER(x)            (void) (x)
+#endif
+#endif
 
 /* Model step function */
 void sensor_fusion_step(sensor_fusion_RT_MODEL *const rtM, sensor_fusion_ExtU

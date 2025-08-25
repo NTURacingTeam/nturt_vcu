@@ -74,15 +74,15 @@ typedef struct _RTWRTModelMethodsInfo_tag {
 } RTWRTModelMethodsInfo;
 
 #define rtmiSetRTModelPtr(M, rtmp) ((M).rtModelPtr = (rtmp))
-#define rtmiGetRTModelPtr(M) (M).rtModelPtr
+#define rtmiGetRTModelPtr(M)       (M).rtModelPtr
 
 #define rtmiSetInitSizesFcn(M, fp) ((M).rtmInitSizesFcn = ((rtMdlInitializeSizesFcn)(fp)))
 #define rtmiSetInitSampTimesFcn(M, fp) \
     ((M).rtmInitSampTimesFcn = ((rtMdlInitializeSampleTimesFcn)(fp)))
-#define rtmiSetStartFcn(M, fp) ((M).rtmStartFcn = ((rtMdlStartFcn)(fp)))
-#define rtmiSetOutputsFcn(M, fp) ((M).rtmOutputsFcn = ((rtMdlOutputsFcn)(fp)))
-#define rtmiSetUpdateFcn(M, fp) ((M).rtmUpdateFcn = ((rtMdlUpdateFcn)(fp)))
-#define rtmiSetDervisFcn(M, fp) ((M).rtmDervisFcn = ((rtMdlDerivativesFcn)(fp)))
+#define rtmiSetStartFcn(M, fp)      ((M).rtmStartFcn = ((rtMdlStartFcn)(fp)))
+#define rtmiSetOutputsFcn(M, fp)    ((M).rtmOutputsFcn = ((rtMdlOutputsFcn)(fp)))
+#define rtmiSetUpdateFcn(M, fp)     ((M).rtmUpdateFcn = ((rtMdlUpdateFcn)(fp)))
+#define rtmiSetDervisFcn(M, fp)     ((M).rtmDervisFcn = ((rtMdlDerivativesFcn)(fp)))
 #define rtmiSetProjectionFcn(M, fp) ((M).rtmProjectionFcn = ((rtMdlProjectionFcn)(fp)))
 #define rtmiSetMassMatrixFcn(M, fp) ((M).rtmMassMatrixFcn = ((rtMdlMassMatrixFcn)(fp)))
 #define rtmiSetForcingFunctionFcn(M, fp) \
@@ -92,16 +92,16 @@ typedef struct _RTWRTModelMethodsInfo_tag {
 #define rtmiSetDiscreteEventsFcn(M, fp) ((M).rtmDiscreteEventsFcn = ((rtMdlDiscreteEventsFcn)(fp)))
 #endif
 
-#define rtmiInitializeSizes(M) ((*(M).rtmInitSizesFcn)((M).rtModelPtr))
+#define rtmiInitializeSizes(M)       ((*(M).rtmInitSizesFcn)((M).rtModelPtr))
 #define rtmiInitializeSampleTimes(M) ((*(M).rtmInitSampTimesFcn)((M).rtModelPtr))
-#define rtmiStart(M) ((*(M).rtmStartFcn)((M).rtModelPtr))
-#define rtmiOutputs(M, tid) ((*(M).rtmOutputsFcn)((M).rtModelPtr, tid))
-#define rtmiUpdate(M, tid) ((*(M).rtmUpdateFcn)((M).rtModelPtr, tid))
-#define rtmiDerivatives(M) ((*(M).rtmDervisFcn)((M).rtModelPtr))
-#define rtmiProjection(M) ((*(M).rtmProjectionFcn)((M).rtModelPtr))
-#define rtmiMassMatrix(M) ((*(M).rtmMassMatrixFcn)((M).rtModelPtr))
-#define rtmiForcingFunction(M) ((*(M).rtmForcingFunctionFcn)((M).rtModelPtr))
-#define rtmiTerminate(M) ((*(M).rtmTerminateFcn)((M).rtModelPtr))
+#define rtmiStart(M)                 ((*(M).rtmStartFcn)((M).rtModelPtr))
+#define rtmiOutputs(M, tid)          ((*(M).rtmOutputsFcn)((M).rtModelPtr, tid))
+#define rtmiUpdate(M, tid)           ((*(M).rtmUpdateFcn)((M).rtModelPtr, tid))
+#define rtmiDerivatives(M)           ((*(M).rtmDervisFcn)((M).rtModelPtr))
+#define rtmiProjection(M)            ((*(M).rtmProjectionFcn)((M).rtModelPtr))
+#define rtmiMassMatrix(M)            ((*(M).rtmMassMatrixFcn)((M).rtModelPtr))
+#define rtmiForcingFunction(M)       ((*(M).rtmForcingFunctionFcn)((M).rtModelPtr))
+#define rtmiTerminate(M)             ((*(M).rtmTerminateFcn)((M).rtModelPtr))
 #ifdef RT_MALLOC
 #define rtmiDiscreteEvents(M, x1, x2, x3, x4) \
     ((*(M).rtmDiscreteEventsFcn)((M).rtModelPtr, (x1), (x2), (x3), (x4)))
