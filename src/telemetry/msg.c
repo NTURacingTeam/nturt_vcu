@@ -23,6 +23,7 @@ ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_states_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_word_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_torque_chan, telemetry_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_tc_chan, telemetry_listener, 0);
 
 /* static function definition ------------------------------------------------*/
 static void msg_cb(const struct zbus_channel *chan) {
@@ -55,5 +56,12 @@ static void msg_cb(const struct zbus_channel *chan) {
                    INV_TORQUE_PHY_TO_CAN_L(msg->torque.rl));
     TM_DATA_UPDATE(inv_rr_target_torque,
                    INV_TORQUE_PHY_TO_CAN_R(msg->torque.rr));
+  } else if(chan == &msg_ctrl_tc_chan) {
+    const struct msg_ctrl_tc *msg = zbus_chan_const_msg(chan);
+
+    TM_DATA_UPDATE(slip_ratio_l, (int16_t)(10000.0 * msg->sr_l));
+    TM_DATA_UPDATE(slip_ratio_r, (int16_t)(10000.0 * msg->sr_r));
+    TM_DATA_UPDATE(yaw_rate, (int16_t)(1000.0 * msg->yawrate_real));
+    TM_DATA_UPDATE(yaw_rate_reference, (int16_t)(1000.0 * msg->yawrate_ref));
   }
 }

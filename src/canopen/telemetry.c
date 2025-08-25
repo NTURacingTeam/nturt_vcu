@@ -29,6 +29,14 @@ CANOPEN_TM_TO_TPDO_DEFINE(inv_rr,
     TPDO_DATA(inv_rr_target_torque, 0x2142, 0x0)
 );
 
+CANOPEN_TM_TO_TPDO_DEFINE(vehicle_control,
+    K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
+    TPDO_DATA(slip_ratio_l, 0x20A0, 0x1),
+    TPDO_DATA(slip_ratio_r, 0x20A0, 0x2),
+    TPDO_DATA(yaw_rate, 0x20A0, 0x3),
+    TPDO_DATA(yaw_rate_reference, 0x20A0, 0x4)
+);
+
 #ifndef CONFIG_VCU_SOURCE_COCKPIT_CANOPEN
 
 CANOPEN_TM_TO_TPDO_DEFINE(cockpit,

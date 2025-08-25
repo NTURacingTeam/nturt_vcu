@@ -53,6 +53,8 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2088_button = {0x02, 0x02},
     .x2090_vehicleVelocity_sub0 = 0x03,
     .x2090_vehicleVelocity = {0, 0, 0},
+    .x20A0_vehicleControl_sub0 = 0x04,
+    .x20A0_vehicleControl = {0, 0, 0, 0},
     .x2100_accumulatorStatus = 0x00,
     .x2101_accumulatorVoltage = 0x00000000,
     .x2102_accumulatorCurrent = 0,
@@ -545,7 +547,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1803_TPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x06,
-        .COB_IDUsedByTPDO = 0xC0000480,
+        .COB_IDUsedByTPDO = 0x00000480,
         .transmissionType = 0xFE,
         .inhibitTime = 0x0000,
         .eventTimer = 0x0000,
@@ -601,11 +603,11 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x1A03_TPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x00,
-        .applicationObject1 = 0x00000000,
-        .applicationObject2 = 0x00000000,
-        .applicationObject3 = 0x00000000,
-        .applicationObject4 = 0x00000000,
+        .numberOfMappedApplicationObjectsInPDO = 0x04,
+        .applicationObject1 = 0x20A00110,
+        .applicationObject2 = 0x20A00210,
+        .applicationObject3 = 0x20A00310,
+        .applicationObject4 = 0x20A00410,
         .applicationObject5 = 0x00000000,
         .applicationObject6 = 0x00000000,
         .applicationObject7 = 0x00000000,
@@ -719,6 +721,7 @@ typedef struct {
     OD_obj_record_t o_2082_brake[4];
     OD_obj_array_t o_2088_button;
     OD_obj_array_t o_2090_vehicleVelocity;
+    OD_obj_array_t o_20A0_vehicleControl;
     OD_obj_var_t o_2100_accumulatorStatus;
     OD_obj_var_t o_2101_accumulatorVoltage;
     OD_obj_var_t o_2102_accumulatorCurrent;
@@ -3185,6 +3188,14 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         .dataElementLength = 2,
         .dataElementSizeof = sizeof(int16_t)
     },
+    .o_20A0_vehicleControl = {
+        .dataOrig0 = &OD_RAM.x20A0_vehicleControl_sub0,
+        .dataOrig = &OD_RAM.x20A0_vehicleControl[0],
+        .attribute0 = ODA_SDO_R,
+        .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+        .dataElementLength = 2,
+        .dataElementSizeof = sizeof(int16_t)
+    },
     .o_2100_accumulatorStatus = {
         .dataOrig = &OD_RAM.x2100_accumulatorStatus,
         .attribute = ODA_RPDO,
@@ -3708,6 +3719,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x2082, 0x04, ODT_REC, &ODObjs.o_2082_brake, NULL},
     {0x2088, 0x03, ODT_ARR, &ODObjs.o_2088_button, NULL},
     {0x2090, 0x04, ODT_ARR, &ODObjs.o_2090_vehicleVelocity, NULL},
+    {0x20A0, 0x05, ODT_ARR, &ODObjs.o_20A0_vehicleControl, NULL},
     {0x2100, 0x01, ODT_VAR, &ODObjs.o_2100_accumulatorStatus, NULL},
     {0x2101, 0x01, ODT_VAR, &ODObjs.o_2101_accumulatorVoltage, NULL},
     {0x2102, 0x01, ODT_VAR, &ODObjs.o_2102_accumulatorCurrent, NULL},

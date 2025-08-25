@@ -44,6 +44,11 @@ enum vcu_tm_data_addr {
 
   TM_INV_RR_CTRL_WORD,
   TM_INV_RR_TARGET_TORQUE,
+
+  TM_SLIP_RATIO_L,
+  TM_SLIP_RATIO_R,
+  TM_YAW_RATE,
+  TM_YAW_RATE_REFERENCE,
 };
 
 TM_DATA_DECLARE(steer, int16_t);
@@ -61,6 +66,11 @@ TM_DATA_DECLARE(inv_rl_target_torque, int16_t);
 
 TM_DATA_DECLARE(inv_rr_ctrl_word, uint16_t);
 TM_DATA_DECLARE(inv_rr_target_torque, int16_t);
+
+TM_DATA_DECLARE(slip_ratio_l, int16_t);
+TM_DATA_DECLARE(slip_ratio_r, int16_t);
+TM_DATA_DECLARE(yaw_rate, int16_t);
+TM_DATA_DECLARE(yaw_rate_reference, int16_t);
 
 /**
  * @} // tm_vcu

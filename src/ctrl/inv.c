@@ -58,8 +58,8 @@ ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
 
 ERR_DEFINE(inv_fl, ERR_CODE_INV_FL, ERR_SEV_FATAL, "Inverter FL error");
 ERR_DEFINE(inv_fr, ERR_CODE_INV_FR, ERR_SEV_FATAL, "Inverter FR error");
-ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_FATAL, "Inverter RL error");
-ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_FATAL, "Inverter RR error");
+ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_ERROR, "Inverter RL error");
+ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_ERROR, "Inverter RR error");
 
 ERR_DEFINE(inv_fl_no_power, ERR_CODE_INV_FL_HV_LOW, ERR_SEV_WARN,
            "Inverter FL HV low voltage");

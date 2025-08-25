@@ -192,6 +192,11 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       msg_header_init(&msg->header);
 
       zbus_chan_pub(&msg_ctrl_torque_chan, msg, K_MSEC(5));
+
+      struct msg_ctrl_tc *msg_tc = &output.tc;
+      msg_header_init(&msg_tc->header);
+
+      zbus_chan_pub(&msg_ctrl_tc_chan, msg_tc, K_MSEC(5));
     }
 
     k_mutex_unlock(&ctx->lock);
@@ -208,6 +213,10 @@ static void msg_cb(const struct zbus_channel *chan) {
     g_ctx.imu = *(const struct msg_sensor_imu *)zbus_chan_const_msg(chan);
   } else if (chan == &msg_sensor_gps_chan) {
     g_ctx.gps = *(const struct msg_sensor_gps *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_vehicle_state_chan) {
+    g_ctx.vehicle_state =
+        *(const struct msg_ctrl_vehicle_state *)zbus_chan_const_msg(chan);
+
   } else if (chan == &msg_ctrl_cmd_chan) {
     const struct msg_ctrl_cmd *msg = zbus_chan_const_msg(chan);
 

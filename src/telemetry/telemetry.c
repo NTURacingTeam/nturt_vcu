@@ -21,3 +21,8 @@ TM_DATA_DEFINE(inv_rl_target_torque, int16_t, TM_INV_RL_TARGET_TORQUE);
 
 TM_DATA_DEFINE(inv_rr_ctrl_word, uint16_t, TM_INV_RR_CTRL_WORD);
 TM_DATA_DEFINE(inv_rr_target_torque, int16_t, TM_INV_RR_TARGET_TORQUE);
+
+TM_DATA_DEFINE(slip_ratio_l, int16_t, TM_SLIP_RATIO_L);
+TM_DATA_DEFINE(slip_ratio_r, int16_t, TM_SLIP_RATIO_R);
+TM_DATA_DEFINE(yaw_rate, int16_t, TM_YAW_RATE);
+TM_DATA_DEFINE(yaw_rate_reference, int16_t, TM_YAW_RATE_REFERENCE);

@@ -33,8 +33,11 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data);
 
 /* static variable -----------------------------------------------------------*/
 const struct zbus_channel *logged_chans[] = {
-    &msg_sensor_cockpit_chan,     &msg_sensor_wheel_chan, &msg_sensor_imu_chan,
-    &msg_ctrl_vehicle_state_chan, &msg_ctrl_torque_chan,  &msg_states_chan,
+    &msg_sensor_cockpit_chan, &msg_sensor_imu_chan,
+    &msg_sensor_wheel_chan,   &msg_ctrl_vehicle_state_chan,
+    &msg_ctrl_tc_chan,        &msg_ctrl_torque_chan,
+    &msg_ctrl_word_chan,      &msg_states_chan,
+    &msg_ts_inv_chan,         &msg_ts_acc_chan,
 };
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, NULL);

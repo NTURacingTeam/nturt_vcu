@@ -23,8 +23,9 @@
  */
 
 /* macro ---------------------------------------------------------------------*/
-#define MSG_CTRL_LIST \
-  msg_ctrl_vehicle_state, msg_ctrl_word, msg_ctrl_torque, msg_ctrl_cmd
+#define MSG_CTRL_LIST                                                  \
+  msg_ctrl_vehicle_state, msg_ctrl_tc, msg_ctrl_word, msg_ctrl_torque, \
+      msg_ctrl_cmd
 
 /**
  * @defgroup msg_if_pri_ctrl Control Message Printing
@@ -49,6 +50,15 @@
 /// @brief Insert @ref msg_ctrl_word printf format string.
 #define PRImsg_ctrl_word \
   PRImsg_header "\n\r\tcontrol word: %" PRImsg_4wheel_flags
+
+#define PRImsg_ctrl_tc                                                        \
+  PRImsg_header                                                               \
+      "\n\r\tsr_l: %f, sr_r: %f, sa: %f\n\r\tyawrate_real: %f, yawrate_ref: " \
+      "%f"
+
+#define PRImsg_ctrl_tc_arg(data)                                         \
+  PRImsg_header_arg((data).header), (data).sr_l, (data).sr_r, (data).sa, \
+      (data).yawrate_real, (data).yawrate_ref
 
 /**
  * @brief Insert @ref msg_ctrl_word arguments to printf format.
@@ -112,6 +122,17 @@
 #define CSV_PRImsg_ctrl_vehicle_state_arg(data) \
   CSV_PRImsg_header_arg((data).header), CSV_PRImsg_2d_data_arg((data).velocity)
 
+#define CSV_PRImsg_ctrl_tc_header \
+  CSV_PRImsg_header_header ",sr_l,sr_r,sa,yawrate_real,yawrate_ref"
+
+/// @brief Insert @ref msg_ctrl_tc CSV format string.
+#define CSV_PRImsg_ctrl_tc CSV_PRImsg_header ",%f,%f,%f,%f,%f"
+
+/// @brief Insert @ref msg_ctrl_tc arguments to CSV print format.
+#define CSV_PRImsg_ctrl_tc_arg(data)                                         \
+  CSV_PRImsg_header_arg((data).header), (data).sr_l, (data).sr_r, (data).sa, \
+      (data).yawrate_real, (data).yawrate_ref
+
 /// @brief CSV header for @ref msg_ctrl_word.
 #define CSV_PRImsg_ctrl_word_header \
   CSV_PRImsg_header_header "," CSV_PRImsg_4wheel_flags_header(ctrl)
@@ -169,6 +190,18 @@ struct msg_ctrl_vehicle_state {
 
   /** Vehicle velocity. Unit: m/s */
   union msg_2d_data velocity;
+};
+
+/// @brief Traction control message.
+struct msg_ctrl_tc {
+  /** Message header. */
+  struct msg_header header;
+
+  double sr_l;
+  double sr_r;
+  double sa;
+  double yawrate_real;
+  double yawrate_ref;
 };
 
 /// @brief Inverter control word message.

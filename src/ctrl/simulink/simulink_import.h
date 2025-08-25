@@ -27,6 +27,7 @@ typedef struct msg_sensor_gps msg_sensor_gps;
 // ctrl
 typedef struct msg_ctrl_vehicle_state msg_ctrl_vehicle_state;
 typedef struct msg_ctrl_torque msg_ctrl_torque;
+typedef struct msg_ctrl_tc msg_ctrl_tc;
 
 /* exported variable ---------------------------------------------------------*/
 CTRL_PARAM_EXTERN(CTRL_PARAM_LIST);
