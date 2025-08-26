@@ -78,6 +78,16 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_cmd,
     )
 );
 
+#define DIV_10000(x) (0.0001 * (x))
+
+CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_tc_in,
+    AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
+    OD_TO_MSG_ENTRY(0x20A0,
+        OD_TO_MSG_DATA(0x5, int16_t, DIV_10000, AGG_MEMBER(sr_l)),
+        OD_TO_MSG_DATA(0x6, int16_t, DIV_10000, AGG_MEMBER(sr_r))
+    )
+);
+
 #ifdef CONFIG_VCU_SOURCE_COCKPIT_CANOPEN
 
 CANOPEN_OD_TO_MSG_DEFINE(msg_sensor_cockpit,

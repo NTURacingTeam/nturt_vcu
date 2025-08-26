@@ -71,6 +71,7 @@ struct ctrl_ctx {
   struct msg_sensor_imu imu;
   struct msg_sensor_gps gps;
   struct msg_ctrl_vehicle_state vehicle_state;
+  struct msg_ctrl_tc_in tc_in;
 
   struct msg_ctrl_cmd cmd_last;
 
@@ -106,6 +107,7 @@ ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_sensor_imu_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_sensor_gps_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_vehicle_state_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_tc_in_chan, ctrl_listener, 0);
 
 ZBUS_CHAN_ADD_OBS(msg_ctrl_cmd_chan, ctrl_listener, 0);
 
@@ -171,6 +173,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
     if (ctx->state != CTRL_STATE_IDLE) {
       vehicle_control_ExtU input = {
+          .tc_in = ctx->tc_in,
           .vehicle_state = ctx->vehicle_state,
           .cockpit = ctx->cockpit,
           .wheel = ctx->wheel,
@@ -216,6 +219,8 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_ctrl_vehicle_state_chan) {
     g_ctx.vehicle_state =
         *(const struct msg_ctrl_vehicle_state *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_tc_in_chan) {
+    g_ctx.tc_in = *(const struct msg_ctrl_tc_in *)zbus_chan_const_msg(chan);
 
   } else if (chan == &msg_ctrl_cmd_chan) {
     const struct msg_ctrl_cmd *msg = zbus_chan_const_msg(chan);

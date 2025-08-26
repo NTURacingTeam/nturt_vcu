@@ -23,9 +23,9 @@
  */
 
 /* macro ---------------------------------------------------------------------*/
-#define MSG_CTRL_LIST                                                  \
-  msg_ctrl_vehicle_state, msg_ctrl_tc, msg_ctrl_word, msg_ctrl_torque, \
-      msg_ctrl_cmd
+#define MSG_CTRL_LIST                                                 \
+  msg_ctrl_vehicle_state, msg_ctrl_tc, msg_ctrl_tc_in, msg_ctrl_word, \
+      msg_ctrl_torque, msg_ctrl_cmd
 
 /**
  * @defgroup msg_if_pri_ctrl Control Message Printing
@@ -59,6 +59,11 @@
 #define PRImsg_ctrl_tc_arg(data)                                         \
   PRImsg_header_arg((data).header), (data).sr_l, (data).sr_r, (data).sa, \
       (data).yawrate_real, (data).yawrate_ref
+
+#define PRImsg_ctrl_tc_in PRImsg_header "\n\r\tsr_l: %f, sr_r: %f"
+
+#define PRImsg_ctrl_tc_in_arg(data) \
+  PRImsg_header_arg((data).header), (data).sr_l, (data).sr_r
 
 /**
  * @brief Insert @ref msg_ctrl_word arguments to printf format.
@@ -133,6 +138,15 @@
   CSV_PRImsg_header_arg((data).header), (data).sr_l, (data).sr_r, (data).sa, \
       (data).yawrate_real, (data).yawrate_ref
 
+#define CSV_PRImsg_ctrl_tc_in_header CSV_PRImsg_header_header ",sr_l,sr_r"
+
+/// @brief Insert @ref msg_ctrl_tc CSV format string.
+#define CSV_PRImsg_ctrl_tc_in CSV_PRImsg_header ",%f,%f"
+
+/// @brief Insert @ref msg_ctrl_tc arguments to CSV print format.
+#define CSV_PRImsg_ctrl_tc_in_arg(data) \
+  CSV_PRImsg_header_arg((data).header), (data).sr_l, (data).sr_r
+
 /// @brief CSV header for @ref msg_ctrl_word.
 #define CSV_PRImsg_ctrl_word_header \
   CSV_PRImsg_header_header "," CSV_PRImsg_4wheel_flags_header(ctrl)
@@ -202,6 +216,14 @@ struct msg_ctrl_tc {
   double sa;
   double yawrate_real;
   double yawrate_ref;
+};
+
+struct msg_ctrl_tc_in {
+  /** Message header. */
+  struct msg_header header;
+
+  double sr_l;
+  double sr_r;
 };
 
 /// @brief Inverter control word message.
