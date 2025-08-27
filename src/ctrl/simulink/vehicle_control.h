@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.0
+ * Model version                  : 5.4
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Mon Aug 25 22:13:10 2025
+ * C/C++ source code generated on : Wed Aug 27 16:14:38 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -42,8 +42,28 @@
 #define rtmSetErrorStatus(rtm, val)    ((rtm)->errorStatus = (val))
 #endif
 
+#ifndef rtmGetT
+#define rtmGetT(rtm)                   (rtmGetTPtr((rtm))[0])
+#endif
+
+#ifndef rtmGetTPtr
+#define rtmGetTPtr(rtm)                ((rtm)->Timing.t)
+#endif
+
 /* Forward declaration for rtModel */
 typedef struct vehicle_control_tag_RTM vehicle_control_RT_MODEL;
+
+/* Block signals and states (default storage) for system '<Root>' */
+typedef struct {
+  double RateLimiter1;                 /* '<S1>/Rate Limiter1' */
+  double RateLimiter;                  /* '<S1>/Rate Limiter' */
+  double PrevY;                        /* '<S1>/Rate Limiter1' */
+  double LastMajorTime;                /* '<S1>/Rate Limiter1' */
+  double PrevY_l;                      /* '<S1>/Rate Limiter' */
+  double LastMajorTime_n;              /* '<S1>/Rate Limiter' */
+  bool PrevLimited;                    /* '<S1>/Rate Limiter1' */
+  bool PrevLimited_m;                  /* '<S1>/Rate Limiter' */
+} vehicle_control_DW;
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
@@ -61,13 +81,38 @@ typedef struct {
 
 /* Real-time Model Data Structure */
 struct vehicle_control_tag_RTM {
-  const char * volatile errorStatus;
+  const char *errorStatus;
+  RTWSolverInfo solverInfo;
+  vehicle_control_DW *dwork;
+
+  /*
+   * Timing:
+   * The following substructure contains information regarding
+   * the timing information for the model.
+   */
+  struct {
+    uint32_t clockTick0;
+    double stepSize0;
+    uint32_t clockTick1;
+    SimTimeStep simTimeStep;
+    double *t;
+    double tArray[2];
+  } Timing;
 };
 
 /* Model entry point functions */
 extern void vehicle_control_initialize(vehicle_control_RT_MODEL *const rtM);
 extern void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
   vehicle_control_ExtU *rtU, vehicle_control_ExtY *rtY);
+
+/*-
+ * These blocks were eliminated from the model due to optimizations:
+ *
+ * Block '<S4>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S4>/Data Type Propagation' : Unused code path elimination
+ * Block '<S5>/Data Type Duplicate' : Unused code path elimination
+ * Block '<S5>/Data Type Propagation' : Unused code path elimination
+ */
 
 /*-
  * The generated code includes comments that allow you to trace directly
@@ -84,6 +129,11 @@ extern void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
  * Here is the system hierarchy for this model
  *
  * '<Root>' : 'vehicle_control'
+ * '<S1>'   : 'vehicle_control/Subsystem1'
+ * '<S2>'   : 'vehicle_control/Subsystem1/MATLAB Function1'
+ * '<S3>'   : 'vehicle_control/Subsystem1/MATLAB Function2'
+ * '<S4>'   : 'vehicle_control/Subsystem1/Saturation Dynamic'
+ * '<S5>'   : 'vehicle_control/Subsystem1/Saturation Dynamic1'
  */
 #endif                                 /* vehicle_control_h_ */
 
