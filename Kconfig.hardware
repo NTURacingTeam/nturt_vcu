@@ -67,8 +67,15 @@ config VCU_HAS_POW_5V_RPI_CURR
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_5V_RPI_CURR))
 	default y
 
+DT_CHOSEN_NTURT_POW_LOW := nturt,pow-low
+
+config VCU_HAS_POW_LOW
+	bool
+	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_LOW))
+	default y
+
 config VCU_HAS_POW
 	bool
 	depends on VCU_HAS_POW_IN_VOLT || VCU_HAS_POW_5V_CURR || \
-		VCU_HAS_POW_5V_RPI_CURR
+		VCU_HAS_POW_5V_RPI_CURR || VCU_HAS_POW_LOW
 	default y
