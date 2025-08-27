@@ -59,8 +59,8 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if(chan == &msg_ctrl_tc_chan) {
     const struct msg_ctrl_tc *msg = zbus_chan_const_msg(chan);
 
-    TM_DATA_UPDATE(slip_ratio_l, (int16_t)(10000.0 * msg->sr_l));
-    TM_DATA_UPDATE(slip_ratio_r, (int16_t)(10000.0 * msg->sr_r));
+    TM_DATA_UPDATE(slip_ratio_l, (int16_t)(1000.0 * msg->sr_l));
+    TM_DATA_UPDATE(slip_ratio_r, (int16_t)(1000.0 * msg->sr_r));
     TM_DATA_UPDATE(yaw_rate, (int16_t)(1000.0 * msg->yawrate_real));
     TM_DATA_UPDATE(yaw_rate_reference, (int16_t)(1000.0 * msg->yawrate_ref));
   }

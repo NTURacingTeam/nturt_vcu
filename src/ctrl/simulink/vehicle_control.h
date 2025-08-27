@@ -7,15 +7,15 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.17
+ * Model version                  : 5.27
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Tue Aug 26 20:10:05 2025
+ * C/C++ source code generated on : Wed Aug 27 15:21:52 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
  * Code generation objectives:
- *    1. Execution efficiency
- *    2. RAM efficiency
+ *    1. Traceability
+ *    2. Debugging
  * Validation result: Not run
  */
 
@@ -80,9 +80,7 @@ typedef struct {
   double target_SR;                    /* '<S21>/target_SR' */
   double sr_l;
   double Saturation;                   /* '<S21>/Saturation' */
-  double Constant1;                    /* '<S3>/Constant1' */
   double RateLimiter1;                 /* '<S3>/Rate Limiter1' */
-  double Constant2;                    /* '<S3>/Constant2' */
   double Memory_j;                     /* '<S22>/Memory' */
   double Memory1_p;                    /* '<S22>/Memory1' */
   double target_SR_n;                  /* '<S22>/target_SR' */
@@ -238,13 +236,13 @@ typedef struct {
    *   '<S4>/2-D Lookup Table'
    *   '<S4>/2-D Lookup Table1'
    */
-  uint32_t pooled16[2];
+  uint32_t pooled17[2];
 } vehicle_control_ConstP;
 
 /* External inputs (root inport signals with default storage) */
 typedef struct {
-  msg_ctrl_vehicle_state vehicle_state;/* '<Root>/vehicle_state' */
   msg_ctrl_tc_in tc_in;                /* '<Root>/tc_in' */
+  msg_ctrl_vehicle_state vehicle_state;/* '<Root>/vehicle_state' */
   msg_sensor_cockpit cockpit;          /* '<Root>/cockpit' */
   msg_sensor_wheel wheel;              /* '<Root>/wheel' */
   msg_sensor_imu imu;                  /* '<Root>/imu' */
@@ -355,8 +353,8 @@ extern void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
  * '<S2>'   : 'vehicle_control/Angular Velocity Conversion1'
  * '<S3>'   : 'vehicle_control/Subsystem1'
  * '<S4>'   : 'vehicle_control/Vehicle Control(TV&TC)'
- * '<S5>'   : 'vehicle_control/Subsystem1/MATLAB Function'
- * '<S6>'   : 'vehicle_control/Subsystem1/MATLAB Function1'
+ * '<S5>'   : 'vehicle_control/Subsystem1/MATLAB Function1'
+ * '<S6>'   : 'vehicle_control/Subsystem1/MATLAB Function2'
  * '<S7>'   : 'vehicle_control/Subsystem1/Saturation Dynamic'
  * '<S8>'   : 'vehicle_control/Subsystem1/Saturation Dynamic1'
  * '<S9>'   : 'vehicle_control/Vehicle Control(TV&TC)/Angle Conversion1'

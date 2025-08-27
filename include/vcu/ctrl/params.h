@@ -78,12 +78,14 @@
 #define CTRL_PARAM_EXTERN(...) FOR_EACH(_CTRL_PARAM_EXTERN, (;), __VA_ARGS__)
 
 /// @brief List of control parameters.
-#define CTRL_PARAM_LIST                                                      \
-  CTRL_PARAM(torq_limit_fl, double, PARAM_TORQ_LIMIT),                       \
-      CTRL_PARAM(torq_limit_fr, double, PARAM_TORQ_LIMIT),                   \
-      CTRL_PARAM(torq_limit_rl, double, PARAM_TORQ_LIMIT),                   \
-      CTRL_PARAM(torq_limit_rr, double, PARAM_TORQ_LIMIT),                   \
-      CTRL_PARAM(torq_slew, double, PARAM_TORQ_SLEW),                        \
+#define CTRL_PARAM_LIST                                                    \
+  CTRL_PARAM(torq_limit_fl, double, PARAM_TORQ_LIMIT),                     \
+      CTRL_PARAM(torq_limit_fr, double, PARAM_TORQ_LIMIT),                 \
+      CTRL_PARAM(torq_limit_rl, double, PARAM_TORQ_LIMIT),                 \
+      CTRL_PARAM(torq_limit_rr, double, PARAM_TORQ_LIMIT),                 \
+      CTRL_PARAM(torq_slew, double, PARAM_TORQ_SLEW),                      \
+      CTRL_PARAM(torq_derate_begin, double, 3000.0),                       \
+      CTRL_PARAM(torq_derate_end, double, 5000.0),                         \
       CTRL_PARAM(fb_ratio, double, 0.5), CTRL_PARAM(tv_gain, double, 2.0), \
       CTRL_PARAM(target_sr, double, 0.1)
 
