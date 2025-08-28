@@ -18,12 +18,39 @@
 #include <nturt/err/err.h>
 
 // project includes
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
 #include "simulink/sensor_fusion.h"
+#endif
 #include "simulink/vehicle_control.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/msg/msg.h"
 
 LOG_MODULE_REGISTER(vcu_ctrl);
+
+/* macro ---------------------------------------------------------------------*/
+#define _CTRL_PARAM_DEFINE(param)                                              \
+  volatile _CTRL_PARAM_TYPE(param) _CTRL_PARAM_NAME(param) =                   \
+      _CTRL_PARAM_DEFAULT(param);                                              \
+                                                                               \
+  void _CTRL_PARAM_SET(_CTRL_PARAM_NAME(param))(_CTRL_PARAM_TYPE(param) val) { \
+    k_mutex_lock(&g_ctx.lock, K_FOREVER);                                      \
+                                                                               \
+    _CTRL_PARAM_NAME(param) = val;                                             \
+                                                                               \
+    k_mutex_unlock(&g_ctx.lock);                                               \
+  }                                                                            \
+                                                                               \
+  _CTRL_PARAM_TYPE(param) _CTRL_PARAM_GET(_CTRL_PARAM_NAME(param))() {         \
+    return _CTRL_PARAM_NAME(param);                                            \
+  }
+
+/**
+ * @brief Define control parameters and their getter/setter functions.
+ *
+ * @param[in] ... Control parameters to define, must be specified by
+ * @ref CTRL_PARAM.
+ */
+#define CTRL_PARAM_DEFINE(list) FOR_EACH(_CTRL_PARAM_DEFINE, (), list)
 
 /* type ----------------------------------------------------------------------*/
 enum ctrl_state {
@@ -43,9 +70,13 @@ struct ctrl_ctx {
   struct msg_sensor_wheel wheel;
   struct msg_sensor_imu imu;
   struct msg_sensor_gps gps;
+  struct msg_ctrl_vehicle_state vehicle_state;
+
   struct msg_ctrl_cmd cmd_last;
 
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
   sensor_fusion_RT_MODEL sensor_fusion_model;
+#endif
 
   vehicle_control_RT_MODEL vehicle_control_model;
 };
@@ -88,7 +119,9 @@ CTRL_PARAM_DEFINE(CTRL_PARAM_LIST);
 
 /* static function definition ------------------------------------------------*/
 static void ctrl_init(struct ctrl_ctx *ctx) {
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
   sensor_fusion_initialize(&ctx->sensor_fusion_model);
+#endif
 
   // send torque command once to start publishing
   struct msg_ctrl_torque msg = {0};
@@ -131,48 +164,34 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
     struct msg_ctrl_vehicle_state *msg = &output.vehicle_state;
     msg_header_init(&msg->header);
+
     zbus_chan_pub(&msg_ctrl_vehicle_state_chan, msg, K_MSEC(5));
 
 #endif  // CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
 
-    switch (ctx->state) {
-      case CTRL_STATE_ERROR:
-      case CTRL_STATE_OK: {
-        vehicle_control_ExtU input = {
-            .cockpit = ctx->cockpit,
-            .wheel = ctx->wheel,
-            .imu = ctx->imu,
-            .gps = ctx->gps,
-        };
+    if (ctx->state != CTRL_STATE_IDLE) {
+      vehicle_control_ExtU input = {
+          .vehicle_state = ctx->vehicle_state,
+          .cockpit = ctx->cockpit,
+          .wheel = ctx->wheel,
+          .imu = ctx->imu,
+          .gps = ctx->gps,
+      };
 
-        if (ctx->state == CTRL_STATE_ERROR) {
-          input.cockpit.accel = 0.0F;
-        }
+      if (ctx->state == CTRL_STATE_ERROR) {
+        input.cockpit.accel = 0.0F;
+      }
 
-        vehicle_control_ExtY output;
-        vehicle_control_step(&ctx->vehicle_control_model, &input, &output);
+      vehicle_control_ExtY output;
+      vehicle_control_step(&ctx->vehicle_control_model, &input, &output);
 
-        struct msg_ctrl_torque *msg = &output.torq;
-        float limit = ctx->state == CTRL_STATE_ERROR ? 0.0F : INV_RATED_TORQUE;
-        for (int i = 0; i < 4; i++) {
-          float factor = 1.0F;
-          float speed = MOTOR_REDUCTION_RATIO * ctx->wheel.speed.values[i];
-          if (speed > 8000.0F) {
-            factor = 0.0F;
-          } else if (speed > 3000.0F) {
-            factor = 1.0F - (speed - 3000.0F) / 5000.0F;
-          }
+      struct msg_ctrl_torque *msg = &output.torq;
+      if (ctx->state == CTRL_STATE_ERROR) {
+        ARRAY_FOR_EACH_PTR(msg->torque.values, val) { *val = 0.0F; }
+      }
+      msg_header_init(&msg->header);
 
-          msg->torque.values[i] = MIN(factor * msg->torque.values[i], limit);
-        }
-
-        msg_header_init(&msg->header);
-
-        zbus_chan_pub(&msg_ctrl_torque_chan, msg, K_MSEC(5));
-      } break;
-
-      default:
-        break;
+      zbus_chan_pub(&msg_ctrl_torque_chan, msg, K_MSEC(5));
     }
 
     k_mutex_unlock(&ctx->lock);
@@ -192,9 +211,9 @@ static void msg_cb(const struct zbus_channel *chan) {
   } else if (chan == &msg_ctrl_cmd_chan) {
     const struct msg_ctrl_cmd *msg = zbus_chan_const_msg(chan);
 
-    if (g_ctx.cmd_last.rtd != msg->rtd) {
+    if (g_ctx.cmd_last.rtd != msg->rtd && msg->rtd) {
       if (states_valid_transition(TRANS_CMD_RTD_FORCED)) {
-        states_valid_transition(TRANS_CMD_RTD_FORCED);
+        states_transition(TRANS_CMD_RTD_FORCED);
       }
     }
 

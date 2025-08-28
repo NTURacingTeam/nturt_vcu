@@ -1,5 +1,3 @@
-#include "vcu/dashboard.h"
-
 // zephyr includes
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -17,6 +15,7 @@
 
 // project includes
 #include "vcu/ctrl/states.h"
+#include "vcu/dashboard.h"
 
 LOG_MODULE_REGISTER(vcu_peripherals);
 

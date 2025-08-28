@@ -15,6 +15,7 @@
 #include <nturt/sys/sys.h>
 
 // project includes
+#include "vcu/ctrl/params.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/msg/msg.h"
 
@@ -130,7 +131,7 @@ static void msg_cb(const struct zbus_channel *chan) {
 
     g_ctx.low_speed = true;
     for (int i = 2; i < 4; i++) {
-      if (MOTOR_REDUCTION_RATIO * msg->speed.values[i] > 1000.0F) {
+      if (PARAM_MOTOR_REDUCTION_RATIO * msg->speed.values[i] > 500.0F) {
         g_ctx.low_speed = false;
         break;
       }

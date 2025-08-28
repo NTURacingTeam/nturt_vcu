@@ -1,5 +1,3 @@
-#include "vcu/dashboard.h"
-
 #include "modes/modes.h"
 
 // glibc includes
@@ -23,6 +21,7 @@
 
 // project includes
 #include "vcu/ctrl/states.h"
+#include "vcu/dashboard.h"
 
 LOG_MODULE_REGISTER(vcu_dashboard);
 

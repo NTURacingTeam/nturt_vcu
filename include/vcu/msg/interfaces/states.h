@@ -38,14 +38,15 @@
  */
 
 /// @brief Insert @ref msg_states printf format string.
-#define PRImsg_states PRImsg_header "\n\r\tTODO"
+#define PRImsg_states PRImsg_header "\n\r\tcmd: %u, before: %u, after: %u"
 
 /**
  * @brief Insert @ref msg_states arguments to printf format.
  *
  * @param[in] data The control system state message data.
  */
-#define PRImsg_states_arg(data) PRImsg_header_arg((data).header)
+#define PRImsg_states_arg(data) \
+  PRImsg_header_arg((data).header), (data).cmd, (data).before, (data).after
 
 /**
  * @} // msg_if_pri_states

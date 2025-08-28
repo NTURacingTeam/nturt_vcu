@@ -170,8 +170,8 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1200_SDOServerParameter = {
         .highestSub_indexSupported = 0x02,
-        .COB_IDClientToServer = 0x00000601,
-        .COB_IDServerToClient = 0x00000581
+        .COB_IDClientToServer = 0x00000600,
+        .COB_IDServerToClient = 0x00000580
     },
     .x1280_SDOClientParameter = {
         .highestSub_indexSupported = 0x03,
