@@ -109,10 +109,11 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_sensor_imu,
         OD_TO_MSG_DATA(0x2, int16_t, IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.y)),
         OD_TO_MSG_DATA(0x3, int16_t, IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.z))
     ),
-    OD_TO_MSG_ENTRY(0x2243,
-        OD_TO_MSG_DATA(0x1, int16_t, IMU_ORIENT_CAN_TO_PHY, AGG_MEMBER(orient.x)),
-        OD_TO_MSG_DATA(0x2, int16_t, IMU_ORIENT_CAN_TO_PHY, AGG_MEMBER(orient.y)),
-        OD_TO_MSG_DATA(0x3, int16_t, IMU_ORIENT_CAN_TO_PHY, AGG_MEMBER(orient.z))
+    OD_TO_MSG_ENTRY(0x2244,
+        OD_TO_MSG_DATA(0x1, int16_t, IMU_ORIENT_CAN_TO_PHY, AGG_MEMBER(orient.w)),
+        OD_TO_MSG_DATA(0x2, int16_t, IMU_ORIENT_CAN_TO_PHY, AGG_MEMBER(orient.x)),
+        OD_TO_MSG_DATA(0x3, int16_t, IMU_ORIENT_CAN_TO_PHY, AGG_MEMBER(orient.y)),
+        OD_TO_MSG_DATA(0x4, int16_t, IMU_ORIENT_CAN_TO_PHY, AGG_MEMBER(orient.z))
     )
 );
 
