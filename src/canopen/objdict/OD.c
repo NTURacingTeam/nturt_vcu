@@ -53,6 +53,8 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2088_button = {0x02, 0x02},
     .x2090_vehicleVelocity_sub0 = 0x03,
     .x2090_vehicleVelocity = {0, 0, 0},
+    .x20A0_vehicleControl_sub0 = 0x06,
+    .x20A0_vehicleControl = {0, 0, 0, 0, 0, 0},
     .x2100_accumulatorStatus = 0x00,
     .x2101_accumulatorVoltage = 0x00000000,
     .x2102_accumulatorCurrent = 0,
@@ -142,8 +144,8 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2240_IMUAcceleration = {0, 0, 0},
     .x2241_IMUGyration_sub0 = 0x03,
     .x2241_IMUGyration = {0, 0, 0},
-    .x2243_IMUEuler_sub0 = 0x03,
-    .x2243_IMUEuler = {0, 0, 0},
+    .x2244_IMUQuaternion_sub0 = 0x04,
+    .x2244_IMUQuaternion = {0, 0, 0, 0},
     .x2250_GPSPosition = {
         .highestSub_indexSupported = 0x03,
         .latitude = 0,
@@ -265,7 +267,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x140E_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000388,
+        .COB_IDUsedByRPDO = 0x00000488,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
@@ -296,6 +298,12 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1413_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
         .COB_IDUsedByRPDO = 0x00000189,
+        .transmissionType = 0xFE,
+        .eventTimer = 0x0000
+    },
+    .x1414_RPDOCommunicationParameter = {
+        .highestSub_indexSupported = 0x05,
+        .COB_IDUsedByRPDO = 0x00000482,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
@@ -454,11 +462,11 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x160E_RPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x03,
-        .applicationObject1 = 0x22430110,
-        .applicationObject2 = 0x22430210,
-        .applicationObject3 = 0x22430310,
-        .applicationObject4 = 0x00000000,
+        .numberOfMappedApplicationObjectsInPDO = 0x04,
+        .applicationObject1 = 0x22440110,
+        .applicationObject2 = 0x22440210,
+        .applicationObject3 = 0x22440310,
+        .applicationObject4 = 0x22440410,
         .applicationObject5 = 0x00000000,
         .applicationObject6 = 0x00000000,
         .applicationObject7 = 0x00000000,
@@ -519,6 +527,17 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject7 = 0x00000000,
         .applicationObject8 = 0x00000000
     },
+    .x1614_RPDOMappingParameter = {
+        .numberOfMappedApplicationObjectsInPDO = 0x02,
+        .applicationObject1 = 0x20A00510,
+        .applicationObject2 = 0x20A00610,
+        .applicationObject3 = 0x00000000,
+        .applicationObject4 = 0x00000000,
+        .applicationObject5 = 0x00000000,
+        .applicationObject6 = 0x00000000,
+        .applicationObject7 = 0x00000000,
+        .applicationObject8 = 0x00000000
+    },
     .x1800_TPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x06,
         .COB_IDUsedByTPDO = 0x00000181,
@@ -545,7 +564,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1803_TPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x06,
-        .COB_IDUsedByTPDO = 0xC0000480,
+        .COB_IDUsedByTPDO = 0x00000480,
         .transmissionType = 0xFE,
         .inhibitTime = 0x0000,
         .eventTimer = 0x0000,
@@ -601,11 +620,11 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x1A03_TPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x00,
-        .applicationObject1 = 0x00000000,
-        .applicationObject2 = 0x00000000,
-        .applicationObject3 = 0x00000000,
-        .applicationObject4 = 0x00000000,
+        .numberOfMappedApplicationObjectsInPDO = 0x04,
+        .applicationObject1 = 0x20A00110,
+        .applicationObject2 = 0x20A00210,
+        .applicationObject3 = 0x20A00310,
+        .applicationObject4 = 0x20A00410,
         .applicationObject5 = 0x00000000,
         .applicationObject6 = 0x00000000,
         .applicationObject7 = 0x00000000,
@@ -680,6 +699,7 @@ typedef struct {
     OD_obj_record_t o_1411_RPDOCommunicationParameter[4];
     OD_obj_record_t o_1412_RPDOCommunicationParameter[4];
     OD_obj_record_t o_1413_RPDOCommunicationParameter[4];
+    OD_obj_record_t o_1414_RPDOCommunicationParameter[4];
     OD_obj_record_t o_1600_RPDOMappingParameter[9];
     OD_obj_record_t o_1601_RPDOMappingParameter[9];
     OD_obj_record_t o_1602_RPDOMappingParameter[9];
@@ -700,6 +720,7 @@ typedef struct {
     OD_obj_record_t o_1611_RPDOMappingParameter[9];
     OD_obj_record_t o_1612_RPDOMappingParameter[9];
     OD_obj_record_t o_1613_RPDOMappingParameter[9];
+    OD_obj_record_t o_1614_RPDOMappingParameter[9];
     OD_obj_record_t o_1800_TPDOCommunicationParameter[6];
     OD_obj_record_t o_1801_TPDOCommunicationParameter[6];
     OD_obj_record_t o_1802_TPDOCommunicationParameter[6];
@@ -719,6 +740,7 @@ typedef struct {
     OD_obj_record_t o_2082_brake[4];
     OD_obj_array_t o_2088_button;
     OD_obj_array_t o_2090_vehicleVelocity;
+    OD_obj_array_t o_20A0_vehicleControl;
     OD_obj_var_t o_2100_accumulatorStatus;
     OD_obj_var_t o_2101_accumulatorVoltage;
     OD_obj_var_t o_2102_accumulatorCurrent;
@@ -746,7 +768,7 @@ typedef struct {
     OD_obj_record_t o_2221_suspensionR[3];
     OD_obj_array_t o_2240_IMUAcceleration;
     OD_obj_array_t o_2241_IMUGyration;
-    OD_obj_array_t o_2243_IMUEuler;
+    OD_obj_array_t o_2244_IMUQuaternion;
     OD_obj_record_t o_2250_GPSPosition[4];
     OD_obj_record_t o_2251_GPSVelocity[3];
 } ODObjs_t;
@@ -1410,6 +1432,32 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         },
         {
             .dataOrig = &OD_PERSIST_COMM.x1413_RPDOCommunicationParameter.eventTimer,
+            .subIndex = 5,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 2
+        }
+    },
+    .o_1414_RPDOCommunicationParameter = {
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1414_RPDOCommunicationParameter.highestSub_indexSupported,
+            .subIndex = 0,
+            .attribute = ODA_SDO_R,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1414_RPDOCommunicationParameter.COB_IDUsedByRPDO,
+            .subIndex = 1,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1414_RPDOCommunicationParameter.transmissionType,
+            .subIndex = 2,
+            .attribute = ODA_SDO_RW,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1414_RPDOCommunicationParameter.eventTimer,
             .subIndex = 5,
             .attribute = ODA_SDO_RW | ODA_MB,
             .dataLength = 2
@@ -2535,6 +2583,62 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .dataLength = 4
         }
     },
+    .o_1614_RPDOMappingParameter = {
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.numberOfMappedApplicationObjectsInPDO,
+            .subIndex = 0,
+            .attribute = ODA_SDO_RW,
+            .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject1,
+            .subIndex = 1,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject2,
+            .subIndex = 2,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject3,
+            .subIndex = 3,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject4,
+            .subIndex = 4,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject5,
+            .subIndex = 5,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject6,
+            .subIndex = 6,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject7,
+            .subIndex = 7,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        },
+        {
+            .dataOrig = &OD_PERSIST_COMM.x1614_RPDOMappingParameter.applicationObject8,
+            .subIndex = 8,
+            .attribute = ODA_SDO_RW | ODA_MB,
+            .dataLength = 4
+        }
+    },
     .o_1800_TPDOCommunicationParameter = {
         {
             .dataOrig = &OD_PERSIST_COMM.x1800_TPDOCommunicationParameter.highestSub_indexSupported,
@@ -3185,6 +3289,14 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         .dataElementLength = 2,
         .dataElementSizeof = sizeof(int16_t)
     },
+    .o_20A0_vehicleControl = {
+        .dataOrig0 = &OD_RAM.x20A0_vehicleControl_sub0,
+        .dataOrig = &OD_RAM.x20A0_vehicleControl[0],
+        .attribute0 = ODA_SDO_R,
+        .attribute = ODA_SDO_R | ODA_TRPDO | ODA_MB,
+        .dataElementLength = 2,
+        .dataElementSizeof = sizeof(int16_t)
+    },
     .o_2100_accumulatorStatus = {
         .dataOrig = &OD_RAM.x2100_accumulatorStatus,
         .attribute = ODA_RPDO,
@@ -3569,9 +3681,9 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         .dataElementLength = 2,
         .dataElementSizeof = sizeof(int16_t)
     },
-    .o_2243_IMUEuler = {
-        .dataOrig0 = &OD_RAM.x2243_IMUEuler_sub0,
-        .dataOrig = &OD_RAM.x2243_IMUEuler[0],
+    .o_2244_IMUQuaternion = {
+        .dataOrig0 = &OD_RAM.x2244_IMUQuaternion_sub0,
+        .dataOrig = &OD_RAM.x2244_IMUQuaternion[0],
         .attribute0 = ODA_SDO_R,
         .attribute = ODA_RPDO | ODA_MB,
         .dataElementLength = 2,
@@ -3669,6 +3781,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1411, 0x04, ODT_REC, &ODObjs.o_1411_RPDOCommunicationParameter, NULL},
     {0x1412, 0x04, ODT_REC, &ODObjs.o_1412_RPDOCommunicationParameter, NULL},
     {0x1413, 0x04, ODT_REC, &ODObjs.o_1413_RPDOCommunicationParameter, NULL},
+    {0x1414, 0x04, ODT_REC, &ODObjs.o_1414_RPDOCommunicationParameter, NULL},
     {0x1600, 0x09, ODT_REC, &ODObjs.o_1600_RPDOMappingParameter, NULL},
     {0x1601, 0x09, ODT_REC, &ODObjs.o_1601_RPDOMappingParameter, NULL},
     {0x1602, 0x09, ODT_REC, &ODObjs.o_1602_RPDOMappingParameter, NULL},
@@ -3689,6 +3802,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1611, 0x09, ODT_REC, &ODObjs.o_1611_RPDOMappingParameter, NULL},
     {0x1612, 0x09, ODT_REC, &ODObjs.o_1612_RPDOMappingParameter, NULL},
     {0x1613, 0x09, ODT_REC, &ODObjs.o_1613_RPDOMappingParameter, NULL},
+    {0x1614, 0x09, ODT_REC, &ODObjs.o_1614_RPDOMappingParameter, NULL},
     {0x1800, 0x06, ODT_REC, &ODObjs.o_1800_TPDOCommunicationParameter, NULL},
     {0x1801, 0x06, ODT_REC, &ODObjs.o_1801_TPDOCommunicationParameter, NULL},
     {0x1802, 0x06, ODT_REC, &ODObjs.o_1802_TPDOCommunicationParameter, NULL},
@@ -3708,6 +3822,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x2082, 0x04, ODT_REC, &ODObjs.o_2082_brake, NULL},
     {0x2088, 0x03, ODT_ARR, &ODObjs.o_2088_button, NULL},
     {0x2090, 0x04, ODT_ARR, &ODObjs.o_2090_vehicleVelocity, NULL},
+    {0x20A0, 0x07, ODT_ARR, &ODObjs.o_20A0_vehicleControl, NULL},
     {0x2100, 0x01, ODT_VAR, &ODObjs.o_2100_accumulatorStatus, NULL},
     {0x2101, 0x01, ODT_VAR, &ODObjs.o_2101_accumulatorVoltage, NULL},
     {0x2102, 0x01, ODT_VAR, &ODObjs.o_2102_accumulatorCurrent, NULL},
@@ -3735,7 +3850,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x2221, 0x03, ODT_REC, &ODObjs.o_2221_suspensionR, NULL},
     {0x2240, 0x04, ODT_ARR, &ODObjs.o_2240_IMUAcceleration, NULL},
     {0x2241, 0x04, ODT_ARR, &ODObjs.o_2241_IMUGyration, NULL},
-    {0x2243, 0x04, ODT_ARR, &ODObjs.o_2243_IMUEuler, NULL},
+    {0x2244, 0x05, ODT_ARR, &ODObjs.o_2244_IMUQuaternion, NULL},
     {0x2250, 0x04, ODT_REC, &ODObjs.o_2250_GPSPosition, NULL},
     {0x2251, 0x03, ODT_REC, &ODObjs.o_2251_GPSVelocity, NULL},
     {0x0000, 0x00, 0, NULL, NULL}
