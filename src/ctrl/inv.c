@@ -131,7 +131,7 @@ static void msg_cb(const struct zbus_channel *chan) {
 static void err_cb(uint32_t errcode, bool set, void *user_data) {
   (void)user_data;
 
-  if (set && states_get() & STATE_RUNNING) {
+  if (set && states_get() & STATE_RUNNING && !states_transition_pending()) {
     LOG_INF("Disable due to inverter no power");
     states_transition(TRANS_CMD_DISABLE);
   }

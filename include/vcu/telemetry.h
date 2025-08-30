@@ -54,7 +54,7 @@ TM_DATA_DECLARE(brake, uint8_t);
 TM_DATA_DECLARE(bse1, uint8_t);
 TM_DATA_DECLARE(bse2, uint8_t);
 
-TM_DATA_DECLARE(vcu_states, uint8_t);
+TM_DATA_DECLARE(vcu_states, uint16_t);
 
 TM_DATA_DECLARE(inv_rl_ctrl_word, uint16_t);
 TM_DATA_DECLARE(inv_rl_target_torque, int16_t);

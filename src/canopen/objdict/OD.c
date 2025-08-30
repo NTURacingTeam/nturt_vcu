@@ -33,7 +33,7 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x1010_storeParameters = {1, 1, 1, 1},
     .x1011_restoreDefaultParameters_sub0 = 0x04,
     .x1011_restoreDefaultParameters = {1, 1, 1, 1},
-    .x2000_VCUStates = 0x00,
+    .x2000_VCUStates = 0x0000,
     .x2001_VCUErrors_sub0 = 0x00,
     .x2001_VCUErrors = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
     .x2080_steerAngle = 0,
@@ -166,8 +166,8 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1012_COB_IDTimeStampObject = 0x80000100,
     .x1014_COB_ID_EMCY = 0x00000080,
     .x1015_inhibitTimeEMCY = 0x0064,
-    .x1016_consumerHeartbeatTime_sub0 = 0x03,
-    .x1016_consumerHeartbeatTime = {0x000201F4, 0x001301F4, 0x001401F4},
+    .x1016_consumerHeartbeatTime_sub0 = 0x02,
+    .x1016_consumerHeartbeatTime = {0x001301F4, 0x001401F4},
     .x1017_producerHeartbeatTime = 0x0064,
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1200_SDOServerParameter = {
@@ -599,7 +599,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1A01_TPDOMappingParameter = {
         .numberOfMappedApplicationObjectsInPDO = 0x01,
-        .applicationObject1 = 0x20000008,
+        .applicationObject1 = 0x20000010,
         .applicationObject2 = 0x00000000,
         .applicationObject3 = 0x00000000,
         .applicationObject4 = 0x00000000,
@@ -3205,8 +3205,8 @@ static CO_PROGMEM ODObjs_t ODObjs = {
     },
     .o_2000_VCUStates = {
         .dataOrig = &OD_RAM.x2000_VCUStates,
-        .attribute = ODA_SDO_R | ODA_TPDO,
-        .dataLength = 1
+        .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+        .dataLength = 2
     },
     .o_2001_VCUErrors = {
         .dataOrig0 = &OD_RAM.x2001_VCUErrors_sub0,
@@ -3756,7 +3756,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1012, 0x01, ODT_VAR, &ODObjs.o_1012_COB_IDTimeStampObject, NULL},
     {0x1014, 0x01, ODT_VAR, &ODObjs.o_1014_COB_ID_EMCY, NULL},
     {0x1015, 0x01, ODT_VAR, &ODObjs.o_1015_inhibitTimeEMCY, NULL},
-    {0x1016, 0x04, ODT_ARR, &ODObjs.o_1016_consumerHeartbeatTime, NULL},
+    {0x1016, 0x03, ODT_ARR, &ODObjs.o_1016_consumerHeartbeatTime, NULL},
     {0x1017, 0x01, ODT_VAR, &ODObjs.o_1017_producerHeartbeatTime, NULL},
     {0x1019, 0x01, ODT_VAR, &ODObjs.o_1019_synchronousCounterOverflowValue, NULL},
     {0x1200, 0x03, ODT_REC, &ODObjs.o_1200_SDOServerParameter, NULL},
