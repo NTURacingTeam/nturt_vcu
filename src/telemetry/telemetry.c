@@ -14,7 +14,7 @@ TM_DATA_DEFINE(brake, uint8_t, TM_BRAKE);
 TM_DATA_DEFINE(bse1, uint8_t, TM_BSE1);
 TM_DATA_DEFINE(bse2, uint8_t, TM_BSE2);
 
-TM_DATA_DEFINE(vcu_states, uint8_t, TM_VCU_STATES);
+TM_DATA_DEFINE(vcu_states, uint16_t, TM_VCU_STATES);
 
 TM_DATA_DEFINE(inv_rl_ctrl_word, uint16_t, TM_INV_RL_CTRL_WORD);
 TM_DATA_DEFINE(inv_rl_target_torque, int16_t, TM_INV_RL_TARGET_TORQUE);

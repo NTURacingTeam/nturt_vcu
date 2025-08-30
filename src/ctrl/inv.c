@@ -131,7 +131,7 @@ static void msg_cb(const struct zbus_channel *chan) {
 
     g_ctx.low_speed = true;
     for (int i = 2; i < 4; i++) {
-      if (PARAM_MOTOR_REDUCTION_RATIO * msg->speed.values[i] > 500.0F) {
+      if (PARAM_MOTOR_REDUCTION_RATIO * msg->speed.values[i] > 500.0) {
         g_ctx.low_speed = false;
         break;
       }
@@ -160,7 +160,7 @@ static void msg_cb(const struct zbus_channel *chan) {
 static void err_cb(uint32_t errcode, bool set, void *user_data) {
   (void)user_data;
 
-  if (set && states_get() & STATE_RUNNING) {
+  if (set && states_get() & STATE_RUNNING && !states_transition_pending()) {
     LOG_INF("Disable due to inverter no power");
     states_transition(TRANS_CMD_DISABLE);
   }

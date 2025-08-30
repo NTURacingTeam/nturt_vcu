@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.4
+ * Model version                  : 5.6
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Wed Aug 27 16:14:38 2025
+ * C/C++ source code generated on : Sat Aug 30 11:58:30 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -108,10 +108,22 @@ extern void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
 /*-
  * These blocks were eliminated from the model due to optimizations:
  *
+ * Block '<S1>/Constant' : Unused code path elimination
+ * Block '<S1>/Constant1' : Unused code path elimination
+ * Block '<S1>/Constant2' : Unused code path elimination
+ * Block '<S1>/Constant3' : Unused code path elimination
  * Block '<S4>/Data Type Duplicate' : Unused code path elimination
  * Block '<S4>/Data Type Propagation' : Unused code path elimination
+ * Block '<S4>/LowerRelop1' : Unused code path elimination
+ * Block '<S4>/Switch' : Unused code path elimination
+ * Block '<S4>/Switch2' : Unused code path elimination
+ * Block '<S4>/UpperRelop' : Unused code path elimination
  * Block '<S5>/Data Type Duplicate' : Unused code path elimination
  * Block '<S5>/Data Type Propagation' : Unused code path elimination
+ * Block '<S5>/LowerRelop1' : Unused code path elimination
+ * Block '<S5>/Switch' : Unused code path elimination
+ * Block '<S5>/Switch2' : Unused code path elimination
+ * Block '<S5>/UpperRelop' : Unused code path elimination
  */
 
 /*-

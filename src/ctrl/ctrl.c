@@ -161,6 +161,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
     };
     sensor_fusion_ExtY output;
     sensor_fusion_step(&ctx->sensor_fusion_model, &input, &output);
+    output.vehicle_state.velocity.x *= 2.0;
 
     struct msg_ctrl_vehicle_state *msg = &output.vehicle_state;
     msg_header_init(&msg->header);

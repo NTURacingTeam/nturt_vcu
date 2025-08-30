@@ -16,7 +16,7 @@
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2025/8/28 下午 10:42:28
+        Modified:     2025/8/30 上午 10:46:03
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
@@ -54,7 +54,7 @@
 #define OD_CNT_ARR_1003 16
 #define OD_CNT_ARR_1010 4
 #define OD_CNT_ARR_1011 4
-#define OD_CNT_ARR_1016 3
+#define OD_CNT_ARR_1016 2
 #define OD_CNT_ARR_2001 16
 #define OD_CNT_ARR_2088 2
 #define OD_CNT_ARR_2090 3
@@ -80,7 +80,7 @@ typedef struct {
     int32_t x1010_storeParameters[OD_CNT_ARR_1010];
     uint8_t x1011_restoreDefaultParameters_sub0;
     int32_t x1011_restoreDefaultParameters[OD_CNT_ARR_1011];
-    uint8_t x2000_VCUStates;
+    uint16_t x2000_VCUStates;
     uint8_t x2001_VCUErrors_sub0;
     uint32_t x2001_VCUErrors[OD_CNT_ARR_2001];
     int16_t x2080_steerAngle;

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.4
+ * Model version                  : 5.6
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Wed Aug 27 16:14:38 2025
+ * C/C++ source code generated on : Sat Aug 30 11:58:30 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -154,23 +154,8 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
     MATLABFunction1(rtb_Gain, 0.076335877862595422 * rtU->wheel.speed.rl,
                     torq_derate_begin, torq_derate_end, &rtb_torqueCmd_h);
 
-    /* Switch: '<S4>/Switch2' incorporates:
-     *  Constant: '<S1>/Constant'
-     *  Constant: '<S1>/Constant1'
-     *  RelationalOperator: '<S4>/LowerRelop1'
-     *  RelationalOperator: '<S4>/UpperRelop'
-     *  Switch: '<S4>/Switch'
-     */
-    if (rtb_torqueCmd_h > torq_limit_rl) {
-      rtb_torqueCmd_h = torq_limit_rl;
-    } else if (rtb_torqueCmd_h < -torq_limit_rl) {
-      /* Switch: '<S4>/Switch' incorporates:
-       *  Constant: '<S1>/Constant'
-       */
-      rtb_torqueCmd_h = -torq_limit_rl;
-    }
-
-    /* End of Switch: '<S4>/Switch2' */
+    /* Gain: '<S1>/Gain' */
+    rtb_torqueCmd_h *= torq_limit_rl;
 
     /* RateLimiter: '<S1>/Rate Limiter1' */
     if (rtDW->LastMajorTime == (rtInf)) {
@@ -223,25 +208,8 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
     MATLABFunction1(rtb_Gain, 0.076335877862595422 * rtU->wheel.speed.rr,
                     torq_derate_begin, torq_derate_end, &rtb_torqueCmd_h);
 
-    /* Switch: '<S5>/Switch2' incorporates:
-     *  Constant: '<S1>/Constant2'
-     *  Constant: '<S1>/Constant3'
-     *  RelationalOperator: '<S5>/LowerRelop1'
-     *  RelationalOperator: '<S5>/UpperRelop'
-     *  Switch: '<S5>/Switch'
-     */
-    if (rtb_torqueCmd_h > torq_limit_rr) {
-      rtb_Gain = torq_limit_rr;
-    } else if (rtb_torqueCmd_h < -torq_limit_rr) {
-      /* Switch: '<S5>/Switch' incorporates:
-       *  Constant: '<S1>/Constant3'
-       */
-      rtb_Gain = -torq_limit_rr;
-    } else {
-      rtb_Gain = rtb_torqueCmd_h;
-    }
-
-    /* End of Switch: '<S5>/Switch2' */
+    /* Gain: '<S1>/Gain1' */
+    rtb_Gain = torq_limit_rr * rtb_torqueCmd_h;
 
     /* RateLimiter: '<S1>/Rate Limiter' */
     if (rtDW->LastMajorTime_n == (rtInf)) {
