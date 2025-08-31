@@ -19,13 +19,13 @@
 #define ON_SEVERITY (FOR_EACH(IDENTITY, (|), FILTERED_ERRORS))
 
 /* static function declaration -----------------------------------------------*/
-static void err_handler(uint32_t errcode, bool set, void* user_data);
+static void err_cb(uint32_t errcode, bool set, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
-ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(FILTERED_ERRORS));
+ERR_CALLBACK_DEFINE(err_cb, NULL, ERR_FILTER_SEV(FILTERED_ERRORS));
 
 /* static function definition ------------------------------------------------*/
-static void err_handler(uint32_t errcode, bool set, void* user_data) {
+static void err_cb(uint32_t errcode, bool set, void* user_data) {
   (void)errcode;
   (void)set;
   (void)user_data;
