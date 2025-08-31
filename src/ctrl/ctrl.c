@@ -187,7 +187,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
       struct msg_ctrl_torque *msg = &output.torq;
       if (ctx->state == CTRL_STATE_ERROR) {
-        ARRAY_FOR_EACH_PTR(msg->torque.values, val) { *val = 0.0F; }
+        ARRAY_FOR_EACH_PTR(msg->torque.values, val) { *val = 0.0; }
       }
       msg_header_init(&msg->header);
 
