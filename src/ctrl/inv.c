@@ -3,7 +3,6 @@
 #include <string.h>
 
 // zephyr includes
-#include <zephyr/drivers/can.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
@@ -38,8 +37,6 @@ struct ctrl_inv_ctx {
 
   struct k_mutex lock;
 
-  bool low_speed;
-
   struct msg_ctrl_word msg;
 };
 
@@ -53,21 +50,16 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void fault_reset_work(struct k_work *work);
 
 /* static variable -----------------------------------------------------------*/
-static const struct device *can = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
-
 static struct ctrl_inv_ctx g_ctx = {
     .fault_reset_work = Z_WORK_DELAYABLE_INITIALIZER(fault_reset_work),
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
 };
 
 ZBUS_LISTENER_DEFINE(ctrl_inv_listener, msg_cb);
-ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, ctrl_inv_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
 
 ERR_DEFINE(inv_fl, ERR_CODE_INV_FL, ERR_SEV_FATAL, "Inverter FL error");
 ERR_DEFINE(inv_fr, ERR_CODE_INV_FR, ERR_SEV_FATAL, "Inverter FR error");
-// ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_FATAL, "Inverter RL error");
-// ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_FATAL, "Inverter RR error");
 ERR_DEFINE(inv_rl, ERR_CODE_INV_RL, ERR_SEV_ERROR, "Inverter RL error");
 ERR_DEFINE(inv_rr, ERR_CODE_INV_RR, ERR_SEV_ERROR, "Inverter RR error");
 
@@ -86,7 +78,7 @@ ERR_CALLBACK_DEFINE(err_cb, NULL,
                                     ERR_CODE_INV_RL_HV_LOW,
                                     ERR_CODE_INV_RR_HV_LOW));
 
-STATES_CALLBACK_DEFINE(STATE_RUNNING, states_cb, &g_ctx);
+STATES_CALLBACK_DEFINE(STATE_RUNNING_OK, states_cb, &g_ctx);
 
 /* function definition -------------------------------------------------------*/
 int ctrl_inv_fault_reset() {
@@ -126,33 +118,13 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
 }
 
 static void msg_cb(const struct zbus_channel *chan) {
-  if (chan == &msg_sensor_wheel_chan) {
-    const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
-
-    g_ctx.low_speed = true;
-    for (int i = 2; i < 4; i++) {
-      if (PARAM_MOTOR_REDUCTION_RATIO * msg->speed.values[i] > 500.0) {
-        g_ctx.low_speed = false;
-        break;
-      }
-    }
-
-  } else if (chan == &msg_ts_inv_chan) {
-    const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
-
-    for (int i = 2; i < 4; i++) {
-      if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
-        if (msg->status.values[i] & STATUS_WORD_FAULT) {
-          if (g_ctx.low_speed) {
-            ctrl_inv_fault_reset();
-          }
-        }
-
-        err_report(ERR_CODE_INV_FL + i,
-                   msg->status.values[i] & STATUS_WORD_FAULT);
-        err_report(ERR_CODE_INV_FL_HV_LOW + i,
-                   !(msg->status.values[i] & STATUS_WORD_POWER));
-      }
+  const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
+  for (int i = 2; i < 4; i++) {
+    if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
+      err_report(ERR_CODE_INV_FL + i,
+                 msg->status.values[i] & STATUS_WORD_FAULT);
+      err_report(ERR_CODE_INV_FL_HV_LOW + i,
+                 !(msg->status.values[i] & STATUS_WORD_POWER));
     }
   }
 }
@@ -172,15 +144,6 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   struct ctrl_inv_ctx *ctx = user_data;
 
   ctrl_inv_word_set_and_pub(ctx, CTRL_WORD_ENABLE, is_entry);
-
-  struct can_frame frame = {
-      .id = 0x420,
-      .dlc = 1,
-      .flags = 0,
-      .data[0] = is_entry ? 0x01 : 0x02,
-  };
-
-  can_send(can, &frame, K_MSEC(10), NULL, NULL);
 }
 
 static void fault_reset_work(struct k_work *work) {
