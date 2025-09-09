@@ -23,13 +23,13 @@
 
 /* static function declaration -----------------------------------------------*/
 static void msg_cb(const struct zbus_channel* chan);
-static void err_handler(uint32_t errcode, bool set, void* user_data);
+static void err_cb(uint32_t errcode, bool set, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
 ZBUS_LISTENER_DEFINE(states_err_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, states_err_listener, 0);
 
-ERR_CALLBACK_DEFINE(err_handler, NULL, ERR_FILTER_SEV(FILTERED_ERRORS));
+ERR_CALLBACK_DEFINE(err_cb, NULL, ERR_FILTER_SEV(FILTERED_ERRORS));
 
 /* static function definition ------------------------------------------------*/
 static void msg_cb(const struct zbus_channel* chan) {
@@ -55,7 +55,7 @@ static void msg_cb(const struct zbus_channel* chan) {
   }
 }
 
-static void err_handler(uint32_t errcode, bool set, void* user_data) {
+static void err_cb(uint32_t errcode, bool set, void* user_data) {
   (void)errcode;
   (void)set;
   (void)user_data;
