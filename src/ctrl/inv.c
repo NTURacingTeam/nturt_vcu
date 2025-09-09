@@ -44,6 +44,7 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
                                       bool is_set);
 
 static void msg_cb(const struct zbus_channel *chan);
+static void err_cb(uint32_t errcode, bool set, void *user_data);
 static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void fault_reset_work(struct k_work *work);
 
@@ -69,6 +70,10 @@ ERR_DEFINE(inv_rl_no_power, ERR_CODE_INV_RL_HV_LOW, ERR_SEV_FATAL,
            "Inverter RL HV low voltage");
 ERR_DEFINE(inv_rr_no_power, ERR_CODE_INV_RR_HV_LOW, ERR_SEV_FATAL,
            "Inverter RR HV low voltage");
+
+ERR_CALLBACK_DEFINE(err_cb, NULL,
+                    ERR_FILTER_SEV(ERR_CODE_INV_FL, ERR_CODE_INV_FR,
+                                   ERR_CODE_INV_RL, ERR_CODE_INV_RR));
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING_OK, states_cb, &g_ctx);
 
@@ -119,6 +124,14 @@ static void msg_cb(const struct zbus_channel *chan) {
                  !(msg->status.values[i] & STATUS_WORD_POWER));
     }
   }
+}
+
+static void err_cb(uint32_t errcode, bool set, void *user_data) {
+  (void)errcode;
+  (void)set;
+  (void)user_data;
+
+  ctrl_inv_fault_reset();
 }
 
 static void states_cb(enum states_state state, bool is_entry, void *user_data) {
