@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.6
+ * Model version                  : 5.7
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Sat Aug 30 11:58:30 2025
+ * C/C++ source code generated on : Thu Sep 11 08:57:15 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -28,7 +28,7 @@
 #include "rtw_continuous.h"
 #include "rtw_solver.h"
 #include "math.h"
-#endif                               /* vehicle_control_COMMON_INCLUDES_ */
+#endif                                 /* vehicle_control_COMMON_INCLUDES_ */
 
 /* Includes for objects with custom storage classes */
 #include "simulink_import.h"

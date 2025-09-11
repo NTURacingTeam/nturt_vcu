@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.6
+ * Model version                  : 5.7
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Sat Aug 30 11:58:30 2025
+ * C/C++ source code generated on : Thu Sep 11 08:57:15 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -180,7 +180,7 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
           rtDW->RateLimiter1 = rtDW->PrevY + riseValLimit;
           limitedCache = true;
         } else {
-          deltaT *= -torq_slew;
+          deltaT *= -10000.0;
           if (deltaT_tmp < deltaT) {
             /* RateLimiter: '<S1>/Rate Limiter1' */
             rtDW->RateLimiter1 = rtDW->PrevY + deltaT;
@@ -234,7 +234,7 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
           rtDW->RateLimiter = rtDW->PrevY_l + riseValLimit;
           limitedCache = true;
         } else {
-          deltaT *= -torq_slew;
+          deltaT *= -10000.0;
           if (deltaT_tmp < deltaT) {
             /* RateLimiter: '<S1>/Rate Limiter' */
             rtDW->RateLimiter = rtDW->PrevY_l + deltaT;
