@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.7
+ * Model version                  : 5.8
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Thu Sep 11 08:57:15 2025
+ * C/C++ source code generated on : Thu Sep 11 12:31:01 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -55,14 +55,14 @@ typedef struct vehicle_control_tag_RTM vehicle_control_RT_MODEL;
 
 /* Block signals and states (default storage) for system '<Root>' */
 typedef struct {
-  double RateLimiter1;                 /* '<S1>/Rate Limiter1' */
   double RateLimiter;                  /* '<S1>/Rate Limiter' */
-  double PrevY;                        /* '<S1>/Rate Limiter1' */
-  double LastMajorTime;                /* '<S1>/Rate Limiter1' */
-  double PrevY_l;                      /* '<S1>/Rate Limiter' */
-  double LastMajorTime_n;              /* '<S1>/Rate Limiter' */
-  bool PrevLimited;                    /* '<S1>/Rate Limiter1' */
-  bool PrevLimited_m;                  /* '<S1>/Rate Limiter' */
+  double RateLimiter1;                 /* '<S1>/Rate Limiter1' */
+  double PrevY;                        /* '<S1>/Rate Limiter' */
+  double LastMajorTime;                /* '<S1>/Rate Limiter' */
+  double PrevY_b;                      /* '<S1>/Rate Limiter1' */
+  double LastMajorTime_i;              /* '<S1>/Rate Limiter1' */
+  bool PrevLimited;                    /* '<S1>/Rate Limiter' */
+  bool PrevLimited_k;                  /* '<S1>/Rate Limiter1' */
 } vehicle_control_DW;
 
 /* External inputs (root inport signals with default storage) */
