@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.7
+ * Model version                  : 5.8
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Thu Sep 11 08:57:15 2025
+ * C/C++ source code generated on : Thu Sep 11 12:31:01 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -136,58 +136,55 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
     double deltaT;
     double deltaT_tmp;
     double riseValLimit;
-    double rtb_Gain;
-    double rtb_torqueCmd_h;
+    double rtb_Gain3;
+    double rtb_torqueCmd;
     bool limitedCache;
 
     /* Gain: '<Root>/Gain3' */
-    rtb_torqueCmd_h = 0.01 * rtU->cockpit.accel;
+    rtb_Gain3 = 0.01 * rtU->cockpit.accel;
 
-    /* Gain: '<Root>/Gain' */
-    rtb_Gain = 20.0 * rtb_torqueCmd_h;
-
-    /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
+    /* MATLAB Function: '<S1>/MATLAB Function2' incorporates:
      *  Constant: '<S1>/Constant4'
      *  Constant: '<S1>/Constant5'
-     *  Gain: '<Root>/Gain2'
+     *  Gain: '<Root>/Gain1'
      */
-    MATLABFunction1(rtb_Gain, 0.076335877862595422 * rtU->wheel.speed.rl,
-                    torq_derate_begin, torq_derate_end, &rtb_torqueCmd_h);
+    MATLABFunction1(rtb_Gain3, 0.076335877862595422 * rtU->wheel.speed.rr,
+                    torq_derate_begin, torq_derate_end, &rtb_torqueCmd);
 
-    /* Gain: '<S1>/Gain' */
-    rtb_torqueCmd_h *= torq_limit_rl;
+    /* Gain: '<S1>/Gain1' */
+    rtb_torqueCmd *= torq_limit_rr;
 
-    /* RateLimiter: '<S1>/Rate Limiter1' */
+    /* RateLimiter: '<S1>/Rate Limiter' */
     if (rtDW->LastMajorTime == (rtInf)) {
-      /* RateLimiter: '<S1>/Rate Limiter1' */
-      rtDW->RateLimiter1 = rtb_torqueCmd_h;
+      /* RateLimiter: '<S1>/Rate Limiter' */
+      rtDW->RateLimiter = rtb_torqueCmd;
     } else {
       deltaT_tmp = rtM->Timing.t[0];
       deltaT = deltaT_tmp - rtDW->LastMajorTime;
       if (rtDW->LastMajorTime == deltaT_tmp) {
         if (rtDW->PrevLimited) {
-          /* RateLimiter: '<S1>/Rate Limiter1' */
-          rtDW->RateLimiter1 = rtDW->PrevY;
+          /* RateLimiter: '<S1>/Rate Limiter' */
+          rtDW->RateLimiter = rtDW->PrevY;
         } else {
-          /* RateLimiter: '<S1>/Rate Limiter1' */
-          rtDW->RateLimiter1 = rtb_torqueCmd_h;
+          /* RateLimiter: '<S1>/Rate Limiter' */
+          rtDW->RateLimiter = rtb_torqueCmd;
         }
       } else {
         riseValLimit = deltaT * torq_slew;
-        deltaT_tmp = rtb_torqueCmd_h - rtDW->PrevY;
+        deltaT_tmp = rtb_torqueCmd - rtDW->PrevY;
         if (deltaT_tmp > riseValLimit) {
-          /* RateLimiter: '<S1>/Rate Limiter1' */
-          rtDW->RateLimiter1 = rtDW->PrevY + riseValLimit;
+          /* RateLimiter: '<S1>/Rate Limiter' */
+          rtDW->RateLimiter = rtDW->PrevY + riseValLimit;
           limitedCache = true;
         } else {
-          deltaT *= -10000.0;
+          deltaT *= -2.0 * torq_slew;
           if (deltaT_tmp < deltaT) {
-            /* RateLimiter: '<S1>/Rate Limiter1' */
-            rtDW->RateLimiter1 = rtDW->PrevY + deltaT;
+            /* RateLimiter: '<S1>/Rate Limiter' */
+            rtDW->RateLimiter = rtDW->PrevY + deltaT;
             limitedCache = true;
           } else {
-            /* RateLimiter: '<S1>/Rate Limiter1' */
-            rtDW->RateLimiter1 = rtb_torqueCmd_h;
+            /* RateLimiter: '<S1>/Rate Limiter' */
+            rtDW->RateLimiter = rtb_torqueCmd;
             limitedCache = false;
           }
         }
@@ -198,61 +195,61 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
       }
     }
 
-    /* End of RateLimiter: '<S1>/Rate Limiter1' */
+    /* End of RateLimiter: '<S1>/Rate Limiter' */
 
-    /* MATLAB Function: '<S1>/MATLAB Function2' incorporates:
+    /* MATLAB Function: '<S1>/MATLAB Function1' incorporates:
      *  Constant: '<S1>/Constant4'
      *  Constant: '<S1>/Constant5'
-     *  Gain: '<Root>/Gain1'
+     *  Gain: '<Root>/Gain2'
      */
-    MATLABFunction1(rtb_Gain, 0.076335877862595422 * rtU->wheel.speed.rr,
-                    torq_derate_begin, torq_derate_end, &rtb_torqueCmd_h);
+    MATLABFunction1(rtb_Gain3, 0.076335877862595422 * rtU->wheel.speed.rl,
+                    torq_derate_begin, torq_derate_end, &rtb_torqueCmd);
 
-    /* Gain: '<S1>/Gain1' */
-    rtb_Gain = torq_limit_rr * rtb_torqueCmd_h;
+    /* Gain: '<S1>/Gain' */
+    rtb_Gain3 = torq_limit_rl * rtb_torqueCmd;
 
-    /* RateLimiter: '<S1>/Rate Limiter' */
-    if (rtDW->LastMajorTime_n == (rtInf)) {
-      /* RateLimiter: '<S1>/Rate Limiter' */
-      rtDW->RateLimiter = rtb_Gain;
+    /* RateLimiter: '<S1>/Rate Limiter1' */
+    if (rtDW->LastMajorTime_i == (rtInf)) {
+      /* RateLimiter: '<S1>/Rate Limiter1' */
+      rtDW->RateLimiter1 = rtb_Gain3;
     } else {
       deltaT_tmp = rtM->Timing.t[0];
-      deltaT = deltaT_tmp - rtDW->LastMajorTime_n;
-      if (rtDW->LastMajorTime_n == deltaT_tmp) {
-        if (rtDW->PrevLimited_m) {
-          /* RateLimiter: '<S1>/Rate Limiter' */
-          rtDW->RateLimiter = rtDW->PrevY_l;
+      deltaT = deltaT_tmp - rtDW->LastMajorTime_i;
+      if (rtDW->LastMajorTime_i == deltaT_tmp) {
+        if (rtDW->PrevLimited_k) {
+          /* RateLimiter: '<S1>/Rate Limiter1' */
+          rtDW->RateLimiter1 = rtDW->PrevY_b;
         } else {
-          /* RateLimiter: '<S1>/Rate Limiter' */
-          rtDW->RateLimiter = rtb_Gain;
+          /* RateLimiter: '<S1>/Rate Limiter1' */
+          rtDW->RateLimiter1 = rtb_Gain3;
         }
       } else {
         riseValLimit = deltaT * torq_slew;
-        deltaT_tmp = rtb_Gain - rtDW->PrevY_l;
+        deltaT_tmp = rtb_Gain3 - rtDW->PrevY_b;
         if (deltaT_tmp > riseValLimit) {
-          /* RateLimiter: '<S1>/Rate Limiter' */
-          rtDW->RateLimiter = rtDW->PrevY_l + riseValLimit;
+          /* RateLimiter: '<S1>/Rate Limiter1' */
+          rtDW->RateLimiter1 = rtDW->PrevY_b + riseValLimit;
           limitedCache = true;
         } else {
-          deltaT *= -10000.0;
+          deltaT *= -2.0 * torq_slew;
           if (deltaT_tmp < deltaT) {
-            /* RateLimiter: '<S1>/Rate Limiter' */
-            rtDW->RateLimiter = rtDW->PrevY_l + deltaT;
+            /* RateLimiter: '<S1>/Rate Limiter1' */
+            rtDW->RateLimiter1 = rtDW->PrevY_b + deltaT;
             limitedCache = true;
           } else {
-            /* RateLimiter: '<S1>/Rate Limiter' */
-            rtDW->RateLimiter = rtb_Gain;
+            /* RateLimiter: '<S1>/Rate Limiter1' */
+            rtDW->RateLimiter1 = rtb_Gain3;
             limitedCache = false;
           }
         }
 
         if (rtsiIsModeUpdateTimeStep(&rtM->solverInfo)) {
-          rtDW->PrevLimited_m = limitedCache;
+          rtDW->PrevLimited_k = limitedCache;
         }
       }
     }
 
-    /* End of RateLimiter: '<S1>/Rate Limiter' */
+    /* End of RateLimiter: '<S1>/Rate Limiter1' */
 
     /* Outport: '<Root>/torq' incorporates:
      *  BusCreator generated from: '<Root>/torq_BusCreator'
@@ -270,16 +267,16 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
   {
     double LastMajorTime_tmp;
 
-    /* Update for RateLimiter: '<S1>/Rate Limiter1' incorporates:
-     *  RateLimiter: '<S1>/Rate Limiter'
+    /* Update for RateLimiter: '<S1>/Rate Limiter' incorporates:
+     *  RateLimiter: '<S1>/Rate Limiter1'
      */
-    rtDW->PrevY = rtDW->RateLimiter1;
+    rtDW->PrevY = rtDW->RateLimiter;
     LastMajorTime_tmp = rtM->Timing.t[0];
     rtDW->LastMajorTime = LastMajorTime_tmp;
 
-    /* Update for RateLimiter: '<S1>/Rate Limiter' */
-    rtDW->PrevY_l = rtDW->RateLimiter;
-    rtDW->LastMajorTime_n = LastMajorTime_tmp;
+    /* Update for RateLimiter: '<S1>/Rate Limiter1' */
+    rtDW->PrevY_b = rtDW->RateLimiter1;
+    rtDW->LastMajorTime_i = LastMajorTime_tmp;
   }
 
   /* Update absolute time for base rate */
@@ -324,11 +321,11 @@ void vehicle_control_initialize(vehicle_control_RT_MODEL *const rtM)
   rtmSetTPtr(rtM, &rtM->Timing.tArray[0]);
   rtM->Timing.stepSize0 = 0.01;
 
-  /* InitializeConditions for RateLimiter: '<S1>/Rate Limiter1' */
+  /* InitializeConditions for RateLimiter: '<S1>/Rate Limiter' */
   rtDW->LastMajorTime = (rtInf);
 
-  /* InitializeConditions for RateLimiter: '<S1>/Rate Limiter' */
-  rtDW->LastMajorTime_n = (rtInf);
+  /* InitializeConditions for RateLimiter: '<S1>/Rate Limiter1' */
+  rtDW->LastMajorTime_i = (rtInf);
 }
 
 /*
