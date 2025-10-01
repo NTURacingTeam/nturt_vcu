@@ -39,8 +39,8 @@
 #define PARAM_TORQ_DERATE_END 5000.0
 
 /**
- * @brief Specify aa control parameter. Used in @ref CTRL_PARAM_DECLARE,
- * @ref CTRL_PARAM_DEFINE and @ref CTRL_PARAM_EXTERN.
+ * @brief Specify aa control parameter. Used in @ref CTRL_PARAM_DECLARE and
+ * @ref CTRL_PARAM_EXTERN.
  *
  * @param[in] name Name of the parameter.
  * @param[in] type Type of the parameter.
