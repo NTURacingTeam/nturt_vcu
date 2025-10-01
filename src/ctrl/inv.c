@@ -3,6 +3,8 @@
 #include <string.h>
 
 // zephyr includes
+#include <zephyr/drivers/can.h>
+#include <zephyr/init.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/util.h>
@@ -29,10 +31,15 @@ LOG_MODULE_REGISTER(vcu_ctrl_inv);
 #define CTRL_WORD_FAULT_RESET BIT(5)
 
 #define CTRL_RESET_BIT_HOLD_TIME K_MSEC(100)
+#define CTRL_SET_PARAM_INTERVAL K_MSEC(100)
 
 /* type ----------------------------------------------------------------------*/
 struct ctrl_inv_ctx {
   struct k_work_delayable fault_reset_work;
+
+  struct k_work_delayable set_param_work;
+
+  int set_param_count;
 
   struct k_mutex lock;
 
@@ -43,16 +50,25 @@ struct ctrl_inv_ctx {
 static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
                                       bool is_set);
 
+static int init();
+
 static void msg_cb(const struct zbus_channel *chan);
 static void err_cb(uint32_t errcode, bool set, void *user_data);
 static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void fault_reset_work(struct k_work *work);
+static void set_param_work(struct k_work *work);
 
 /* static variable -----------------------------------------------------------*/
+static const struct device *can_dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_canbus));
+
 static struct ctrl_inv_ctx g_ctx = {
     .fault_reset_work = Z_WORK_DELAYABLE_INITIALIZER(fault_reset_work),
+    .set_param_work = Z_WORK_DELAYABLE_INITIALIZER(set_param_work),
+    .set_param_count = 0,
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
 };
+
+SYS_INIT(init, APPLICATION, CONFIG_VCU_CTRL_INIT_PRIORITY);
 
 ZBUS_LISTENER_DEFINE(ctrl_inv_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_ts_inv_chan, ctrl_inv_listener, 0);
@@ -92,6 +108,12 @@ int ctrl_inv_fault_reset() {
 }
 
 /* static function definition ------------------------------------------------*/
+static int init() {
+  sys_work_schedule(&g_ctx.set_param_work, CTRL_SET_PARAM_INTERVAL);
+
+  return 0;
+}
+
 static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
                                       bool is_set) {
   k_mutex_lock(&ctx->lock, K_FOREVER);
@@ -148,4 +170,47 @@ static void fault_reset_work(struct k_work *work) {
       CONTAINER_OF(dwork, struct ctrl_inv_ctx, fault_reset_work);
 
   ctrl_inv_word_set_and_pub(ctx, CTRL_WORD_FAULT_RESET, false);
+}
+
+static void set_param_work(struct k_work *work) {
+  struct k_work_delayable *dwork = k_work_delayable_from_work(work);
+  struct ctrl_inv_ctx *ctx =
+      CONTAINER_OF(dwork, struct ctrl_inv_ctx, set_param_work);
+
+  struct can_frame frame = {
+      .id = 0x200,
+      .dlc = 5,
+      .flags = 0,
+  };
+
+  switch (ctx->set_param_count) {
+    case 0:
+      // 3.0
+      memcpy(&frame.data[0], (uint8_t[]){0x02, 0x00, 0x00, 0xF0, 0x41}, 5);
+      break;
+    case 1:
+      // 3.0
+      memcpy(&frame.data[0], (uint8_t[]){0x12, 0x00, 0x00, 0xF0, 0x41}, 5);
+      break;
+    case 2:
+      // 4.8 0x4099999a
+      memcpy(&frame.data[0], (uint8_t[]){0x01, 0x9A, 0x99, 0x99, 0x40}, 5);
+      break;
+    case 3:
+      // 3.84 0x4075c28f
+      memcpy(&frame.data[0], (uint8_t[]){0x11, 0x8F, 0xC2, 0x75, 0x40}, 5);
+      break;
+    default:
+      break;
+  }
+
+  int ret = can_send(can_dev, &frame, K_MSEC(200), NULL, NULL);
+  if (ret < 0) {
+    LOG_ERR("Failed to send CAN frame to set inverter parameter: %s",
+            strerror(-ret));
+  }
+
+  ctx->set_param_count = (ctx->set_param_count + 1) % 4;
+
+  sys_work_reschedule(&ctx->set_param_work, CTRL_SET_PARAM_INTERVAL);
 }

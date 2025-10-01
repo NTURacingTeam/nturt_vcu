@@ -37,7 +37,7 @@ ZBUS_LISTENER_DEFINE(ctrl_acc_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_ts_acc_chan, ctrl_acc_listener, 0);
 
 ERR_DEFINE(acc, ERR_CODE_ACC, ERR_SEV_FATAL, "Accumulator error");
-ERR_DEFINE(acc_comm, ERR_CODE_ACC_COMM, ERR_SEV_ERROR,
+ERR_DEFINE(acc_comm, ERR_CODE_ACC_COMM, ERR_SEV_WARN,
            "Accumulator communication error");
 
 /* static function definition ------------------------------------------------*/
