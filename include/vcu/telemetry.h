@@ -39,6 +39,9 @@ enum vcu_tm_data_addr {
 
   TM_VCU_STATES,
 
+  TM_SUSP_TRAVEL_FL,
+  TM_SUSP_TRAVEL_RL,
+
   TM_INV_RL_CTRL_WORD,
   TM_INV_RL_TARGET_TORQUE,
 
@@ -55,6 +58,9 @@ TM_DATA_DECLARE(bse1, uint8_t);
 TM_DATA_DECLARE(bse2, uint8_t);
 
 TM_DATA_DECLARE(vcu_states, uint16_t);
+
+TM_DATA_DECLARE(susp_travel_fl, int16_t);
+TM_DATA_DECLARE(susp_travel_rl, int16_t);
 
 TM_DATA_DECLARE(inv_rl_ctrl_word, uint16_t);
 TM_DATA_DECLARE(inv_rl_target_torque, int16_t);
