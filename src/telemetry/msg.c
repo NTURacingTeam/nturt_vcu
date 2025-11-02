@@ -20,6 +20,7 @@ static void msg_cb(const struct zbus_channel *chan);
 /* static variable -----------------------------------------------------------*/
 ZBUS_LISTENER_DEFINE(telemetry_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, telemetry_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_states_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_word_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_torque_chan, telemetry_listener, 0);
@@ -36,6 +37,12 @@ static void msg_cb(const struct zbus_channel *chan) {
     TM_DATA_UPDATE(brake, PEDAL_TRAV_PHY_TO_CAN(msg->brake));
     TM_DATA_UPDATE(bse1, BSE_RAW_PHY_TO_CAN(msg->bse1));
     TM_DATA_UPDATE(bse2, BSE_RAW_PHY_TO_CAN(msg->bse2));
+
+  } else if (chan == &msg_sensor_wheel_chan) {
+    const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
+
+    TM_DATA_UPDATE(susp_travel_fl, SUSP_PHY_TO_CAN(msg->susp_travel.fl));
+    TM_DATA_UPDATE(susp_travel_rl, SUSP_PHY_TO_CAN(msg->susp_travel.rl));
 
   } else if (chan == &msg_states_chan) {
     const struct msg_states *msg = zbus_chan_const_msg(chan);
