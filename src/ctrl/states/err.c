@@ -21,24 +21,33 @@
 
 #define ON_SEVERITY (FOR_EACH(IDENTITY, (|), FILTERED_ERRORS))
 
+/* type ----------------------------------------------------------------------*/
+struct err_ctx {
+  double accel;
+};
+
 /* static function declaration -----------------------------------------------*/
 static void msg_cb(const struct zbus_channel* chan);
 static void err_cb(uint32_t errcode, bool set, void* user_data);
 
 /* static variable -----------------------------------------------------------*/
+static struct err_ctx g_ctx = {
+    .accel = 0.0,
+};
+
 ZBUS_LISTENER_DEFINE(states_err_listener, msg_cb);
-ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, states_err_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, states_err_listener, 0);
 
 ERR_CALLBACK_DEFINE(err_cb, NULL, ERR_FILTER_SEV(FILTERED_ERRORS));
 
 /* static function definition ------------------------------------------------*/
 static void msg_cb(const struct zbus_channel* chan) {
-  const struct msg_sensor_wheel* msg = zbus_chan_const_msg(chan);
+  const struct msg_sensor_cockpit* msg = zbus_chan_const_msg(chan);
 
-  for (int i = 2; i < 4; i++) {
-    if (PARAM_MOTOR_REDUCTION_RATIO * msg->speed.values[i] > 500.0) {
-      return;
-    }
+  g_ctx.accel = msg->accel;
+
+  if (msg->accel > 0.0) {
+    return;
   }
 
   int max_severity = 0;
@@ -59,6 +68,11 @@ static void err_cb(uint32_t errcode, bool set, void* user_data) {
   (void)errcode;
   (void)set;
   (void)user_data;
+
+  /// @todo Fix this, may require architecture overhaul
+  if (states_transition_pending()) {
+    return;
+  }
 
   int max_severity = 0;
 
@@ -82,6 +96,8 @@ static void err_cb(uint32_t errcode, bool set, void* user_data) {
   } else {
     if (states_valid_transition(TRANS_CMD_ERROR_CLEARED)) {
       states_transition(TRANS_CMD_ERROR_CLEARED);
+    } else if (states_valid_transition(TRANS_CMD_ERROR_CLEARED_RUNNING) && g_ctx.accel == 0.0) {
+      states_transition(TRANS_CMD_ERROR_CLEARED_RUNNING);
     }
   }
 }
