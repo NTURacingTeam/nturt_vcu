@@ -18,7 +18,7 @@
 #include <nturt/err/err.h>
 
 // project includes
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
 #include "simulink/sensor_fusion.h"
 #endif
 #include "simulink/vehicle_control.h"
@@ -71,10 +71,11 @@ struct ctrl_ctx {
   struct msg_sensor_imu imu;
   struct msg_sensor_gps gps;
   struct msg_ctrl_vehicle_state vehicle_state;
+  struct msg_ctrl_tc_in tc_in;
 
   struct msg_ctrl_cmd cmd_last;
 
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
   sensor_fusion_RT_MODEL sensor_fusion_model;
 #endif
 
@@ -106,6 +107,7 @@ ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_sensor_imu_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_sensor_gps_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_vehicle_state_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_tc_in_chan, ctrl_listener, 0);
 
 ZBUS_CHAN_ADD_OBS(msg_ctrl_cmd_chan, ctrl_listener, 0);
 
@@ -119,7 +121,7 @@ CTRL_PARAM_DEFINE(CTRL_PARAM_LIST);
 
 /* static function definition ------------------------------------------------*/
 static void ctrl_init(struct ctrl_ctx *ctx) {
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
   sensor_fusion_initialize(&ctx->sensor_fusion_model);
 #endif
 
@@ -151,7 +153,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       continue;
     }
 
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
 
     sensor_fusion_ExtU input = {
         .cockpit = ctx->cockpit,
@@ -168,10 +170,11 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
     zbus_chan_pub(&msg_ctrl_vehicle_state_chan, msg, K_MSEC(5));
 
-#endif  // CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#endif  // CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
 
     if (ctx->state != CTRL_STATE_IDLE) {
       vehicle_control_ExtU input = {
+          .tc_in = ctx->tc_in,
           .vehicle_state = ctx->vehicle_state,
           .cockpit = ctx->cockpit,
           .wheel = ctx->wheel,
@@ -193,6 +196,11 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       msg_header_init(&msg->header);
 
       zbus_chan_pub(&msg_ctrl_torque_chan, msg, K_MSEC(5));
+
+      struct msg_ctrl_tc *msg_tc = &output.tc;
+      msg_header_init(&msg_tc->header);
+
+      zbus_chan_pub(&msg_ctrl_tc_chan, msg_tc, K_MSEC(5));
     }
 
     k_mutex_unlock(&ctx->lock);
@@ -209,6 +217,12 @@ static void msg_cb(const struct zbus_channel *chan) {
     g_ctx.imu = *(const struct msg_sensor_imu *)zbus_chan_const_msg(chan);
   } else if (chan == &msg_sensor_gps_chan) {
     g_ctx.gps = *(const struct msg_sensor_gps *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_vehicle_state_chan) {
+    g_ctx.vehicle_state =
+        *(const struct msg_ctrl_vehicle_state *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_tc_in_chan) {
+    g_ctx.tc_in = *(const struct msg_ctrl_tc_in *)zbus_chan_const_msg(chan);
+
   } else if (chan == &msg_ctrl_cmd_chan) {
     const struct msg_ctrl_cmd *msg = zbus_chan_const_msg(chan);
 

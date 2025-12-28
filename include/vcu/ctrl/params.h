@@ -37,6 +37,11 @@
 #define PARAM_TORQ_SLEW 4.0
 #define PARAM_TORQ_DERATE_BEGIN 3000.0
 #define PARAM_TORQ_DERATE_END 5000.0
+#define PARAM_FB_RATIO 0.5
+#define PARAM_FB_GAIN 1.0
+#define PARAM_FF_GAIN 1.0
+#define PARAM_TV_GAIN 2.0
+#define PARAM_TARGET_SR 0.1
 
 /**
  * @brief Specify aa control parameter. Used in @ref CTRL_PARAM_DECLARE and
@@ -87,7 +92,12 @@
       CTRL_PARAM(torq_limit_fr, double, PARAM_TORQ_LIMIT),        \
       CTRL_PARAM(torq_limit_rl, double, PARAM_TORQ_LIMIT),        \
       CTRL_PARAM(torq_limit_rr, double, PARAM_TORQ_LIMIT),        \
-      CTRL_PARAM(torq_slew, double, PARAM_TORQ_SLEW)
+      CTRL_PARAM(torq_slew, double, PARAM_TORQ_SLEW),             \
+      CTRL_PARAM(fb_ratio, double, PARAM_FB_RATIO),               \
+      CTRL_PARAM(fb_gain, double, PARAM_FB_GAIN),                 \
+      CTRL_PARAM(ff_gain, double, PARAM_FF_GAIN),                 \
+      CTRL_PARAM(tv_gain, double, PARAM_TV_GAIN),                 \
+      CTRL_PARAM(target_sr, double, PARAM_TARGET_SR)
 
 /* function declaration ------------------------------------------------------*/
 CTRL_PARAM_DECLARE(CTRL_PARAM_LIST);

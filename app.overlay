@@ -28,8 +28,8 @@
 
         steer: steer {
             zephyr,axis = <INPUT_ABS_WHEEL>;
-            out-min = <(-130)>;
-            out-max = <130>;
+            out-min = <(-125)>;
+            out-max = <125>;
             noise = <1000>; // 1%
 
             steer_sensor_axis: steer_encoder {
