@@ -249,19 +249,19 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x140C_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000188,
+        .COB_IDUsedByRPDO = 0x00000185,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
     .x140D_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000288,
+        .COB_IDUsedByRPDO = 0x00000285,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
     .x140E_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000488,
+        .COB_IDUsedByRPDO = 0x00000485,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },

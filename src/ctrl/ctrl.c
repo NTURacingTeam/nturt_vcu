@@ -18,7 +18,7 @@
 #include <nturt/err/err.h>
 
 // project includes
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
 #include "simulink/sensor_fusion.h"
 #endif
 #include "simulink/vehicle_control.h"
@@ -75,7 +75,7 @@ struct ctrl_ctx {
 
   struct msg_ctrl_cmd cmd_last;
 
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
   sensor_fusion_RT_MODEL sensor_fusion_model;
 #endif
 
@@ -121,7 +121,7 @@ CTRL_PARAM_DEFINE(CTRL_PARAM_LIST);
 
 /* static function definition ------------------------------------------------*/
 static void ctrl_init(struct ctrl_ctx *ctx) {
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
   sensor_fusion_initialize(&ctx->sensor_fusion_model);
 #endif
 
@@ -153,7 +153,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       continue;
     }
 
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
 
     sensor_fusion_ExtU input = {
         .cockpit = ctx->cockpit,
@@ -169,7 +169,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
     zbus_chan_pub(&msg_ctrl_vehicle_state_chan, msg, K_MSEC(5));
 
-#endif  // CONFIG_VCU_SOURCE_VEHICLE_STATE_FUSION
+#endif  // CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
 
     if (ctx->state != CTRL_STATE_IDLE) {
       vehicle_control_ExtU input = {

@@ -15,11 +15,11 @@ rsource "src/perception/Kconfig"
 rsource "src/sys/Kconfig"
 rsource "src/telemetry/Kconfig"
 
-config VCU_HAL
+config VCU_HIL
 	bool "VCU hardware in a loop test"
 	depends on VCU_CANOPEN
 
-if VCU_HAL
+if VCU_HIL
 
 choice VCU_SOURCE_COCKPIT
 	default VCU_SOURCE_COCKPIT_CANOPEN
@@ -31,23 +31,23 @@ choice VCU_SOURCE_GPS
 	default VCU_SOURCE_GPS_CANOPEN
 endchoice
 
-endif # VCU_HAL
+endif # VCU_HIL
 
-choice VCU_SOURCE_VEHICLE_STATE
+choice VCU_SOURCE_VEHICLE_STATES
 	prompt "Vehicle states data source"
-	default VCU_SOURCE_VEHICLE_STATE_FUSION
+	default VCU_SOURCE_VEHICLE_STATES_FUSION
 
-config VCU_SOURCE_VEHICLE_STATE_DISABLED
+config VCU_SOURCE_VEHICLE_STATES_DISABLED
 	bool "Vehicle states data disabled"
 
-config VCU_SOURCE_VEHICLE_STATE_FUSION
+config VCU_SOURCE_VEHICLE_STATES_FUSION
 	bool "Vehicle states data from sensor fusion"
 
-config VCU_SOURCE_VEHICLE_STATE_CANOPEN
+config VCU_SOURCE_VEHICLE_STATES_CANOPEN
 	bool "Vehicle states data from CAN open"
 	depends on VCU_CANOPEN
 
-endchoice # VCU_SOURCE_VEHICLE_STATE
+endchoice # VCU_SOURCE_VEHICLE_STATES
 
 choice VCU_SOURCE_COCKPIT
 	prompt "Cockpit sensors data source"
