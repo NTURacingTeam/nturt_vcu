@@ -17,6 +17,12 @@ CANOPEN_TM_TO_TPDO_DEFINE(states,
     TPDO_DATA(vcu_states, 0x2000, 0x0)
 );
 
+CANOPEN_TM_TO_TPDO_DEFINE(sensors,
+    K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
+    TPDO_DATA(susp_travel_fl, 0x2210, 0x04),
+    TPDO_DATA(susp_travel_rl, 0x2212, 0x04)
+);
+
 CANOPEN_TM_TO_TPDO_DEFINE(inv_rl,
     K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
     TPDO_DATA(inv_rl_ctrl_word, 0x2130, 0x0, AGG_MEMBER_FLAG_OPTIONAL),

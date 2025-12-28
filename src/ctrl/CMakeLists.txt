@@ -8,6 +8,7 @@ file(GLOB SIMULINK_FILES
 
 target_sources(app PRIVATE
     ${SIMULINK_FILES}
+    acc.c
     ctrl.c
     inv.c
 )

@@ -252,6 +252,8 @@ bool states_valid_transition(enum states_trans_cmd cmd) {
   return g_ctx.states & g_trans_cmd_infos[cmd].src;
 }
 
+bool states_transition_pending() { return k_sem_count_get(&g_ctx.sem) == 0; }
+
 void states_transition(enum states_trans_cmd cmd) {
   __ASSERT(g_ctx.initialized, "States module not yet initialized");
 

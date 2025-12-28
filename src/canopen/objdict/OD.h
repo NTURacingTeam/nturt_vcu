@@ -16,7 +16,7 @@
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2025/8/26 下午 06:44:05
+        Modified:     2025/11/1 下午 08:55:29
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
@@ -54,14 +54,14 @@
 #define OD_CNT_ARR_1003 16
 #define OD_CNT_ARR_1010 4
 #define OD_CNT_ARR_1011 4
-#define OD_CNT_ARR_1016 3
+#define OD_CNT_ARR_1016 2
 #define OD_CNT_ARR_2001 16
 #define OD_CNT_ARR_2088 2
 #define OD_CNT_ARR_2090 3
 #define OD_CNT_ARR_20A0 6
 #define OD_CNT_ARR_2240 3
 #define OD_CNT_ARR_2241 3
-#define OD_CNT_ARR_2243 3
+#define OD_CNT_ARR_2244 4
 
 
 /*******************************************************************************
@@ -80,7 +80,7 @@ typedef struct {
     int32_t x1010_storeParameters[OD_CNT_ARR_1010];
     uint8_t x1011_restoreDefaultParameters_sub0;
     int32_t x1011_restoreDefaultParameters[OD_CNT_ARR_1011];
-    uint8_t x2000_VCUStates;
+    uint16_t x2000_VCUStates;
     uint8_t x2001_VCUErrors_sub0;
     uint32_t x2001_VCUErrors[OD_CNT_ARR_2001];
     int16_t x2080_steerAngle;
@@ -158,41 +158,35 @@ typedef struct {
         int16_t speed;
         int16_t torque;
         uint8_t tireTemperature;
+        int16_t suspensionTravel;
     } x2210_wheelFL;
     struct {
         uint8_t highestSub_indexSupported;
         int16_t speed;
         int16_t torque;
         uint8_t tireTemperature;
+        int16_t suspensionTravel;
     } x2211_wheelFR;
     struct {
         uint8_t highestSub_indexSupported;
         int16_t speed;
         int16_t torque;
         uint8_t tireTemperature;
+        int16_t suspensionTravel;
     } x2212_wheelRL;
     struct {
         uint8_t highestSub_indexSupported;
         int16_t speed;
         int16_t torque;
         uint8_t tireTemperature;
+        int16_t suspensionTravel;
     } x2213_wheelRR;
-    struct {
-        uint8_t highestSub_indexSupported;
-        uint8_t dive;
-        uint8_t roll;
-    } x2220_suspensionF;
-    struct {
-        uint8_t highestSub_indexSupported;
-        uint8_t dive;
-        uint8_t roll;
-    } x2221_suspensionR;
     uint8_t x2240_IMUAcceleration_sub0;
     int16_t x2240_IMUAcceleration[OD_CNT_ARR_2240];
     uint8_t x2241_IMUGyration_sub0;
     int16_t x2241_IMUGyration[OD_CNT_ARR_2241];
-    uint8_t x2243_IMUEuler_sub0;
-    int16_t x2243_IMUEuler[OD_CNT_ARR_2243];
+    uint8_t x2244_IMUQuaternion_sub0;
+    int16_t x2244_IMUQuaternion[OD_CNT_ARR_2244];
     struct {
         uint8_t highestSub_indexSupported;
         int32_t latitude;
@@ -829,13 +823,11 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H2211 &OD->list[101]
 #define OD_ENTRY_H2212 &OD->list[102]
 #define OD_ENTRY_H2213 &OD->list[103]
-#define OD_ENTRY_H2220 &OD->list[104]
-#define OD_ENTRY_H2221 &OD->list[105]
-#define OD_ENTRY_H2240 &OD->list[106]
-#define OD_ENTRY_H2241 &OD->list[107]
-#define OD_ENTRY_H2243 &OD->list[108]
-#define OD_ENTRY_H2250 &OD->list[109]
-#define OD_ENTRY_H2251 &OD->list[110]
+#define OD_ENTRY_H2240 &OD->list[104]
+#define OD_ENTRY_H2241 &OD->list[105]
+#define OD_ENTRY_H2244 &OD->list[106]
+#define OD_ENTRY_H2250 &OD->list[107]
+#define OD_ENTRY_H2251 &OD->list[108]
 
 
 /*******************************************************************************
@@ -945,13 +937,11 @@ extern OD_ATTR_OD OD_t *OD;
 #define OD_ENTRY_H2211_wheelFR &OD->list[101]
 #define OD_ENTRY_H2212_wheelRL &OD->list[102]
 #define OD_ENTRY_H2213_wheelRR &OD->list[103]
-#define OD_ENTRY_H2220_suspensionF &OD->list[104]
-#define OD_ENTRY_H2221_suspensionR &OD->list[105]
-#define OD_ENTRY_H2240_IMUAcceleration &OD->list[106]
-#define OD_ENTRY_H2241_IMUGyration &OD->list[107]
-#define OD_ENTRY_H2243_IMUEuler &OD->list[108]
-#define OD_ENTRY_H2250_GPSPosition &OD->list[109]
-#define OD_ENTRY_H2251_GPSVelocity &OD->list[110]
+#define OD_ENTRY_H2240_IMUAcceleration &OD->list[104]
+#define OD_ENTRY_H2241_IMUGyration &OD->list[105]
+#define OD_ENTRY_H2244_IMUQuaternion &OD->list[106]
+#define OD_ENTRY_H2250_GPSPosition &OD->list[107]
+#define OD_ENTRY_H2251_GPSVelocity &OD->list[108]
 
 
 /*******************************************************************************

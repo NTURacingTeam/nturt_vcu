@@ -33,7 +33,7 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x1010_storeParameters = {1, 1, 1, 1},
     .x1011_restoreDefaultParameters_sub0 = 0x04,
     .x1011_restoreDefaultParameters = {1, 1, 1, 1},
-    .x2000_VCUStates = 0x00,
+    .x2000_VCUStates = 0x0000,
     .x2001_VCUErrors_sub0 = 0x00,
     .x2001_VCUErrors = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
     .x2080_steerAngle = 0,
@@ -107,45 +107,39 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
         .I_5rpi = 0x00
     },
     .x2210_wheelFL = {
-        .highestSub_indexSupported = 0x03,
+        .highestSub_indexSupported = 0x04,
         .speed = 0,
         .torque = 0,
-        .tireTemperature = 0x00
+        .tireTemperature = 0x00,
+        .suspensionTravel = 0
     },
     .x2211_wheelFR = {
-        .highestSub_indexSupported = 0x03,
+        .highestSub_indexSupported = 0x04,
         .speed = 0,
         .torque = 0,
-        .tireTemperature = 0x00
+        .tireTemperature = 0x00,
+        .suspensionTravel = 0
     },
     .x2212_wheelRL = {
-        .highestSub_indexSupported = 0x03,
+        .highestSub_indexSupported = 0x04,
         .speed = 0,
         .torque = 0,
-        .tireTemperature = 0x00
+        .tireTemperature = 0x00,
+        .suspensionTravel = 0
     },
     .x2213_wheelRR = {
-        .highestSub_indexSupported = 0x03,
+        .highestSub_indexSupported = 0x04,
         .speed = 0,
         .torque = 0,
-        .tireTemperature = 0x00
-    },
-    .x2220_suspensionF = {
-        .highestSub_indexSupported = 0x02,
-        .dive = 0x00,
-        .roll = 0x00
-    },
-    .x2221_suspensionR = {
-        .highestSub_indexSupported = 0x02,
-        .dive = 0x00,
-        .roll = 0x00
+        .tireTemperature = 0x00,
+        .suspensionTravel = 0
     },
     .x2240_IMUAcceleration_sub0 = 0x03,
     .x2240_IMUAcceleration = {0, 0, 0},
     .x2241_IMUGyration_sub0 = 0x03,
     .x2241_IMUGyration = {0, 0, 0},
-    .x2243_IMUEuler_sub0 = 0x03,
-    .x2243_IMUEuler = {0, 0, 0},
+    .x2244_IMUQuaternion_sub0 = 0x04,
+    .x2244_IMUQuaternion = {0, 0, 0, 0},
     .x2250_GPSPosition = {
         .highestSub_indexSupported = 0x03,
         .latitude = 0,
@@ -166,8 +160,8 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     .x1012_COB_IDTimeStampObject = 0x80000100,
     .x1014_COB_ID_EMCY = 0x00000080,
     .x1015_inhibitTimeEMCY = 0x0064,
-    .x1016_consumerHeartbeatTime_sub0 = 0x03,
-    .x1016_consumerHeartbeatTime = {0x000201F4, 0x001301F4, 0x001401F4},
+    .x1016_consumerHeartbeatTime_sub0 = 0x02,
+    .x1016_consumerHeartbeatTime = {0x001301F4, 0x001401F4},
     .x1017_producerHeartbeatTime = 0x0064,
     .x1019_synchronousCounterOverflowValue = 0x00,
     .x1200_SDOServerParameter = {
@@ -267,7 +261,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x140E_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000388,
+        .COB_IDUsedByRPDO = 0x00000488,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
@@ -462,11 +456,11 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x160E_RPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x03,
-        .applicationObject1 = 0x22430110,
-        .applicationObject2 = 0x22430210,
-        .applicationObject3 = 0x22430310,
-        .applicationObject4 = 0x00000000,
+        .numberOfMappedApplicationObjectsInPDO = 0x04,
+        .applicationObject1 = 0x22440110,
+        .applicationObject2 = 0x22440210,
+        .applicationObject3 = 0x22440310,
+        .applicationObject4 = 0x22440410,
         .applicationObject5 = 0x00000000,
         .applicationObject6 = 0x00000000,
         .applicationObject7 = 0x00000000,
@@ -556,7 +550,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1802_TPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x06,
-        .COB_IDUsedByTPDO = 0xC0000380,
+        .COB_IDUsedByTPDO = 0x00000381,
         .transmissionType = 0xFE,
         .inhibitTime = 0x0000,
         .eventTimer = 0x0000,
@@ -599,7 +593,7 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1A01_TPDOMappingParameter = {
         .numberOfMappedApplicationObjectsInPDO = 0x01,
-        .applicationObject1 = 0x20000008,
+        .applicationObject1 = 0x20000010,
         .applicationObject2 = 0x00000000,
         .applicationObject3 = 0x00000000,
         .applicationObject4 = 0x00000000,
@@ -609,9 +603,9 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x1A02_TPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x00,
-        .applicationObject1 = 0x00000000,
-        .applicationObject2 = 0x00000000,
+        .numberOfMappedApplicationObjectsInPDO = 0x02,
+        .applicationObject1 = 0x22100410,
+        .applicationObject2 = 0x22120410,
         .applicationObject3 = 0x00000000,
         .applicationObject4 = 0x00000000,
         .applicationObject5 = 0x00000000,
@@ -760,15 +754,13 @@ typedef struct {
     OD_obj_record_t o_2144_invRR_DCBus[3];
     OD_obj_record_t o_2145_invRRTemperature[4];
     OD_obj_record_t o_2200_power[5];
-    OD_obj_record_t o_2210_wheelFL[4];
-    OD_obj_record_t o_2211_wheelFR[4];
-    OD_obj_record_t o_2212_wheelRL[4];
-    OD_obj_record_t o_2213_wheelRR[4];
-    OD_obj_record_t o_2220_suspensionF[3];
-    OD_obj_record_t o_2221_suspensionR[3];
+    OD_obj_record_t o_2210_wheelFL[5];
+    OD_obj_record_t o_2211_wheelFR[5];
+    OD_obj_record_t o_2212_wheelRL[5];
+    OD_obj_record_t o_2213_wheelRR[5];
     OD_obj_array_t o_2240_IMUAcceleration;
     OD_obj_array_t o_2241_IMUGyration;
-    OD_obj_array_t o_2243_IMUEuler;
+    OD_obj_array_t o_2244_IMUQuaternion;
     OD_obj_record_t o_2250_GPSPosition[4];
     OD_obj_record_t o_2251_GPSVelocity[3];
 } ODObjs_t;
@@ -3205,8 +3197,8 @@ static CO_PROGMEM ODObjs_t ODObjs = {
     },
     .o_2000_VCUStates = {
         .dataOrig = &OD_RAM.x2000_VCUStates,
-        .attribute = ODA_SDO_R | ODA_TPDO,
-        .dataLength = 1
+        .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+        .dataLength = 2
     },
     .o_2001_VCUErrors = {
         .dataOrig0 = &OD_RAM.x2001_VCUErrors_sub0,
@@ -3545,6 +3537,12 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 3,
             .attribute = ODA_SDO_R | ODA_TPDO,
             .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_RAM.x2210_wheelFL.suspensionTravel,
+            .subIndex = 4,
+            .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+            .dataLength = 2
         }
     },
     .o_2211_wheelFR = {
@@ -3571,6 +3569,12 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 3,
             .attribute = ODA_SDO_R | ODA_TPDO,
             .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_RAM.x2211_wheelFR.suspensionTravel,
+            .subIndex = 4,
+            .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+            .dataLength = 2
         }
     },
     .o_2212_wheelRL = {
@@ -3597,6 +3601,12 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 3,
             .attribute = ODA_SDO_R | ODA_TPDO,
             .dataLength = 1
+        },
+        {
+            .dataOrig = &OD_RAM.x2212_wheelRL.suspensionTravel,
+            .subIndex = 4,
+            .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+            .dataLength = 2
         }
     },
     .o_2213_wheelRR = {
@@ -3623,46 +3633,12 @@ static CO_PROGMEM ODObjs_t ODObjs = {
             .subIndex = 3,
             .attribute = ODA_SDO_R | ODA_TPDO,
             .dataLength = 1
-        }
-    },
-    .o_2220_suspensionF = {
-        {
-            .dataOrig = &OD_RAM.x2220_suspensionF.highestSub_indexSupported,
-            .subIndex = 0,
-            .attribute = ODA_SDO_R,
-            .dataLength = 1
         },
         {
-            .dataOrig = &OD_RAM.x2220_suspensionF.dive,
-            .subIndex = 1,
-            .attribute = ODA_SDO_R | ODA_TPDO,
-            .dataLength = 1
-        },
-        {
-            .dataOrig = &OD_RAM.x2220_suspensionF.roll,
-            .subIndex = 2,
-            .attribute = ODA_SDO_R | ODA_TPDO,
-            .dataLength = 1
-        }
-    },
-    .o_2221_suspensionR = {
-        {
-            .dataOrig = &OD_RAM.x2221_suspensionR.highestSub_indexSupported,
-            .subIndex = 0,
-            .attribute = ODA_SDO_R,
-            .dataLength = 1
-        },
-        {
-            .dataOrig = &OD_RAM.x2221_suspensionR.dive,
-            .subIndex = 1,
-            .attribute = ODA_SDO_R | ODA_TPDO,
-            .dataLength = 1
-        },
-        {
-            .dataOrig = &OD_RAM.x2221_suspensionR.roll,
-            .subIndex = 2,
-            .attribute = ODA_SDO_R | ODA_TPDO,
-            .dataLength = 1
+            .dataOrig = &OD_RAM.x2213_wheelRR.suspensionTravel,
+            .subIndex = 4,
+            .attribute = ODA_SDO_R | ODA_TPDO | ODA_MB,
+            .dataLength = 2
         }
     },
     .o_2240_IMUAcceleration = {
@@ -3681,9 +3657,9 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         .dataElementLength = 2,
         .dataElementSizeof = sizeof(int16_t)
     },
-    .o_2243_IMUEuler = {
-        .dataOrig0 = &OD_RAM.x2243_IMUEuler_sub0,
-        .dataOrig = &OD_RAM.x2243_IMUEuler[0],
+    .o_2244_IMUQuaternion = {
+        .dataOrig0 = &OD_RAM.x2244_IMUQuaternion_sub0,
+        .dataOrig = &OD_RAM.x2244_IMUQuaternion[0],
         .attribute0 = ODA_SDO_R,
         .attribute = ODA_RPDO | ODA_MB,
         .dataElementLength = 2,
@@ -3756,7 +3732,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1012, 0x01, ODT_VAR, &ODObjs.o_1012_COB_IDTimeStampObject, NULL},
     {0x1014, 0x01, ODT_VAR, &ODObjs.o_1014_COB_ID_EMCY, NULL},
     {0x1015, 0x01, ODT_VAR, &ODObjs.o_1015_inhibitTimeEMCY, NULL},
-    {0x1016, 0x04, ODT_ARR, &ODObjs.o_1016_consumerHeartbeatTime, NULL},
+    {0x1016, 0x03, ODT_ARR, &ODObjs.o_1016_consumerHeartbeatTime, NULL},
     {0x1017, 0x01, ODT_VAR, &ODObjs.o_1017_producerHeartbeatTime, NULL},
     {0x1019, 0x01, ODT_VAR, &ODObjs.o_1019_synchronousCounterOverflowValue, NULL},
     {0x1200, 0x03, ODT_REC, &ODObjs.o_1200_SDOServerParameter, NULL},
@@ -3842,15 +3818,13 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x2144, 0x03, ODT_REC, &ODObjs.o_2144_invRR_DCBus, NULL},
     {0x2145, 0x04, ODT_REC, &ODObjs.o_2145_invRRTemperature, NULL},
     {0x2200, 0x05, ODT_REC, &ODObjs.o_2200_power, NULL},
-    {0x2210, 0x04, ODT_REC, &ODObjs.o_2210_wheelFL, NULL},
-    {0x2211, 0x04, ODT_REC, &ODObjs.o_2211_wheelFR, NULL},
-    {0x2212, 0x04, ODT_REC, &ODObjs.o_2212_wheelRL, NULL},
-    {0x2213, 0x04, ODT_REC, &ODObjs.o_2213_wheelRR, NULL},
-    {0x2220, 0x03, ODT_REC, &ODObjs.o_2220_suspensionF, NULL},
-    {0x2221, 0x03, ODT_REC, &ODObjs.o_2221_suspensionR, NULL},
+    {0x2210, 0x05, ODT_REC, &ODObjs.o_2210_wheelFL, NULL},
+    {0x2211, 0x05, ODT_REC, &ODObjs.o_2211_wheelFR, NULL},
+    {0x2212, 0x05, ODT_REC, &ODObjs.o_2212_wheelRL, NULL},
+    {0x2213, 0x05, ODT_REC, &ODObjs.o_2213_wheelRR, NULL},
     {0x2240, 0x04, ODT_ARR, &ODObjs.o_2240_IMUAcceleration, NULL},
     {0x2241, 0x04, ODT_ARR, &ODObjs.o_2241_IMUGyration, NULL},
-    {0x2243, 0x04, ODT_ARR, &ODObjs.o_2243_IMUEuler, NULL},
+    {0x2244, 0x05, ODT_ARR, &ODObjs.o_2244_IMUQuaternion, NULL},
     {0x2250, 0x04, ODT_REC, &ODObjs.o_2250_GPSPosition, NULL},
     {0x2251, 0x03, ODT_REC, &ODObjs.o_2251_GPSVelocity, NULL},
     {0x0000, 0x00, 0, NULL, NULL}

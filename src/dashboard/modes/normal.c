@@ -24,7 +24,7 @@
 #include "vcu/msg/msg.h"
 
 /* macro ---------------------------------------------------------------------*/
-#define M_S_TO_KM_H(x) ((x) * 3.6F)
+#define M_S_TO_KM_H(x) ((x) * 3.6)
 
 /* type ----------------------------------------------------------------------*/
 enum dashboard_normal_state {
@@ -217,8 +217,8 @@ static void msg_cb(const struct zbus_channel *chan) {
     const struct msg_ctrl_vehicle_state *msg = zbus_chan_const_msg(chan);
 
     if (!g_ctx.states[ERROR_HB_INV]) {
-      int speed = roundf(M_S_TO_KM_H(sqrtf(msg->velocity.x * msg->velocity.x +
-                                           msg->velocity.y * msg->velocity.y)));
+      int speed = round(M_S_TO_KM_H(sqrt(msg->velocity.x * msg->velocity.x +
+                                         msg->velocity.y * msg->velocity.y)));
       dashboard_set_level(DASHBOARD_SPEED, speed);
     }
 

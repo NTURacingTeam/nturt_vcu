@@ -55,7 +55,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
 
     struct timespec ts;
     sys_clock_gettime(SYS_CLOCK_REALTIME, &ts);
-    p += strftime(p, sizeof(path) - (p - path), "%Y_%m_%d_%H_%M_%S",
+    p += strftime(p, sizeof(path) - (p - path), "%Y_%m_%d/%H_%M_%S",
                   gmtime(&ts.tv_sec));
     *p = '/';
     p++;

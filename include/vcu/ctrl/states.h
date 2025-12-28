@@ -160,6 +160,14 @@ states_t states_get();
 bool states_valid_transition(enum states_trans_cmd cmd);
 
 /**
+ * @brief Check if a state transition is currently pending.
+ *
+ * @return true If a state transition is pending.
+ * @return false If no state transition is pending.
+ */
+bool states_transition_pending();
+
+/**
  * @brief Execute a state transition command to transition to a new state.
  *
  * @param[in] cmd State transition command.
