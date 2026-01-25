@@ -201,13 +201,13 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x1404_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000290,
+        .COB_IDUsedByRPDO = 0x00000501,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
     .x1405_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000490,
+        .COB_IDUsedByRPDO = 0x00000511,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
