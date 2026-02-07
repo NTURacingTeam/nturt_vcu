@@ -9,7 +9,7 @@
  *
  * Model version                  : 5.43
  * Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
- * C/C++ source code generated on : Sun Jan 25 14:34:30 2026
+ * C/C++ source code generated on : Sat Feb  7 21:55:47 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -473,11 +473,11 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
      *  MATLAB Function: '<S6>/MATLAB Function3'
      *  Memory: '<S30>/Memory'
      */
-    MATLABFunction3_o(rtDW->Memory_PreviousInput_p, fabs(rtb_Gain4 * rt_powd_snf
-      (rtU->vehicle_state.velocity.x, 3.0) * rtDW->y_e * (1.0 / ((rtb_Gain *
-      scaling + rtb_F_dy * scaling) * fr_ratio) + 1.0 / (C_alhpa_r_tmp * scaling
-      + C_alhpa_r_tmp_0 * scaling)) / 4.096000000000001), &rtDW->y_g,
-                      &rtDW->sf_MATLABFunction3_m0);
+    MATLABFunction3_o(rtDW->Memory_PreviousInput_p, rtb_Gain4 * rt_powd_snf
+                      (rtU->vehicle_state.velocity.x, 3.0) * rtDW->y_e * (1.0 /
+      ((rtb_Gain * scaling + rtb_F_dy * scaling) * fr_ratio) + 1.0 /
+      (C_alhpa_r_tmp * scaling + C_alhpa_r_tmp_0 * scaling)) / 4.096000000000001,
+                      &rtDW->y_g, &rtDW->sf_MATLABFunction3_m0);
 
     /* MATLAB Function: '<S6>/MATLAB Function' incorporates:
      *  MATLAB Function: '<S6>/Torque_Max'
