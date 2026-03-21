@@ -50,28 +50,28 @@ static int init() {
 #ifdef CONFIG_VCU_HAS_SUSP_FL
   if (!device_is_ready(susp_fl)) {
     LOG_ERR("Suspension front left device not ready");
-    return -ENODEV;
+    // return -ENODEV;
   }
 #endif  // CONFIG_VCU_HAS_SUSP_FL
 
 #ifdef CONFIG_VCU_HAS_SUSP_FR
   if (!device_is_ready(susp_fr)) {
     LOG_ERR("Suspension front right device not ready");
-    return -ENODEV;
+    // return -ENODEV;
   }
 #endif  // CONFIG_VCU_HAS_SUSP_FR
 
 #ifdef CONFIG_VCU_HAS_SUSP_RL
   if (!device_is_ready(susp_rl)) {
     LOG_ERR("Suspension rear left device not ready");
-    return -ENODEV;
+    // return -ENODEV;
   }
 #endif  // CONFIG_VCU_HAS_SUSP_RL
 
 #ifdef CONFIG_VCU_HAS_SUSP_RR
   if (!device_is_ready(susp_rr)) {
     LOG_ERR("Suspension rear right device not ready");
-    return -ENODEV;
+    // return -ENODEV;
   }
 #endif  // CONFIG_VCU_HAS_SUSP_RR
 

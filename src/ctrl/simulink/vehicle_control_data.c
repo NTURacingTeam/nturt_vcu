@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 3.18
+ * Model version                  : 3.23
  * Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
- * C/C++ source code generated on : Sun Mar  1 01:46:13 2026
+ * C/C++ source code generated on : Sun Mar  1 15:32:26 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -94,15 +94,35 @@ const vehicle_control_ConstP rtConstP = {
     0.540395117, 0.554272928, 0.568220377, 0.582240956, 0.59633798, 0.61051494,
     0.624775851, 0.639124377, 0.653564358, 0.668099983 },
 
-  /* Expression: [0;826.04999999999995]
-   * Referenced by: '<S20>/1-D Lookup Table1'
+  /* Expression: [-826.04999999999995;0;826.04999999999995]
+   * Referenced by: '<S20>/1-D Lookup Table'
    */
-  { 0.0, 826.05 },
+  { -826.05, 0.0, 826.05 },
 
-  /* Expression: [0;1424.3699999999999]
-   * Referenced by: '<S20>/1-D Lookup Table1'
+  /* Expression: [-1424.3699999999999;0;1424.3699999999999]
+   * Referenced by: '<S20>/1-D Lookup Table'
    */
-  { 0.0, 1424.37 }
+  { -1424.37, 0.0, 1424.37 },
+
+  /* Expression: [0.82;0.88]
+   * Referenced by: '<S5>/1-D Lookup Table'
+   */
+  { 0.82, 0.88 },
+
+  /* Expression: [-5;5]
+   * Referenced by: '<S5>/1-D Lookup Table'
+   */
+  { -5.0, 5.0 },
+
+  /* Expression: [1;0.92;0.85]
+   * Referenced by: '<S5>/1-D Lookup Table2'
+   */
+  { 1.0, 0.92, 0.85 },
+
+  /* Expression: [0;6;12]
+   * Referenced by: '<S5>/1-D Lookup Table2'
+   */
+  { 0.0, 6.0, 12.0 }
 };
 
 /*

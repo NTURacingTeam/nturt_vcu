@@ -43,7 +43,9 @@ static void msg_cb(const struct zbus_channel *chan) {
     const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
 
     TM_DATA_UPDATE(susp_travel_fl, SUSP_PHY_TO_CAN(msg->susp_travel.fl));
+    TM_DATA_UPDATE(susp_travel_fr, SUSP_PHY_TO_CAN(msg->susp_travel.fr));
     TM_DATA_UPDATE(susp_travel_rl, SUSP_PHY_TO_CAN(msg->susp_travel.rl));
+    TM_DATA_UPDATE(susp_travel_rr, SUSP_PHY_TO_CAN(msg->susp_travel.rr));
 
   } else if (chan == &msg_states_chan) {
     const struct msg_states *msg = zbus_chan_const_msg(chan);

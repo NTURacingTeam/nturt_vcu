@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 3.18
+ * Model version                  : 3.23
  * Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
- * C/C++ source code generated on : Sun Mar  1 01:46:13 2026
+ * C/C++ source code generated on : Sun Mar  1 15:32:26 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -158,15 +158,35 @@ typedef struct {
    */
   double SteerWheeltoSteerAngleR_tableDa[101];
 
-  /* Expression: [0;826.04999999999995]
-   * Referenced by: '<S20>/1-D Lookup Table1'
+  /* Expression: [-826.04999999999995;0;826.04999999999995]
+   * Referenced by: '<S20>/1-D Lookup Table'
    */
-  double uDLookupTable1_tableData[2];
+  double uDLookupTable_tableData[3];
 
-  /* Expression: [0;1424.3699999999999]
-   * Referenced by: '<S20>/1-D Lookup Table1'
+  /* Expression: [-1424.3699999999999;0;1424.3699999999999]
+   * Referenced by: '<S20>/1-D Lookup Table'
    */
-  double uDLookupTable1_bp01Data[2];
+  double uDLookupTable_bp01Data[3];
+
+  /* Expression: [0.82;0.88]
+   * Referenced by: '<S5>/1-D Lookup Table'
+   */
+  double uDLookupTable_tableData_m[2];
+
+  /* Expression: [-5;5]
+   * Referenced by: '<S5>/1-D Lookup Table'
+   */
+  double uDLookupTable_bp01Data_c[2];
+
+  /* Expression: [1;0.92;0.85]
+   * Referenced by: '<S5>/1-D Lookup Table2'
+   */
+  double uDLookupTable2_tableData[3];
+
+  /* Expression: [0;6;12]
+   * Referenced by: '<S5>/1-D Lookup Table2'
+   */
+  double uDLookupTable2_bp01Data[3];
 } vehicle_control_ConstP;
 
 /* External inputs (root inport signals with default storage) */
@@ -231,6 +251,7 @@ extern void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
  * Block '<S17>/Data Type Propagation' : Unused code path elimination
  * Block '<S18>/Data Type Duplicate' : Unused code path elimination
  * Block '<S18>/Data Type Propagation' : Unused code path elimination
+ * Block '<S5>/TV_Gain' : Eliminated nontunable gain of 1
  */
 
 /*-

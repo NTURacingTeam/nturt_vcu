@@ -19,7 +19,7 @@ MSG_AGG_TO_MSG_DEFINE(msg_sensor_wheel_agg,
 
     AGG_MEMBER(speed.fl), AGG_MEMBER(speed.fr), AGG_MEMBER(speed.rl), AGG_MEMBER(speed.rr),
     AGG_MEMBER(torque.rl), AGG_MEMBER(torque.rr),
-    AGG_MEMBER(susp_travel.fl), AGG_MEMBER(susp_travel.rl)
+    AGG_MEMBER(susp_travel.fl), AGG_MEMBER(susp_travel.fr), AGG_MEMBER(susp_travel.rl), AGG_MEMBER(susp_travel.rr)
 );
 
 // clang-format on

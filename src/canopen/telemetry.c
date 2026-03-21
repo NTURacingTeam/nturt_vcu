@@ -20,7 +20,9 @@ CANOPEN_TM_TO_TPDO_DEFINE(states,
 CANOPEN_TM_TO_TPDO_DEFINE(sensors,
     K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
     TPDO_DATA(susp_travel_fl, 0x2210, 0x04),
-    TPDO_DATA(susp_travel_rl, 0x2212, 0x04)
+    TPDO_DATA(susp_travel_fr, 0x2211, 0x04),
+    TPDO_DATA(susp_travel_rl, 0x2212, 0x04),
+    TPDO_DATA(susp_travel_rr, 0x2213, 0x04)
 );
 
 CANOPEN_TM_TO_TPDO_DEFINE(inv_rl,

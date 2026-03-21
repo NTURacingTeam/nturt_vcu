@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 3.18
+ * Model version                  : 3.23
  * Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
- * C/C++ source code generated on : Sun Mar  1 01:46:13 2026
+ * C/C++ source code generated on : Sun Mar  1 15:32:26 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -351,18 +351,13 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
   double rtb_TSamp_d;
 
   {
-    double C_alhpa_r_tmp;
-    double C_alhpa_r_tmp_0;
-    double C_alhpa_r_tmp_tmp;
     double rtb_F_aero;
     double rtb_F_dy;
     double rtb_FzFL;
-    double rtb_FzFL_tmp;
     double rtb_FzFR;
     double rtb_Gain;
     double rtb_Gain2;
-    double rtb_uDLookupTable1;
-    double u0;
+    double rtb_uDLookupTable;
     bool limitedCache;
 
     /* UnitConversion: '<S3>/Unit Conversion' */
@@ -579,63 +574,56 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
     /* MATLAB Function: '<S20>/MATLAB Function1' */
     rtb_F_dy = 0.24193548387096772 * rtDW->y_p * 307.0;
 
-    /* Lookup_n-D: '<S20>/1-D Lookup Table1' */
-    rtb_uDLookupTable1 = look1_binlc(rtb_F_dy, rtConstP.uDLookupTable1_bp01Data,
-      rtConstP.uDLookupTable1_tableData, 1U);
+    /* Lookup_n-D: '<S20>/1-D Lookup Table' */
+    rtb_uDLookupTable = look1_binlc(rtb_F_dy, rtConstP.uDLookupTable_bp01Data,
+      rtConstP.uDLookupTable_tableData, 2U);
 
     /* Sum: '<S20>/Subtract' */
-    rtb_F_dy -= rtb_uDLookupTable1;
+    rtb_F_dy -= rtb_uDLookupTable;
 
     /* MATLAB Function: '<S20>/MATLAB Function4' */
-    rtb_FzFL_tmp = rtb_F_aero * 0.48 / 2.0;
-    rtb_FzFL = ((658.56000000000006 - rtb_Gain) - rtb_F_dy) + rtb_FzFL_tmp;
-    rtb_FzFR = ((658.56000000000006 - rtb_Gain) + rtb_F_dy) + rtb_FzFL_tmp;
+    rtb_FzFR = rtb_F_aero * 0.48 / 2.0;
+    rtb_FzFL = ((658.56000000000006 - rtb_Gain) - rtb_F_dy) + rtb_FzFR;
+    rtb_FzFR += (658.56000000000006 - rtb_Gain) + rtb_F_dy;
     rtb_F_aero = rtb_F_aero * 0.52 / 2.0;
-    rtb_F_dy = ((rtb_Gain + 909.43999999999994) - rtb_uDLookupTable1) +
+    rtb_F_dy = ((rtb_Gain + 909.43999999999994) - rtb_uDLookupTable) +
       rtb_F_aero;
-    rtb_F_aero += (rtb_Gain + 909.43999999999994) + rtb_uDLookupTable1;
+    rtb_F_aero += (rtb_Gain + 909.43999999999994) + rtb_uDLookupTable;
 
     /* MATLAB Function: '<S5>/MATLAB Function' incorporates:
-     *  Constant: '<S5>/FR_ratio'
-     *  Constant: '<S5>/scaling'
-     *  MATLAB Function: '<S5>/MATLAB Function3'
-     *  MATLAB Function: '<S5>/Torque_Max'
+     *  Abs: '<S5>/Abs'
+     *  Constant: '<S5>/Constant2'
+     *  Lookup_n-D: '<S5>/1-D Lookup Table'
+     *  Lookup_n-D: '<S5>/1-D Lookup Table2'
+     *  Product: '<S5>/Product2'
      */
-    rtb_FzFL = (rtb_FzFL * rtb_FzFL * -0.00059 + 1.46113 * rtb_FzFL) + 17.01657;
-    rtb_Gain = (rtb_FzFR * rtb_FzFR * -0.00059 + 1.46113 * rtb_FzFR) + 17.01657;
-    rtb_uDLookupTable1 = (rtb_FzFL * scaling + rtb_Gain * scaling) * fr_ratio;
-    rtb_FzFL_tmp = rtb_F_dy * rtb_F_dy;
-    C_alhpa_r_tmp = (rtb_FzFL_tmp * -0.00059 + 1.46113 * rtb_F_dy) + 17.01657;
-    C_alhpa_r_tmp_tmp = rtb_F_aero * rtb_F_aero;
-    C_alhpa_r_tmp_0 = (C_alhpa_r_tmp_tmp * -0.00059 + 1.46113 * rtb_F_aero) +
-      17.01657;
-    rtb_FzFR = C_alhpa_r_tmp * scaling + C_alhpa_r_tmp_0 * scaling;
+    rtb_uDLookupTable = (((rtb_FzFL * rtb_FzFL * -0.00059 + 1.46113 * rtb_FzFL)
+                          + 17.01657) * 0.66 + ((rtb_FzFR * rtb_FzFR * -0.00059
+      + 1.46113 * rtb_FzFR) + 17.01657) * 0.66) * (look1_binlx(rtDW->y_h,
+      rtConstP.uDLookupTable_bp01Data_c, rtConstP.uDLookupTable_tableData_m, 1U)
+      * look1_binlc(fabs(rtDW->y_p), rtConstP.uDLookupTable2_bp01Data,
+                    rtConstP.uDLookupTable2_tableData, 2U));
+    rtb_Gain = ((rtb_F_dy * rtb_F_dy * -0.00059 + 1.46113 * rtb_F_dy) + 17.01657)
+      * 0.66 + ((rtb_F_aero * rtb_F_aero * -0.00059 + 1.46113 * rtb_F_aero) +
+                17.01657) * 0.66;
 
     /* MATLAB Function: '<S5>/MATLAB Function1' incorporates:
-     *  Constant: '<S5>/FR_ratio'
-     *  Constant: '<S5>/scaling'
      *  MATLAB Function: '<S5>/MATLAB Function3'
      */
-    rtb_FzFL = (rtDW->y - rtDW->y_m) / fabs((1.0 / ((rtb_FzFL * scaling +
-      rtb_Gain * scaling) * fr_ratio) + 1.0 / (C_alhpa_r_tmp * scaling +
-      C_alhpa_r_tmp_0 * scaling)) * (rtb_Gain2 * rt_powd_snf
-      (rtU->vehicle_state.velocity.x, 3.0) * rtDW->y_p) / 4.096000000000001);
-
-    /* MATLAB Function: '<S5>/MATLAB Function' incorporates:
-     *  MATLAB Function: '<S5>/Torque_Max'
-     */
-    rtb_Gain = cos(rtb_Gain2);
+    rtb_FzFL = (rtDW->y - rtDW->y_m) / fabs((1.0 / rtb_uDLookupTable + 1.0 /
+      rtb_Gain) * (rtb_Gain2 * rt_powd_snf(rtU->vehicle_state.velocity.x, 3.0) *
+                   rtDW->y_p) / 4.096000000000001);
 
     /* Gain: '<S5>/Gain2' incorporates:
      *  Sum: '<S5>/Subtract3'
      */
-    u0 = (rtDW->y_f - rtDW->y_a) * 51.0;
+    rtb_F_dy = (rtDW->y_f - rtDW->y_a) * 51.0;
 
     /* Saturate: '<S5>/Saturation1' */
-    if (u0 > 300.0) {
-      u0 = 300.0;
-    } else if (u0 < -300.0) {
-      u0 = -300.0;
+    if (rtb_F_dy > 300.0) {
+      rtb_F_dy = 300.0;
+    } else if (rtb_F_dy < -300.0) {
+      rtb_F_dy = -300.0;
     }
 
     /* MATLAB Function: '<S5>/MATLAB Function4' */
@@ -660,11 +648,11 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
      *  Saturate: '<S5>/Saturation1'
      *  Sum: '<S5>/Sum2'
      */
-    rtb_Gain2 = (((0.672 * rtb_FzFR - 0.92799999999999994 * rtb_uDLookupTable1 *
-                   rtb_Gain) / (rtb_uDLookupTable1 + rtb_FzFR) * 320.0 *
+    rtb_Gain2 = (((0.672 * rtb_Gain - 0.92799999999999994 * rtb_uDLookupTable *
+                   cos(rtb_Gain2)) / (rtb_uDLookupTable + rtb_Gain) * 320.0 *
                   (rtU->vehicle_state.velocity.x * rtU->vehicle_state.velocity.x)
-                  / 1.6 * rtb_Gain2 * ff_gain + ff_dyna_gain * u0) + fb_gain *
-                 rtb_FzFL) / 1.24 * 0.254;
+                  / 1.6 * rtb_Gain2 * ff_gain + ff_dyna_gain * rtb_F_dy) +
+                 fb_gain * rtb_FzFL) / 1.24 * 0.254;
 
     /* Saturate: '<S5>/Saturation' */
     if (rtb_Gain2 > 210.0) {
@@ -697,71 +685,20 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
     /* Gain: '<Root>/Gain2' */
     rtb_Gain2 = 0.01 * rtU->cockpit.accel;
 
-    /* Sum: '<S5>/Sum' incorporates:
-     *  Constant: '<S5>/Constant'
-     *  Gain: '<S5>/Gain'
-     *  Product: '<S5>/Product'
-     */
-    rtb_FzFR = trq_lim * rtb_Gain2 * 13.1 - rtb_FzFL;
-
-    /* MATLAB Function: '<S5>/Torque_Max' incorporates:
-     *  Constant: '<S5>/TC_limit'
-     *  Constant: '<S5>/scaling'
-     */
-    rtb_uDLookupTable1 = 0.92799999999999994 * rtb_Gain;
-    rtb_Gain = fabs((rtb_uDLookupTable1 * 320.0 * rtDW->y_p - 51.0 * rtDW->y_a) /
-                    (rtb_uDLookupTable1 + 0.672));
-    rtb_uDLookupTable1 = C_alhpa_r_tmp_0 * scaling * rtb_Gain / (C_alhpa_r_tmp *
-      scaling + C_alhpa_r_tmp_0 * scaling);
-    rtb_F_aero = (1.0 - rtb_uDLookupTable1 / (((C_alhpa_r_tmp_tmp * -0.0005 +
-      3.2826 * rtb_F_aero) - 37.404) * scaling)) * ((2.4825 * rtb_F_aero +
-      0.4821) * scaling) / 0.254 * tc_lim;
-    rtb_F_dy = (1.0 - (rtb_Gain - rtb_uDLookupTable1) / (((rtb_FzFL_tmp *
-      -0.0005 + 3.2826 * rtb_F_dy) - 37.404) * scaling)) * ((2.4825 * rtb_F_dy +
-      0.4821) * scaling) / 0.254 * tc_lim;
-
-    /* Switch: '<S5>/Switch' incorporates:
-     *  Constant: '<S5>/TC_Switch'
-     */
-    if (tc_switch > 0.0) {
-      /* Saturate: '<S5>/Saturation3' */
-      if (rtb_F_dy <= 0.0) {
-        rtb_F_dy = 0.0;
-      }
-
-      /* End of Saturate: '<S5>/Saturation3' */
-
-      /* Switch: '<S17>/Switch2' incorporates:
-       *  RelationalOperator: '<S17>/LowerRelop1'
-       */
-      if (rtb_FzFR > rtb_F_dy) {
-        rtb_FzFR = rtb_F_dy;
-      } else {
-        /* Gain: '<S5>/Gain3' */
-        rtb_F_dy = -rtb_F_dy;
-
-        /* Switch: '<S17>/Switch' incorporates:
-         *  RelationalOperator: '<S17>/UpperRelop'
-         */
-        if (rtb_FzFR < rtb_F_dy) {
-          rtb_FzFR = rtb_F_dy;
-        }
-
-        /* End of Switch: '<S17>/Switch' */
-      }
-
-      /* End of Switch: '<S17>/Switch2' */
-    }
-
-    /* End of Switch: '<S5>/Switch' */
+    /* MATLAB Function: '<S5>/Torque_Max' */
+    rtb_F_dy = (rtNaN);
 
     /* MATLAB Function: '<S4>/MATLAB Function1' incorporates:
      *  Constant: '<S4>/Constant4'
      *  Constant: '<S4>/Constant5'
+     *  Constant: '<S5>/Constant'
      *  Gain: '<Root>/Gain3'
+     *  Gain: '<S5>/Gain'
+     *  Product: '<S5>/Product'
+     *  Sum: '<S5>/Sum'
      */
-    MATLABFunction1(0.076335877862595422 * rtb_FzFR, 0.0, torq_derate_begin,
-                    torq_derate_end, &rtb_F_dy);
+    MATLABFunction1(0.076335877862595422 * (13.1 * (trq_lim * rtb_Gain2) -
+      rtb_FzFL), 0.0, torq_derate_begin, torq_derate_end, &rtb_F_dy);
 
     /* Switch: '<S8>/Switch2' incorporates:
      *  Constant: '<S4>/Constant'
@@ -797,11 +734,11 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
           rtDW->RateLimiter1 = rtb_F_dy;
         }
       } else {
-        rtb_uDLookupTable1 = rtb_FzFR * torq_slew;
+        rtb_uDLookupTable = rtb_FzFR * torq_slew;
         rtb_Gain = rtb_F_dy - rtDW->PrevY;
-        if (rtb_Gain > rtb_uDLookupTable1) {
+        if (rtb_Gain > rtb_uDLookupTable) {
           /* RateLimiter: '<S4>/Rate Limiter1' */
-          rtDW->RateLimiter1 = rtDW->PrevY + rtb_uDLookupTable1;
+          rtDW->RateLimiter1 = rtDW->PrevY + rtb_uDLookupTable;
           limitedCache = true;
         } else {
           rtb_FzFR *= -torq_slew;
@@ -831,43 +768,6 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
      */
     rtb_FzFR = rtb_Gain2 * trq_lim * 13.1 + rtb_FzFL;
 
-    /* Switch: '<S5>/Switch1' incorporates:
-     *  Constant: '<S5>/TC_Switch'
-     */
-    if (tc_switch > 0.0) {
-      /* Saturate: '<S5>/Saturation2' */
-      if (rtb_F_aero <= 0.0) {
-        rtb_Gain2 = 0.0;
-      } else {
-        rtb_Gain2 = rtb_F_aero;
-      }
-
-      /* End of Saturate: '<S5>/Saturation2' */
-
-      /* Switch: '<S18>/Switch2' incorporates:
-       *  RelationalOperator: '<S18>/LowerRelop1'
-       */
-      if (rtb_FzFR > rtb_Gain2) {
-        rtb_FzFR = rtb_Gain2;
-      } else {
-        /* Gain: '<S5>/Gain4' */
-        rtb_Gain2 = -rtb_Gain2;
-
-        /* Switch: '<S18>/Switch' incorporates:
-         *  RelationalOperator: '<S18>/UpperRelop'
-         */
-        if (rtb_FzFR < rtb_Gain2) {
-          rtb_FzFR = rtb_Gain2;
-        }
-
-        /* End of Switch: '<S18>/Switch' */
-      }
-
-      /* End of Switch: '<S18>/Switch2' */
-    }
-
-    /* End of Switch: '<S5>/Switch1' */
-
     /* MATLAB Function: '<S4>/MATLAB Function2' incorporates:
      *  Constant: '<S4>/Constant4'
      *  Constant: '<S4>/Constant5'
@@ -884,14 +784,14 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
      *  Switch: '<S9>/Switch'
      */
     if (rtb_FzFR > torq_limit_rr) {
-      rtb_Gain2 = torq_limit_rr;
+      rtb_F_dy = torq_limit_rr;
     } else if (rtb_FzFR < -torq_limit_rr) {
       /* Switch: '<S9>/Switch' incorporates:
        *  Constant: '<S4>/Constant3'
        */
-      rtb_Gain2 = -torq_limit_rr;
+      rtb_F_dy = -torq_limit_rr;
     } else {
-      rtb_Gain2 = rtb_FzFR;
+      rtb_F_dy = rtb_FzFR;
     }
 
     /* End of Switch: '<S9>/Switch2' */
@@ -899,7 +799,7 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
     /* RateLimiter: '<S4>/Rate Limiter' */
     if (rtDW->LastMajorTime_b == (rtInf)) {
       /* RateLimiter: '<S4>/Rate Limiter' */
-      rtDW->RateLimiter = rtb_Gain2;
+      rtDW->RateLimiter = rtb_F_dy;
     } else {
       rtb_Gain = rtM->Timing.t[0];
       rtb_FzFR = rtb_Gain - rtDW->LastMajorTime_b;
@@ -909,14 +809,14 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
           rtDW->RateLimiter = rtDW->PrevY_a;
         } else {
           /* RateLimiter: '<S4>/Rate Limiter' */
-          rtDW->RateLimiter = rtb_Gain2;
+          rtDW->RateLimiter = rtb_F_dy;
         }
       } else {
-        rtb_uDLookupTable1 = rtb_FzFR * torq_slew;
-        rtb_Gain = rtb_Gain2 - rtDW->PrevY_a;
-        if (rtb_Gain > rtb_uDLookupTable1) {
+        rtb_uDLookupTable = rtb_FzFR * torq_slew;
+        rtb_Gain = rtb_F_dy - rtDW->PrevY_a;
+        if (rtb_Gain > rtb_uDLookupTable) {
           /* RateLimiter: '<S4>/Rate Limiter' */
-          rtDW->RateLimiter = rtDW->PrevY_a + rtb_uDLookupTable1;
+          rtDW->RateLimiter = rtDW->PrevY_a + rtb_uDLookupTable;
           limitedCache = true;
         } else {
           rtb_FzFR *= -torq_slew;
@@ -926,7 +826,7 @@ void vehicle_control_step(vehicle_control_RT_MODEL *const rtM,
             limitedCache = true;
           } else {
             /* RateLimiter: '<S4>/Rate Limiter' */
-            rtDW->RateLimiter = rtb_Gain2;
+            rtDW->RateLimiter = rtb_F_dy;
             limitedCache = false;
           }
         }
