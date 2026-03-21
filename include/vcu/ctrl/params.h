@@ -53,6 +53,12 @@
 #define PARAM_FR_RATIO 0.85
 
 
+#define PARAM_KP 0.0
+#define PARAM_KI 0.0
+#define PARAM_KD 0.0
+
+
+
 /**
  * @brief Specify aa control parameter. Used in @ref CTRL_PARAM_DECLARE and
  * @ref CTRL_PARAM_EXTERN.
@@ -114,8 +120,10 @@
       CTRL_PARAM(tc_lim, double, PARAM_TC_LIM),                   \
       CTRL_PARAM(trq_lim, double, PARAM_TRQ_LIM),                 \
       CTRL_PARAM(scaling, double, PARAM_SCALING),                 \
-      CTRL_PARAM(fr_ratio, double, PARAM_FR_RATIO)
-      
+      CTRL_PARAM(fr_ratio, double, PARAM_FR_RATIO),               \
+      CTRL_PARAM(Kp, double, PARAM_KP),                 \
+      CTRL_PARAM(Ki, double, PARAM_KI),                 \
+      CTRL_PARAM(Kd, double, PARAM_KD)
 
 /* function declaration ------------------------------------------------------*/
 CTRL_PARAM_DECLARE(CTRL_PARAM_LIST);
