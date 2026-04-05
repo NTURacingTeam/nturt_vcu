@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'sensor_fusion'.
  *
- * Model version                  : 5.13
+ * Model version                  : 5.14
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Sun Apr  5 13:20:28 2026
+ * C/C++ source code generated on : Sun Apr  5 15:38:40 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M

@@ -35,15 +35,8 @@
 // defaults
 #define PARAM_TORQ_LIMIT 20.0
 
-#define PARAM_FB_RATIO 0.5
-#define PARAM_FB_GAIN 0.0
-
 #define PARAM_FF_SWITCH 0.0
 #define PARAM_FF_GAIN 0.0
-#define PARAM_FF_DYNA_GAIN 0.0
-
-#define PARAM_TV_GAIN 2.0
-#define PARAM_TARGET_SR 0.1
 
 #define PARAM_TC_SWITCH 0.0
 #define PARAM_TC_LIM 1.0
@@ -98,17 +91,11 @@
 /// @brief List of control parameters.
 #define CTRL_PARAM_LIST                                                   \
   CTRL_PARAM(torq_lim, double, PARAM_TORQ_LIMIT),                         \
-      CTRL_PARAM(fb_ratio, double, PARAM_FB_RATIO),                       \
-      CTRL_PARAM(fb_gain, double, PARAM_FB_GAIN),                         \
       CTRL_PARAM(ff_switch, double, PARAM_FF_SWITCH),                     \
       CTRL_PARAM(ff_gain, double, PARAM_FF_GAIN),                         \
-      CTRL_PARAM(ff_dyna_gain, double, PARAM_FF_DYNA_GAIN),               \
-      CTRL_PARAM(tv_gain, double, PARAM_TV_GAIN),                         \
-      CTRL_PARAM(target_sr, double, PARAM_TARGET_SR),                     \
       CTRL_PARAM(tc_switch, double, PARAM_TC_SWITCH),                     \
       CTRL_PARAM(tc_lim, double, PARAM_TC_LIM),                           \
       CTRL_PARAM(scaling, double, PARAM_SCALING),                         \
-      CTRL_PARAM(fr_ratio, double, PARAM_FR_RATIO),                       \
       CTRL_PARAM(Kp, double, PARAM_KP), CTRL_PARAM(Ki, double, PARAM_KI), \
       CTRL_PARAM(Kd, double, PARAM_KD)
 

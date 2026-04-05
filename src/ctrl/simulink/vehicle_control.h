@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 4.13
+ * Model version                  : 4.15
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Sun Apr  5 13:48:42 2026
+ * C/C++ source code generated on : Sun Apr  5 15:41:15 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M

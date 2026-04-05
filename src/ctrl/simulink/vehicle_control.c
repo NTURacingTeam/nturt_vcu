@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 4.13
+ * Model version                  : 4.15
  * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Sun Apr  5 13:48:42 2026
+ * C/C++ source code generated on : Sun Apr  5 15:41:15 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -663,7 +663,7 @@ void vehicle_control_step(void)
     rtb_Gain = (13.1 * vehicle_control_U.wheel.speed.rr * 0.10471975511965977 *
                 0.076335877862595422 / 13.1 * 0.254 - rtb_rate_lo_o) /
       rtb_rate_lo_o;
-    rtb_F_dy = (-13.1 * vehicle_control_U.wheel.speed.rl * 0.10471975511965977 *
+    rtb_F_dy = (13.1 * vehicle_control_U.wheel.speed.rl * 0.10471975511965977 *
                 0.076335877862595422 / 13.1 * 0.254 - rtb_F_dy) / rtb_F_dy;
   }
 
