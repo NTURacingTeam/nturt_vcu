@@ -72,7 +72,7 @@ INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
 
 ZBUS_LISTENER_DEFINE(dashboard_normal_listener, msg_cb);
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, dashboard_normal_listener, 0);
-ZBUS_CHAN_ADD_OBS(msg_ctrl_vehicle_state_chan, dashboard_normal_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_states_chan, dashboard_normal_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ts_acc_chan, dashboard_normal_listener, 0);
 
 ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
@@ -213,8 +213,8 @@ static void msg_cb(const struct zbus_channel *chan) {
       dashboard_set_level(DASHBOARD_BRAKE, msg->brake);
     }
 
-  } else if (chan == &msg_ctrl_vehicle_state_chan) {
-    const struct msg_ctrl_vehicle_state *msg = zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_states_chan) {
+    const struct msg_ctrl_states *msg = zbus_chan_const_msg(chan);
 
     if (!g_ctx.states[ERROR_HB_INV]) {
       int speed = round(M_S_TO_KM_H(sqrt(msg->velocity.x * msg->velocity.x +

@@ -19,15 +19,27 @@ static void msg_cb(const struct zbus_channel *chan);
 
 /* static variable -----------------------------------------------------------*/
 ZBUS_LISTENER_DEFINE(telemetry_listener, msg_cb);
+
+// cockpit
 ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, telemetry_listener, 0);
+
+// sensors
 ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, telemetry_listener, 0);
+
+// states
 ZBUS_CHAN_ADD_OBS(msg_states_chan, telemetry_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_states_chan, telemetry_listener, 0);
+
+// control
+ZBUS_CHAN_ADD_OBS(msg_ctrl_tc_chan, telemetry_listener, 0);
+
+// inverter
 ZBUS_CHAN_ADD_OBS(msg_ctrl_word_chan, telemetry_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_torque_chan, telemetry_listener, 0);
-ZBUS_CHAN_ADD_OBS(msg_ctrl_tc_chan, telemetry_listener, 0);
 
 /* static function definition ------------------------------------------------*/
 static void msg_cb(const struct zbus_channel *chan) {
+  // cockpit
   if (chan == &msg_sensor_cockpit_chan) {
     const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
 
@@ -39,6 +51,7 @@ static void msg_cb(const struct zbus_channel *chan) {
     TM_DATA_UPDATE(bse1, BSE_RAW_PHY_TO_CAN(msg->bse1));
     TM_DATA_UPDATE(bse2, BSE_RAW_PHY_TO_CAN(msg->bse2));
 
+    // sensors
   } else if (chan == &msg_sensor_wheel_chan) {
     const struct msg_sensor_wheel *msg = zbus_chan_const_msg(chan);
 
@@ -47,11 +60,27 @@ static void msg_cb(const struct zbus_channel *chan) {
     TM_DATA_UPDATE(susp_travel_rl, SUSP_PHY_TO_CAN(msg->susp_travel.rl));
     TM_DATA_UPDATE(susp_travel_rr, SUSP_PHY_TO_CAN(msg->susp_travel.rr));
 
+    // states
   } else if (chan == &msg_states_chan) {
     const struct msg_states *msg = zbus_chan_const_msg(chan);
 
     TM_DATA_UPDATE(vcu_states, msg->after);
 
+  } else if (chan == &msg_ctrl_states_chan) {
+    const struct msg_ctrl_states *msg = zbus_chan_const_msg(chan);
+
+    TM_DATA_UPDATE(velocity_x, VELOCITY_PHY_TO_CAN(msg->velocity.x));
+
+    // control
+  } else if (chan == &msg_ctrl_tc_chan) {
+    const struct msg_ctrl_tc *msg = zbus_chan_const_msg(chan);
+
+    TM_DATA_UPDATE(slip_ratio_l, (int16_t)(1000.0 * msg->sr_l));
+    TM_DATA_UPDATE(slip_ratio_r, (int16_t)(1000.0 * msg->sr_r));
+    TM_DATA_UPDATE(yaw_rate, (int16_t)(1000.0 * msg->yawrate_real));
+    TM_DATA_UPDATE(yaw_rate_reference, (int16_t)(1000.0 * msg->yawrate_ref));
+
+    // inverter
   } else if (chan == &msg_ctrl_word_chan) {
     const struct msg_ctrl_word *msg = zbus_chan_const_msg(chan);
 
@@ -65,12 +94,5 @@ static void msg_cb(const struct zbus_channel *chan) {
                    INV_TORQUE_PHY_TO_CAN_L(msg->torque.rl));
     TM_DATA_UPDATE(inv_rr_target_torque,
                    INV_TORQUE_PHY_TO_CAN_R(msg->torque.rr));
-  } else if(chan == &msg_ctrl_tc_chan) {
-    const struct msg_ctrl_tc *msg = zbus_chan_const_msg(chan);
-
-    TM_DATA_UPDATE(slip_ratio_l, (int16_t)(1000.0 * msg->sr_l));
-    TM_DATA_UPDATE(slip_ratio_r, (int16_t)(1000.0 * msg->sr_r));
-    TM_DATA_UPDATE(yaw_rate, (int16_t)(1000.0 * msg->yawrate_real));
-    TM_DATA_UPDATE(yaw_rate_reference, (int16_t)(1000.0 * msg->yawrate_ref));
   }
 }

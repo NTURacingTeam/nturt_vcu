@@ -18,7 +18,7 @@
 #include <nturt/err/err.h>
 
 // project includes
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
+#ifdef CONFIG_VCU_SOURCE_STATES_FUSION
 #include "simulink/sensor_fusion.h"
 #endif
 #include "simulink/vehicle_control.h"
@@ -70,16 +70,10 @@ struct ctrl_ctx {
   struct msg_sensor_wheel wheel;
   struct msg_sensor_imu imu;
   struct msg_sensor_gps gps;
-  struct msg_ctrl_vehicle_state vehicle_state;
+  struct msg_ctrl_states states;
   struct msg_ctrl_tc_in tc_in;
 
   struct msg_ctrl_cmd cmd_last;
-
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
-  sensor_fusion_RT_MODEL sensor_fusion_model;
-#endif
-
-  vehicle_control_RT_MODEL vehicle_control_model;
 };
 
 /* static function declaration -----------------------------------------------*/
@@ -106,7 +100,7 @@ ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_sensor_wheel_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_sensor_imu_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_sensor_gps_chan, ctrl_listener, 0);
-ZBUS_CHAN_ADD_OBS(msg_ctrl_vehicle_state_chan, ctrl_listener, 0);
+ZBUS_CHAN_ADD_OBS(msg_ctrl_states_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_tc_in_chan, ctrl_listener, 0);
 
 ZBUS_CHAN_ADD_OBS(msg_ctrl_cmd_chan, ctrl_listener, 0);
@@ -121,8 +115,8 @@ CTRL_PARAM_DEFINE(CTRL_PARAM_LIST);
 
 /* static function definition ------------------------------------------------*/
 static void ctrl_init(struct ctrl_ctx *ctx) {
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
-  sensor_fusion_initialize(&ctx->sensor_fusion_model);
+#ifdef CONFIG_VCU_SOURCE_STATES_FUSION
+  sensor_fusion_initialize();
 #endif
 
   // send torque command once to start publishing
@@ -153,43 +147,37 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       continue;
     }
 
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
+#ifdef CONFIG_VCU_SOURCE_STATES_FUSION
 
-    sensor_fusion_ExtU input = {
-        .cockpit = ctx->cockpit,
-        .wheel = ctx->wheel,
-        .imu = ctx->imu,
-        .gps = ctx->gps,
-    };
-    sensor_fusion_ExtY output;
-    sensor_fusion_step(&ctx->sensor_fusion_model, &input, &output);
-    output.vehicle_state.velocity.x *= 2.0;
+    sensor_fusion_U.cockpit = ctx->cockpit;
+    sensor_fusion_U.wheel = ctx->wheel;
+    sensor_fusion_U.imu = ctx->imu;
+    sensor_fusion_U.gps = ctx->gps;
 
-    struct msg_ctrl_vehicle_state *msg = &output.vehicle_state;
+    sensor_fusion_step();
+
+    struct msg_ctrl_states *msg = &sensor_fusion_Y.states;
     msg_header_init(&msg->header);
 
-    zbus_chan_pub(&msg_ctrl_vehicle_state_chan, msg, K_MSEC(5));
+    zbus_chan_pub(&msg_ctrl_states_chan, msg, K_MSEC(5));
 
-#endif  // CONFIG_VCU_SOURCE_VEHICLE_STATES_FUSION
+#endif  // CONFIG_VCU_SOURCE_STATES_FUSION
 
     if (ctx->state != CTRL_STATE_IDLE) {
-      vehicle_control_ExtU input = {
-          .tc_in = ctx->tc_in,
-          .vehicle_state = ctx->vehicle_state,
-          .cockpit = ctx->cockpit,
-          .wheel = ctx->wheel,
-          .imu = ctx->imu,
-          .gps = ctx->gps,
-      };
+      vehicle_control_U.tc_in = ctx->tc_in;
+      vehicle_control_U.states = ctx->states;
+      vehicle_control_U.cockpit = ctx->cockpit;
+      vehicle_control_U.wheel = ctx->wheel;
+      vehicle_control_U.imu = ctx->imu;
+      vehicle_control_U.gps = ctx->gps;
 
       if (ctx->state == CTRL_STATE_ERROR) {
-        input.cockpit.accel = 0.0F;
+        vehicle_control_U.cockpit.accel = 0.0;
       }
 
-      vehicle_control_ExtY output;
-      vehicle_control_step(&ctx->vehicle_control_model, &input, &output);
+      vehicle_control_step();
 
-      struct msg_ctrl_torque *msg = &output.torq;
+      struct msg_ctrl_torque *msg = &vehicle_control_Y.torq;
       if (ctx->state == CTRL_STATE_ERROR) {
         ARRAY_FOR_EACH_PTR(msg->torque.values, val) { *val = 0.0; }
       }
@@ -197,7 +185,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
       zbus_chan_pub(&msg_ctrl_torque_chan, msg, K_MSEC(5));
 
-      struct msg_ctrl_tc *msg_tc = &output.tc;
+      struct msg_ctrl_tc *msg_tc = &vehicle_control_Y.tc;
       msg_header_init(&msg_tc->header);
 
       zbus_chan_pub(&msg_ctrl_tc_chan, msg_tc, K_MSEC(5));
@@ -217,9 +205,8 @@ static void msg_cb(const struct zbus_channel *chan) {
     g_ctx.imu = *(const struct msg_sensor_imu *)zbus_chan_const_msg(chan);
   } else if (chan == &msg_sensor_gps_chan) {
     g_ctx.gps = *(const struct msg_sensor_gps *)zbus_chan_const_msg(chan);
-  } else if (chan == &msg_ctrl_vehicle_state_chan) {
-    g_ctx.vehicle_state =
-        *(const struct msg_ctrl_vehicle_state *)zbus_chan_const_msg(chan);
+  } else if (chan == &msg_ctrl_states_chan) {
+    g_ctx.states = *(const struct msg_ctrl_states *)zbus_chan_const_msg(chan);
   } else if (chan == &msg_ctrl_tc_in_chan) {
     g_ctx.tc_in = *(const struct msg_ctrl_tc_in *)zbus_chan_const_msg(chan);
 
@@ -248,7 +235,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   switch (state) {
     case STATE_RUNNING:
       if (is_entry) {
-        vehicle_control_initialize(&ctx->vehicle_control_model);
+        vehicle_control_initialize();
 
       } else {
         struct msg_ctrl_torque msg = {0};

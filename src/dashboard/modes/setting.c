@@ -49,8 +49,7 @@ enum dashboard_setting_state {
 
 enum dashboard_setting_mode {
   SET_BRIGHTNESS,
-  SET_INV_RL,
-  SET_INV_RR,
+  SET_TORQ_LIM,
   SET_STEER,
   SET_ACCEL,
   SET_BRAKE,
@@ -147,14 +146,10 @@ static void dashboard_display(const struct dashboard_setting_ctx *ctx) {
   dashboard_led_set(LED_NUM_INV_RR, false);
 
   switch (ctx->mode) {
-    case SET_INV_RL:
+    case SET_TORQ_LIM:
       dashboard_led_set(LED_NUM_INV_RL, true);
-      dashboard_set_level(DASHBOARD_SPEED, ctrl_param_torq_limit_rl_get());
-      break;
-
-    case SET_INV_RR:
-      dashboard_led_set(LED_NUM_INV_RR, true);
-      dashboard_set_level(DASHBOARD_SPEED, ctrl_param_torq_limit_rr_get());
+      dashboard_led_set(LED_NUM_INV_RL, true);
+      dashboard_set_level(DASHBOARD_SPEED, ctrl_param_torq_lim_get());
       break;
 
     default:
@@ -187,8 +182,7 @@ static void dashboard_display(const struct dashboard_setting_ctx *ctx) {
         dashboard_apply_selected(DASHBOARD_BATTERY);
         break;
 
-      case SET_INV_RL:
-      case SET_INV_RR:
+      case SET_TORQ_LIM:
       case SET_STEER:
         dashboard_apply_selected(DASHBOARD_SPEED);
         break;
@@ -222,20 +216,10 @@ static void dashboard_modify(const struct dashboard_setting_ctx *ctx,
       break;
     }
 
-    case SET_INV_RL: {
-      int torq = ctrl_param_torq_limit_rl_get();
+    case SET_TORQ_LIM: {
+      int torq = ctrl_param_torq_lim_get();
       torq += is_up ? 1 : -1;
-      ctrl_param_torq_limit_rl_set(CLAMP(torq, 0, 20));
-
-      ctrl_settings_save();
-
-      break;
-    }
-
-    case SET_INV_RR: {
-      int torq = ctrl_param_torq_limit_rr_get();
-      torq += is_up ? 1 : -1;
-      ctrl_param_torq_limit_rr_set(CLAMP(torq, 0, 20));
+      ctrl_param_torq_lim_set(CLAMP(torq, 0, 20));
 
       ctrl_settings_save();
 

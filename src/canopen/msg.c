@@ -70,24 +70,6 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_ts_inv,
     )
 );
 
-CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_cmd,
-    AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
-    OD_TO_MSG_ENTRY(0x2088,
-        OD_TO_MSG_DATA(0x1, uint8_t, IDENTITY, AGG_MEMBER(rtd)),
-        OD_TO_MSG_DATA(0x2, uint8_t, IDENTITY, AGG_MEMBER(emcy_stop))
-    )
-);
-
-#define DIV_10000(x) (0.0001 * (x))
-
-CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_tc_in,
-    AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
-    OD_TO_MSG_ENTRY(0x20A0,
-        OD_TO_MSG_DATA(0x5, int16_t, DIV_10000, AGG_MEMBER(sr_l)),
-        OD_TO_MSG_DATA(0x6, int16_t, DIV_10000, AGG_MEMBER(sr_r))
-    )
-);
-
 #ifdef CONFIG_VCU_SOURCE_COCKPIT_CANOPEN
 
 CANOPEN_OD_TO_MSG_DEFINE(msg_sensor_cockpit,
@@ -141,9 +123,9 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_sensor_gps,
 
 #endif // CONFIG_VCU_SOURCE_GPS_CANOPEN
 
-#ifdef CONFIG_VCU_SOURCE_VEHICLE_STATES_CANOPEN
+#ifdef CONFIG_VCU_SOURCE_STATES_CANOPEN
 
-CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_vehicle_state,
+CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_states,
     AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
     OD_TO_MSG_ENTRY(0x2090,
         OD_TO_MSG_DATA(0x1, int16_t, VELOCITY_CAN_TO_PHY, AGG_MEMBER(velocity.x)),
@@ -151,6 +133,24 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_vehicle_state,
     )
 );
 
-#endif // CONFIG_VCU_SOURCE_VEHICLE_STATES_CANOPEN
+#endif // CONFIG_VCU_SOURCE_STATES_CANOPEN
+
+CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_cmd,
+    AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
+    OD_TO_MSG_ENTRY(0x2088,
+        OD_TO_MSG_DATA(0x1, uint8_t, IDENTITY, AGG_MEMBER(rtd)),
+        OD_TO_MSG_DATA(0x2, uint8_t, IDENTITY, AGG_MEMBER(emcy_stop))
+    )
+);
+
+#define DIV_10000(x) (0.0001 * (x))
+
+CANOPEN_OD_TO_MSG_DEFINE(msg_ctrl_tc_in,
+    AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
+    OD_TO_MSG_ENTRY(0x20A0,
+        OD_TO_MSG_DATA(0x5, int16_t, DIV_10000, AGG_MEMBER(sr_l)),
+        OD_TO_MSG_DATA(0x6, int16_t, DIV_10000, AGG_MEMBER(sr_r))
+    )
+);
 
 // clang-format on

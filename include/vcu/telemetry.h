@@ -29,6 +29,7 @@
 /// @brief Telemetry data address for VCU. Currently the addresses are not used
 /// and can be changed to match those used in future protocols.
 enum vcu_tm_data_addr {
+  // cockpit
   TM_STEER_ANGLE,
   TM_ACCELERATOR,
   TM_APPS1,
@@ -37,25 +38,32 @@ enum vcu_tm_data_addr {
   TM_BSE1,
   TM_BSE2,
 
-  TM_VCU_STATES,
-
+  // sensors
   TM_SUSP_TRAVEL_FL,
   TM_SUSP_TRAVEL_FR,
   TM_SUSP_TRAVEL_RL,
   TM_SUSP_TRAVEL_RR,
 
+  // states
+  TM_VCU_STATES,
+  TM_VELOCITY_X,
+
+  // control
+  TM_SLIP_RATIO_L,
+  TM_SLIP_RATIO_R,
+  TM_YAW_RATE,
+  TM_YAW_RATE_REFERENCE,
+
+  // inverter
   TM_INV_RL_CTRL_WORD,
   TM_INV_RL_TARGET_TORQUE,
 
   TM_INV_RR_CTRL_WORD,
   TM_INV_RR_TARGET_TORQUE,
 
-  TM_SLIP_RATIO_L,
-  TM_SLIP_RATIO_R,
-  TM_YAW_RATE,
-  TM_YAW_RATE_REFERENCE,
 };
 
+// cockpit
 TM_DATA_DECLARE(steer, int16_t);
 TM_DATA_DECLARE(accel, uint8_t);
 TM_DATA_DECLARE(apps1, int8_t);
@@ -64,23 +72,28 @@ TM_DATA_DECLARE(brake, uint8_t);
 TM_DATA_DECLARE(bse1, uint8_t);
 TM_DATA_DECLARE(bse2, uint8_t);
 
-TM_DATA_DECLARE(vcu_states, uint16_t);
-
+// sensors
 TM_DATA_DECLARE(susp_travel_fl, int16_t);
 TM_DATA_DECLARE(susp_travel_fr, int16_t);
 TM_DATA_DECLARE(susp_travel_rl, int16_t);
 TM_DATA_DECLARE(susp_travel_rr, int16_t);
 
+// states
+TM_DATA_DECLARE(vcu_states, uint16_t);
+TM_DATA_DECLARE(velocity_x, uint16_t);
+
+// control
+TM_DATA_DECLARE(slip_ratio_l, int16_t);
+TM_DATA_DECLARE(slip_ratio_r, int16_t);
+TM_DATA_DECLARE(yaw_rate, int16_t);
+TM_DATA_DECLARE(yaw_rate_reference, int16_t);
+
+// inverter
 TM_DATA_DECLARE(inv_rl_ctrl_word, uint16_t);
 TM_DATA_DECLARE(inv_rl_target_torque, int16_t);
 
 TM_DATA_DECLARE(inv_rr_ctrl_word, uint16_t);
 TM_DATA_DECLARE(inv_rr_target_torque, int16_t);
-
-TM_DATA_DECLARE(slip_ratio_l, int16_t);
-TM_DATA_DECLARE(slip_ratio_r, int16_t);
-TM_DATA_DECLARE(yaw_rate, int16_t);
-TM_DATA_DECLARE(yaw_rate_reference, int16_t);
 
 /**
  * @} // tm_vcu

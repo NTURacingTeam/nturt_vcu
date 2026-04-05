@@ -23,8 +23,8 @@
  */
 
 /* macro ---------------------------------------------------------------------*/
-#define MSG_CTRL_LIST                                                 \
-  msg_ctrl_vehicle_state, msg_ctrl_tc, msg_ctrl_tc_in, msg_ctrl_word, \
+#define MSG_CTRL_LIST                                          \
+  msg_ctrl_states, msg_ctrl_tc, msg_ctrl_tc_in, msg_ctrl_word, \
       msg_ctrl_torque, msg_ctrl_cmd
 
 /**
@@ -35,16 +35,16 @@
  * @{
  */
 
-/// @brief Insert @ref msg_ctrl_vehicle_state printf format string.
-#define PRImsg_ctrl_vehicle_state \
+/// @brief Insert @ref msg_ctrl_states printf format string.
+#define PRImsg_ctrl_states \
   PRImsg_header "\n\r\tvelocity (m/s): %" PRImsg_2d_data
 
 /**
- * @brief Insert @ref msg_ctrl_vehicle_state arguments to printf format.
+ * @brief Insert @ref msg_ctrl_states arguments to printf format.
  *
  * @param[in] data The vehicle state message data.
  */
-#define PRImsg_ctrl_vehicle_state_arg(data) \
+#define PRImsg_ctrl_states_arg(data) \
   PRImsg_header_arg((data).header), PRImsg_2d_data_arg((data).velocity)
 
 /// @brief Insert @ref msg_ctrl_word printf format string.
@@ -112,19 +112,19 @@
  * @{
  */
 
-/// @brief CSV header for @ref msg_ctrl_vehicle_state.
-#define CSV_PRImsg_ctrl_vehicle_state_header \
+/// @brief CSV header for @ref msg_ctrl_states.
+#define CSV_PRImsg_ctrl_states_header \
   CSV_PRImsg_header_header "," CSV_PRImsg_2d_data_header(velocity)
 
-/// @brief Insert @ref msg_ctrl_vehicle_state CSV format string.
-#define CSV_PRImsg_ctrl_vehicle_state CSV_PRImsg_header ",%" CSV_PRImsg_2d_data
+/// @brief Insert @ref msg_ctrl_states CSV format string.
+#define CSV_PRImsg_ctrl_states CSV_PRImsg_header ",%" CSV_PRImsg_2d_data
 
 /**
- * @brief Insert @ref msg_ctrl_vehicle_state arguments to CSV print format.
+ * @brief Insert @ref msg_ctrl_states arguments to CSV print format.
  *
  * @param[in] data The vehicle state message data.
  */
-#define CSV_PRImsg_ctrl_vehicle_state_arg(data) \
+#define CSV_PRImsg_ctrl_states_arg(data) \
   CSV_PRImsg_header_arg((data).header), CSV_PRImsg_2d_data_arg((data).velocity)
 
 #define CSV_PRImsg_ctrl_tc_header \
@@ -197,8 +197,8 @@
  */
 
 /* type ----------------------------------------------------------------------*/
-/// @brief Vehicle state message.
-struct msg_ctrl_vehicle_state {
+/// @brief Vehicle control states message.
+struct msg_ctrl_states {
   /** Message header. */
   struct msg_header header;
 

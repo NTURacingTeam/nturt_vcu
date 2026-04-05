@@ -12,39 +12,6 @@
 
 // clang-format off
 
-CANOPEN_TM_TO_TPDO_DEFINE(states,
-    K_MSEC(100), K_MSEC(80), K_MSEC(10), 0,
-    TPDO_DATA(vcu_states, 0x2000, 0x0)
-);
-
-CANOPEN_TM_TO_TPDO_DEFINE(sensors,
-    K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
-    TPDO_DATA(susp_travel_fl, 0x2210, 0x04),
-    TPDO_DATA(susp_travel_fr, 0x2211, 0x04),
-    TPDO_DATA(susp_travel_rl, 0x2212, 0x04),
-    TPDO_DATA(susp_travel_rr, 0x2213, 0x04)
-);
-
-CANOPEN_TM_TO_TPDO_DEFINE(inv_rl,
-    K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
-    TPDO_DATA(inv_rl_ctrl_word, 0x2130, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
-    TPDO_DATA(inv_rl_target_torque, 0x2132, 0x0)
-);
-
-CANOPEN_TM_TO_TPDO_DEFINE(inv_rr,
-    K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
-    TPDO_DATA(inv_rr_ctrl_word, 0x2140, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
-    TPDO_DATA(inv_rr_target_torque, 0x2142, 0x0)
-);
-
-CANOPEN_TM_TO_TPDO_DEFINE(vehicle_control,
-    K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
-    TPDO_DATA(slip_ratio_l, 0x20A0, 0x1),
-    TPDO_DATA(slip_ratio_r, 0x20A0, 0x2),
-    TPDO_DATA(yaw_rate, 0x20A0, 0x3),
-    TPDO_DATA(yaw_rate_reference, 0x20A0, 0x4)
-);
-
 #ifndef CONFIG_VCU_SOURCE_COCKPIT_CANOPEN
 
 CANOPEN_TM_TO_TPDO_DEFINE(cockpit,
@@ -59,5 +26,39 @@ CANOPEN_TM_TO_TPDO_DEFINE(cockpit,
 );
 
 #endif // CONFIG_VCU_VCU_SOURCE_COCKPIT_CANOPEN
+
+CANOPEN_TM_TO_TPDO_DEFINE(sensors,
+    K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
+    TPDO_DATA(susp_travel_fl, 0x2210, 0x04),
+    TPDO_DATA(susp_travel_fr, 0x2211, 0x04),
+    TPDO_DATA(susp_travel_rl, 0x2212, 0x04),
+    TPDO_DATA(susp_travel_rr, 0x2213, 0x04)
+);
+
+CANOPEN_TM_TO_TPDO_DEFINE(states,
+    K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
+    TPDO_DATA(vcu_states, 0x2000, 0x0),
+    TPDO_DATA(velocity_x, 0x2090, 0x1)
+);
+
+CANOPEN_TM_TO_TPDO_DEFINE(control,
+    K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
+    TPDO_DATA(slip_ratio_l, 0x20A0, 0x1),
+    TPDO_DATA(slip_ratio_r, 0x20A0, 0x2),
+    TPDO_DATA(yaw_rate, 0x20A0, 0x3),
+    TPDO_DATA(yaw_rate_reference, 0x20A0, 0x4)
+);
+
+CANOPEN_TM_TO_TPDO_DEFINE(inv_rl,
+    K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
+    TPDO_DATA(inv_rl_ctrl_word, 0x2130, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
+    TPDO_DATA(inv_rl_target_torque, 0x2132, 0x0)
+);
+
+CANOPEN_TM_TO_TPDO_DEFINE(inv_rr,
+    K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
+    TPDO_DATA(inv_rr_ctrl_word, 0x2140, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
+    TPDO_DATA(inv_rr_target_torque, 0x2142, 0x0)
+);
 
 // clang-format on

@@ -34,30 +34,25 @@
 
 // defaults
 #define PARAM_TORQ_LIMIT 20.0
-#define PARAM_TORQ_SLEW 4.0
-#define PARAM_TORQ_DERATE_BEGIN 3000.0
-#define PARAM_TORQ_DERATE_END 5000.0
+
 #define PARAM_FB_RATIO 0.5
+#define PARAM_FB_GAIN 0.0
+
+#define PARAM_FF_SWITCH 0.0
+#define PARAM_FF_GAIN 0.0
+#define PARAM_FF_DYNA_GAIN 0.0
 
 #define PARAM_TV_GAIN 2.0
 #define PARAM_TARGET_SR 0.1
-#define PARAM_FF_SWITCH 0.0
 
-#define PARAM_FB_GAIN 0.0
-#define PARAM_FF_GAIN 0.0
-#define PARAM_FF_DYNA_GAIN 0.0
 #define PARAM_TC_SWITCH 0.0
 #define PARAM_TC_LIM 1.0
-#define PARAM_TRQ_LIM 20.0
 #define PARAM_SCALING 0.66
 #define PARAM_FR_RATIO 0.85
-
 
 #define PARAM_KP 0.0
 #define PARAM_KI 0.0
 #define PARAM_KD 0.0
-
-
 
 /**
  * @brief Specify aa control parameter. Used in @ref CTRL_PARAM_DECLARE and
@@ -101,28 +96,20 @@
 #define CTRL_PARAM_EXTERN(...) FOR_EACH(_CTRL_PARAM_EXTERN, (;), __VA_ARGS__)
 
 /// @brief List of control parameters.
-#define CTRL_PARAM_LIST                                           \
-  CTRL_PARAM(torq_derate_begin, double, PARAM_TORQ_DERATE_BEGIN), \
-      CTRL_PARAM(torq_derate_end, double, PARAM_TORQ_DERATE_END), \
-      CTRL_PARAM(torq_limit_fl, double, PARAM_TORQ_LIMIT),        \
-      CTRL_PARAM(torq_limit_fr, double, PARAM_TORQ_LIMIT),        \
-      CTRL_PARAM(torq_limit_rl, double, PARAM_TORQ_LIMIT),        \
-      CTRL_PARAM(torq_limit_rr, double, PARAM_TORQ_LIMIT),        \
-      CTRL_PARAM(torq_slew, double, PARAM_TORQ_SLEW),             \
-      CTRL_PARAM(fb_ratio, double, PARAM_FB_RATIO),               \
-      CTRL_PARAM(ff_switch, double, PARAM_FF_SWITCH),             \
-      CTRL_PARAM(tv_gain, double, PARAM_TV_GAIN),                 \
-      CTRL_PARAM(target_sr, double, PARAM_TARGET_SR),             \
-      CTRL_PARAM(fb_gain, double, PARAM_FB_GAIN),                 \
-      CTRL_PARAM(ff_gain, double, PARAM_FF_GAIN),                 \
-      CTRL_PARAM(ff_dyna_gain, double, PARAM_FF_DYNA_GAIN),       \
-      CTRL_PARAM(tc_switch, double, PARAM_TC_SWITCH),             \
-      CTRL_PARAM(tc_lim, double, PARAM_TC_LIM),                   \
-      CTRL_PARAM(trq_lim, double, PARAM_TRQ_LIM),                 \
-      CTRL_PARAM(scaling, double, PARAM_SCALING),                 \
-      CTRL_PARAM(fr_ratio, double, PARAM_FR_RATIO),               \
-      CTRL_PARAM(Kp, double, PARAM_KP),                 \
-      CTRL_PARAM(Ki, double, PARAM_KI),                 \
+#define CTRL_PARAM_LIST                                                   \
+  CTRL_PARAM(torq_lim, double, PARAM_TORQ_LIMIT),                         \
+      CTRL_PARAM(fb_ratio, double, PARAM_FB_RATIO),                       \
+      CTRL_PARAM(fb_gain, double, PARAM_FB_GAIN),                         \
+      CTRL_PARAM(ff_switch, double, PARAM_FF_SWITCH),                     \
+      CTRL_PARAM(ff_gain, double, PARAM_FF_GAIN),                         \
+      CTRL_PARAM(ff_dyna_gain, double, PARAM_FF_DYNA_GAIN),               \
+      CTRL_PARAM(tv_gain, double, PARAM_TV_GAIN),                         \
+      CTRL_PARAM(target_sr, double, PARAM_TARGET_SR),                     \
+      CTRL_PARAM(tc_switch, double, PARAM_TC_SWITCH),                     \
+      CTRL_PARAM(tc_lim, double, PARAM_TC_LIM),                           \
+      CTRL_PARAM(scaling, double, PARAM_SCALING),                         \
+      CTRL_PARAM(fr_ratio, double, PARAM_FR_RATIO),                       \
+      CTRL_PARAM(Kp, double, PARAM_KP), CTRL_PARAM(Ki, double, PARAM_KI), \
       CTRL_PARAM(Kd, double, PARAM_KD)
 
 /* function declaration ------------------------------------------------------*/
