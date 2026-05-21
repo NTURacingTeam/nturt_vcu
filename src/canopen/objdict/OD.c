@@ -36,6 +36,7 @@ OD_ATTR_RAM OD_RAM_t OD_RAM = {
     .x2000_VCUStates = 0x0000,
     .x2001_VCUErrors_sub0 = 0x00,
     .x2001_VCUErrors = {0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000},
+    .x2002_gear = 0x00,
     .x2080_steerAngle = 0,
     .x2081_accelerator = {
         .highestSub_indexSupported = 0x03,
@@ -592,10 +593,10 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
         .applicationObject8 = 0x00000000
     },
     .x1A01_TPDOMappingParameter = {
-        .numberOfMappedApplicationObjectsInPDO = 0x02,
+        .numberOfMappedApplicationObjectsInPDO = 0x03,
         .applicationObject1 = 0x20000010,
         .applicationObject2 = 0x20900110,
-        .applicationObject3 = 0x00000000,
+        .applicationObject3 = 0x20020008,
         .applicationObject4 = 0x00000000,
         .applicationObject5 = 0x00000000,
         .applicationObject6 = 0x00000000,
@@ -729,6 +730,7 @@ typedef struct {
     OD_obj_record_t o_1A05_TPDOMappingParameter[9];
     OD_obj_var_t o_2000_VCUStates;
     OD_obj_array_t o_2001_VCUErrors;
+    OD_obj_var_t o_2002_gear;
     OD_obj_var_t o_2080_steerAngle;
     OD_obj_record_t o_2081_accelerator[4];
     OD_obj_record_t o_2082_brake[4];
@@ -3208,6 +3210,11 @@ static CO_PROGMEM ODObjs_t ODObjs = {
         .dataElementLength = 4,
         .dataElementSizeof = sizeof(uint32_t)
     },
+    .o_2002_gear = {
+        .dataOrig = &OD_RAM.x2002_gear,
+        .attribute = ODA_SDO_RW | ODA_TRPDO,
+        .dataLength = 1
+    },
     .o_2080_steerAngle = {
         .dataOrig = &OD_RAM.x2080_steerAngle,
         .attribute = ODA_SDO_R | ODA_TRPDO | ODA_MB,
@@ -3793,6 +3800,7 @@ static OD_ATTR_OD OD_entry_t ODList[] = {
     {0x1A05, 0x09, ODT_REC, &ODObjs.o_1A05_TPDOMappingParameter, NULL},
     {0x2000, 0x01, ODT_VAR, &ODObjs.o_2000_VCUStates, NULL},
     {0x2001, 0x11, ODT_ARR, &ODObjs.o_2001_VCUErrors, NULL},
+    {0x2002, 0x01, ODT_VAR, &ODObjs.o_2002_gear, NULL},
     {0x2080, 0x01, ODT_VAR, &ODObjs.o_2080_steerAngle, NULL},
     {0x2081, 0x04, ODT_REC, &ODObjs.o_2081_accelerator, NULL},
     {0x2082, 0x04, ODT_REC, &ODObjs.o_2082_brake, NULL},

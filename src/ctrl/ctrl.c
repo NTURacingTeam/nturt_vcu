@@ -1,6 +1,7 @@
 #include "vcu/ctrl/ctrl.h"
 
 // glibc includes
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -24,6 +25,7 @@
 #include "simulink/vehicle_control.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/msg/msg.h"
+#include "vcu/telemetry.h"
 
 LOG_MODULE_REGISTER(vcu_ctrl);
 
@@ -66,6 +68,8 @@ struct ctrl_ctx {
 
   enum ctrl_state state;
 
+  uint32_t gear;  // 0 for forward, 1 for reverse
+
   struct msg_sensor_cockpit cockpit;
   struct msg_sensor_wheel wheel;
   struct msg_sensor_imu imu;
@@ -89,6 +93,7 @@ static void thread(void *arg1, void *arg2, void *arg3);
 static struct ctrl_ctx g_ctx = {
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
     .state = CTRL_STATE_IDLE,
+    .gear = 0,
 };
 
 SYS_INIT(init, APPLICATION, CONFIG_VCU_CTRL_INIT_PRIORITY);
@@ -106,12 +111,37 @@ ZBUS_CHAN_ADD_OBS(msg_ctrl_tc_in_chan, ctrl_listener, 0);
 ZBUS_CHAN_ADD_OBS(msg_ctrl_cmd_chan, ctrl_listener, 0);
 
 ERR_DEFINE(emcy_stop, ERR_CODE_EMCY_STOP, ERR_SEV_FATAL, "Emergency stop");
+ERR_DEFINE(reverse, ERR_CODE_REVERSE, ERR_SEV_INFO, "Reverse engaged");
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_RUNNING_OK | STATE_RUNNING_ERROR,
                        states_cb, &g_ctx);
 
 /* function definition -------------------------------------------------------*/
 CTRL_PARAM_DEFINE(CTRL_PARAM_LIST);
+
+int ctrl_ctrl_change_gear() {
+  k_mutex_lock(&g_ctx.lock, K_FOREVER);
+
+  // if (g_ctx.state != CTRL_STATE_OK || g_ctx.cockpit.brake < 50.0 ||
+  //     round(sqrt(g_ctx.states.velocity.x * g_ctx.states.velocity.x +
+  //     g_ctx.states.velocity.y * g_ctx.states.velocity.y)) != 0) {
+  //   k_mutex_unlock(&g_ctx.lock);
+  //   return 0;
+  // }
+
+  // if not in running state or brake is not pressed enough, do not allow gear change for safety
+  if (g_ctx.state != CTRL_STATE_OK || g_ctx.cockpit.brake < 50.0) {
+    k_mutex_unlock(&g_ctx.lock);
+    return 0;
+  }
+
+  g_ctx.gear = !g_ctx.gear;  // change gear
+  err_report(ERR_CODE_REVERSE, g_ctx.gear);
+  TM_DATA_UPDATE(gear, g_ctx.gear);
+  k_mutex_unlock(&g_ctx.lock);
+
+  return 1;
+}
 
 /* static function definition ------------------------------------------------*/
 static void ctrl_init(struct ctrl_ctx *ctx) {
@@ -178,6 +208,15 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       vehicle_control_step();
 
       struct msg_ctrl_torque *msg = &vehicle_control_Y.torq;
+
+      // if in reverse gear, invert torque
+      if (ctx->gear) {
+        ARRAY_FOR_EACH_PTR(msg->torque.values, val) { 
+          *val = -*val;
+          if (*val < -10.0) *val = -10.0;  // limit max torque in reverse
+        }
+      }
+
       if (ctx->state == CTRL_STATE_ERROR) {
         ARRAY_FOR_EACH_PTR(msg->torque.values, val) { *val = 0.0; }
       }
@@ -237,6 +276,9 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
       if (is_entry) {
         vehicle_control_initialize();
 
+        ctx->gear = 0;  // reset to forward gear when entering running state
+        err_report(ERR_CODE_REVERSE, ctx->gear);
+        TM_DATA_UPDATE(gear, ctx->gear);
       } else {
         struct msg_ctrl_torque msg = {0};
         msg_header_init(&msg.header);

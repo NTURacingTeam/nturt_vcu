@@ -18,6 +18,7 @@
 #include <nturt/msg/msg.h>
 
 // project includes
+#include "vcu/ctrl/ctrl.h"
 #include "vcu/ctrl/inv.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/dashboard.h"
@@ -51,6 +52,7 @@ struct dashboard_normal_ctx {
   struct k_mutex lock;
 
   bool states[NUM_DASHBOARD_STATE];
+  uint32_t button_mask; // for detecting multiple button presses
 };
 
 /* static function declaraion ------------------------------------------------*/
@@ -66,6 +68,7 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static struct dashboard_normal_ctx g_ctx = {
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
     .states = {0},
+    .button_mask = 0,
 };
 
 INPUT_CALLBACK_DEFINE(NULL, input_cb, &g_ctx);
@@ -79,7 +82,7 @@ ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
                     ERR_FILTER_CODE(ERR_CODE_ACCEL, ERR_CODE_BRAKE,
                                     ERR_CODE_PEDAL_PLAUS, ERR_CODE_HB_INV_RL,
                                     ERR_CODE_HB_INV_RR, ERR_CODE_HB_ACC,
-                                    ERR_CODE_INV_RL, ERR_CODE_INV_RR));
+                                    ERR_CODE_INV_RL, ERR_CODE_INV_RR, ERR_CODE_REVERSE));
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_ERROR | STATE_RUNNING_ERROR,
                        states_cb, &g_ctx);
@@ -171,19 +174,45 @@ static void input_cb(struct input_event *evt, void *user_data) {
 
   k_mutex_lock(&ctx->lock, K_FOREVER);
 
-  if (!ctx->states[ACTIVE] || evt->type != INPUT_EV_KEY || !evt->value) {
+  if (!ctx->states[ACTIVE] || evt->type != INPUT_EV_KEY) {
     k_mutex_unlock(&ctx->lock);
     return;
   }
 
   switch (evt->code) {
     case INPUT_BTN_FAULT_RESET:
-      ctrl_inv_fault_reset();
+      if (evt->value) {
+        ctrl_inv_fault_reset();
+      }
       break;
 
     case INPUT_BTN_DOWN_HOLD:
-      if (states_valid_transition(TRANS_CMD_RTD_FORCED)) {
-        states_transition(TRANS_CMD_RTD_FORCED);
+      if (evt->value) {
+        if (states_valid_transition(TRANS_CMD_RTD_FORCED)) {
+          states_transition(TRANS_CMD_RTD_FORCED);
+        }
+      }
+      break;
+
+    case INPUT_BTN_LEFT:
+      if (evt->value) {
+        ctx->button_mask |= INPUT_BTN_LEFT;
+        if (ctx->button_mask == INPUT_BTN_REVERSE) {
+          // only change gear when both left and right buttons are pressed
+          // and the left button is pressed after the right button
+          ctrl_ctrl_change_gear();
+          ctx->button_mask = 0;
+        }
+      } else {
+        ctx->button_mask &= ~INPUT_BTN_LEFT;
+      }
+      break;
+
+    case INPUT_BTN_RIGHT:
+      if (evt->value) {
+        ctx->button_mask |= INPUT_BTN_RIGHT;
+      } else {
+        ctx->button_mask &= ~INPUT_BTN_RIGHT;
       }
       break;
 
@@ -269,6 +298,10 @@ static void err_cb(uint32_t errcode, bool set, void *user_data) {
 
     case ERR_CODE_INV_RR:
       dashboard_state_update(ctx, ERROR_INV_RR, set);
+      break;
+
+    case ERR_CODE_REVERSE:
+      dashboard_led_set(LED_NUM_REVERSE, set);
       break;
 
     default:

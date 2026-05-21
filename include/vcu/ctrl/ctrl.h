@@ -29,6 +29,14 @@
 int ctrl_settings_save();
 
 /**
+ * @brief Change the gear of the vehicle (forward/reverse).
+ * @author chicken0709 (brianliang0709@gmail.com)
+ * @date 2026-05-11
+ * @return 1 on success, 0 on failure 
+ */
+int ctrl_ctrl_change_gear();
+
+/**
  * @} // ctrl
  */
 

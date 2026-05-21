@@ -47,6 +47,7 @@ enum vcu_tm_data_addr {
   // states
   TM_VCU_STATES,
   TM_VELOCITY_X,
+  TM_GEAR,
 
   // control
   TM_SLIP_RATIO_L,
@@ -81,6 +82,7 @@ TM_DATA_DECLARE(susp_travel_rr, int16_t);
 // states
 TM_DATA_DECLARE(vcu_states, uint16_t);
 TM_DATA_DECLARE(velocity_x, uint16_t);
+TM_DATA_DECLARE(gear, uint8_t);
 
 // control
 TM_DATA_DECLARE(slip_ratio_l, int16_t);

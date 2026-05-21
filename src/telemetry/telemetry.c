@@ -24,6 +24,7 @@ TM_DATA_DEFINE(susp_travel_rr, int16_t, TM_SUSP_TRAVEL_RR);
 // states
 TM_DATA_DEFINE(vcu_states, uint16_t, TM_VCU_STATES);
 TM_DATA_DEFINE(velocity_x, uint16_t, TM_VELOCITY_X);
+TM_DATA_DEFINE(gear, uint8_t, TM_GEAR);
 
 // control
 TM_DATA_DEFINE(slip_ratio_l, int16_t, TM_SLIP_RATIO_L);

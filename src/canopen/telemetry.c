@@ -38,7 +38,8 @@ CANOPEN_TM_TO_TPDO_DEFINE(sensors,
 CANOPEN_TM_TO_TPDO_DEFINE(states,
     K_MSEC(10), K_MSEC(8), K_MSEC(1), 0,
     TPDO_DATA(vcu_states, 0x2000, 0x0),
-    TPDO_DATA(velocity_x, 0x2090, 0x1)
+    TPDO_DATA(velocity_x, 0x2090, 0x1),
+    TPDO_DATA(gear, 0x2002, 0x0)
 );
 
 CANOPEN_TM_TO_TPDO_DEFINE(control,
