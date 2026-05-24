@@ -169,7 +169,7 @@ static void rtd_sound_work(struct k_work *work) {
       CONTAINER_OF(dwork, struct peripherials_ctx, rtd_sound_dwork);
 
   if (ctx->rtd_sound_count % 2 == 0) {
-    gpio_pin_set_dt(&buzzer, true);
+    // gpio_pin_set_dt(&buzzer, true);
 
     if (ctx->rtd_sound_count == 0) {
       sys_work_reschedule(&ctx->rtd_sound_dwork, K_MSEC(1000));

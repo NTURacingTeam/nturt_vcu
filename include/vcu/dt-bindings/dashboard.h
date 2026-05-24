@@ -19,6 +19,8 @@
 #define LED_NUM_PEDAL_PLAUS 4
 #define LED_NUM_RUNNING 8
 #define LED_NUM_ERROR 12
+#define LED_NUM_INV_FL 10
+#define LED_NUM_INV_FR 11
 #define LED_NUM_INV_RL 14
 #define LED_NUM_INV_RR 15
 #define LED_NUM_REVERSE 3

@@ -116,7 +116,7 @@ static void ctrl_inv_word_set_and_pub(struct ctrl_inv_ctx *ctx, uint16_t flags,
 
 static void msg_cb(const struct zbus_channel *chan) {
   const struct msg_ts_inv *msg = zbus_chan_const_msg(chan);
-  for (int i = 2; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     if (!err_is_set(ERR_CODE_HB_INV_FL + i)) {
       err_report(ERR_CODE_INV_FL + i,
                  msg->status.values[i] & STATUS_WORD_FAULT);

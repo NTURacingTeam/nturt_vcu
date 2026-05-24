@@ -18,18 +18,29 @@
 
 // clang-format off
 
-CANOPEN_OD_TO_AGG_DEFINE(0x2210, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, speed.fl)
+// CANOPEN_OD_TO_AGG_DEFINE(0x2210, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
+//     OD_TO_AGG_DATA(0x1, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, speed.fl)
+// );
+
+// CANOPEN_OD_TO_AGG_DEFINE(0x2211, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
+//     OD_TO_AGG_DATA(0x1, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, speed.fr)
+// );
+
+CANOPEN_OD_TO_AGG_DEFINE(0x2113, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_L, torque.fl),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_L, speed.fl)
 );
 
-CANOPEN_OD_TO_AGG_DEFINE(0x2211, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, speed.fr)
+CANOPEN_OD_TO_AGG_DEFINE(0x2123, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_L, torque.fr),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_L, speed.fr)
 );
 
 CANOPEN_OD_TO_AGG_DEFINE(0x2133, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
     OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_L, torque.rl),
     OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_L, speed.rl)
 );
+
 CANOPEN_OD_TO_AGG_DEFINE(0x2143, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
     OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_R, torque.rr),
     OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_R, speed.rr)
@@ -47,6 +58,28 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_ts_acc,
 
 CANOPEN_OD_TO_MSG_DEFINE(msg_ts_inv,
     AGG_DATA_INIT(0), K_MSEC(100), K_MSEC(80), K_MSEC(30), 0,
+    OD_TO_MSG_ENTRY(0x2111, OD_TO_MSG_DATA(0x0, uint16_t, IDENTITY, AGG_MEMBER(status.fl))),
+    OD_TO_MSG_ENTRY(0x2114,
+        OD_TO_MSG_DATA(0x1, uint16_t, INV_VOLT_CAN_TO_PHY, AGG_MEMBER(volt.fl)),
+        OD_TO_MSG_DATA(0x2, uint16_t, INV_CURRENT_CAN_TO_PHY, AGG_MEMBER(current.fl))
+    ),
+    OD_TO_MSG_ENTRY(0x2115,
+        OD_TO_MSG_DATA(0x1, int16_t, INV_TEMP_CAN_TO_PHY, AGG_MEMBER(inv_temp.fl)),
+        OD_TO_MSG_DATA(0x2, int16_t, INV_TEMP_CAN_TO_PHY, AGG_MEMBER(motor_temp.fl)),
+        OD_TO_MSG_DATA(0x3, int16_t, INV_TEMP_CAN_TO_PHY, AGG_MEMBER(mcu_temp.fl))
+    ),
+
+    OD_TO_MSG_ENTRY(0x2121, OD_TO_MSG_DATA(0x0, uint16_t, IDENTITY, AGG_MEMBER(status.fr))),
+    OD_TO_MSG_ENTRY(0x2124,
+        OD_TO_MSG_DATA(0x1, uint16_t, INV_VOLT_CAN_TO_PHY, AGG_MEMBER(volt.fr)),
+        OD_TO_MSG_DATA(0x2, uint16_t, INV_CURRENT_CAN_TO_PHY, AGG_MEMBER(current.fr))
+    ),
+    OD_TO_MSG_ENTRY(0x2125,
+        OD_TO_MSG_DATA(0x1, int16_t, INV_TEMP_CAN_TO_PHY, AGG_MEMBER(inv_temp.fr)),
+        OD_TO_MSG_DATA(0x2, int16_t, INV_TEMP_CAN_TO_PHY, AGG_MEMBER(motor_temp.fr)),
+        OD_TO_MSG_DATA(0x3, int16_t, INV_TEMP_CAN_TO_PHY, AGG_MEMBER(mcu_temp.fr))
+    ),
+
     OD_TO_MSG_ENTRY(0x2131, OD_TO_MSG_DATA(0x0, uint16_t, IDENTITY, AGG_MEMBER(status.rl))),
     OD_TO_MSG_ENTRY(0x2134,
         OD_TO_MSG_DATA(0x1, uint16_t, INV_VOLT_CAN_TO_PHY, AGG_MEMBER(volt.rl)),

@@ -38,3 +38,9 @@ TM_DATA_DEFINE(inv_rl_target_torque, int16_t, TM_INV_RL_TARGET_TORQUE);
 
 TM_DATA_DEFINE(inv_rr_ctrl_word, uint16_t, TM_INV_RR_CTRL_WORD);
 TM_DATA_DEFINE(inv_rr_target_torque, int16_t, TM_INV_RR_TARGET_TORQUE);
+
+TM_DATA_DEFINE(inv_fl_ctrl_word, uint16_t, TM_INV_FL_CTRL_WORD);
+TM_DATA_DEFINE(inv_fl_target_torque, int16_t, TM_INV_FL_TARGET_TORQUE);
+
+TM_DATA_DEFINE(inv_fr_ctrl_word, uint16_t, TM_INV_FR_CTRL_WORD);
+TM_DATA_DEFINE(inv_fr_target_torque, int16_t, TM_INV_FR_TARGET_TORQUE);

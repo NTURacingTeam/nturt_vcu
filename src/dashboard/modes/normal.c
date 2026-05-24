@@ -36,9 +36,13 @@ enum dashboard_normal_state {
   ERROR_PEDAL_PLAUS,
 
   ERROR_HB_INV,
+  ERROR_HB_INV_FL,
+  ERROR_HB_INV_FR,
   ERROR_HB_INV_RL,
   ERROR_HB_INV_RR,
   ERROR_HB_ACC,
+  ERROR_INV_FL,
+  ERROR_INV_FR,
   ERROR_INV_RL,
   ERROR_INV_RR,
 
@@ -80,9 +84,12 @@ ZBUS_CHAN_ADD_OBS(msg_ts_acc_chan, dashboard_normal_listener, 0);
 
 ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
                     ERR_FILTER_CODE(ERR_CODE_ACCEL, ERR_CODE_BRAKE,
-                                    ERR_CODE_PEDAL_PLAUS, ERR_CODE_HB_INV_RL,
-                                    ERR_CODE_HB_INV_RR, ERR_CODE_HB_ACC,
-                                    ERR_CODE_INV_RL, ERR_CODE_INV_RR, ERR_CODE_REVERSE));
+                                    ERR_CODE_PEDAL_PLAUS, ERR_CODE_HB_ACC,
+                                    ERR_CODE_HB_INV_FL, ERR_CODE_HB_INV_FR,
+                                    ERR_CODE_HB_INV_RL, ERR_CODE_HB_INV_RR, 
+                                    ERR_CODE_INV_FL, ERR_CODE_INV_FR, 
+                                    ERR_CODE_INV_RL, ERR_CODE_INV_RR,
+                                    ERR_CODE_REVERSE));
 
 STATES_CALLBACK_DEFINE(STATE_RUNNING | STATE_ERROR | STATE_RUNNING_ERROR,
                        states_cb, &g_ctx);
@@ -132,9 +139,12 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
       dashboard_led_set(LED_NUM_PEDAL_PLAUS, set);
       break;
 
+    case ERROR_HB_INV_FL:
+    case ERROR_HB_INV_FR:
     case ERROR_HB_INV_RL:
     case ERROR_HB_INV_RR:
       ctx->states[ERROR_HB_INV] =
+          ctx->states[ERROR_HB_INV_FL] || ctx->states[ERROR_HB_INV_FR] ||
           ctx->states[ERROR_HB_INV_RL] || ctx->states[ERROR_HB_INV_RR];
 
       if (ctx->states[ERROR_HB_INV]) {
@@ -146,6 +156,14 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
       if (set) {
         dashboard_set_error(DASHBOARD_BATTERY);
       }
+      break;
+
+    case ERROR_INV_FL:
+      dashboard_led_set(LED_NUM_INV_FL, set);
+      break;
+
+    case ERROR_INV_FR:
+      dashboard_led_set(LED_NUM_INV_FR, set);
       break;
 
     case ERROR_INV_RL:
@@ -280,6 +298,14 @@ static void err_cb(uint32_t errcode, bool set, void *user_data) {
       dashboard_state_update(ctx, ERROR_PEDAL_PLAUS, set);
       break;
 
+    case ERR_CODE_HB_INV_FL:
+      dashboard_state_update(ctx, ERROR_HB_INV_FL, set);
+      break;
+
+    case ERR_CODE_HB_INV_FR:
+      dashboard_state_update(ctx, ERROR_HB_INV_FR, set);
+      break;
+
     case ERR_CODE_HB_INV_RL:
       dashboard_state_update(ctx, ERROR_HB_INV_RL, set);
       break;
@@ -290,6 +316,14 @@ static void err_cb(uint32_t errcode, bool set, void *user_data) {
 
     case ERR_CODE_HB_ACC:
       dashboard_state_update(ctx, ERROR_HB_ACC, set);
+      break;
+
+    case ERR_CODE_INV_FL:
+      dashboard_state_update(ctx, ERROR_INV_FL, set);
+      break;
+
+    case ERR_CODE_INV_FR:
+      dashboard_state_update(ctx, ERROR_INV_FR, set);
       break;
 
     case ERR_CODE_INV_RL:
