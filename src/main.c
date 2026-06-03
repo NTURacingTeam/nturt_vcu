@@ -1,7 +1,7 @@
 // glibc includes
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 // zephyr includes
 #include <zephyr/drivers/auxdisplay.h>
@@ -9,9 +9,6 @@
 #include <zephyr/drivers/led_strip.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
-
-// lvgl includes
-#include <lvgl.h>
 
 // nturt includes
 #include <nturt/canbus/canopen.h>
@@ -24,9 +21,7 @@ LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 int main() {
   while (true) {
-		uint32_t sleep_ms = lv_timer_handler();
-
-    k_sleep(K_MSEC(sleep_ms));
+    k_sleep(K_SECONDS(1));
   }
 
   return 0;

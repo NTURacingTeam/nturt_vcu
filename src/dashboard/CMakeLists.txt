@@ -1,6 +1,5 @@
 if(CONFIG_VCU_DASHBOARD)
 
-add_subdirectory(display)
 add_subdirectory(modes)
 
 target_sources(app PRIVATE

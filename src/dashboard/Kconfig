@@ -1,5 +1,5 @@
 menuconfig VCU_DASHBOARD
-	bool "Dashboard and display system"
+	bool "Dashboard system"
 	select LED
 	select LED_STRIP
 	select AUXDISPLAY
@@ -9,22 +9,20 @@ menuconfig VCU_DASHBOARD
 
 if VCU_DASHBOARD
 
-rsource "display/Kconfig"
-
 config VCU_DASHBOARD_INIT_PRIORITY
 	int "Init priority"
 	default 50
 	help
-	  Dashboard and display system initialization priority.
+	  Dashboard system initialization priority.
 
 config VCU_DASHBOARD_SHELL
-	bool "Dashboard and display shell support"
+	bool "Dashboard shell support"
 	depends on VCU_SHELL
 	default y
 	select LED_SHELL
 
 config VCU_DASHBOARD_SETTINGS
-	bool "Dashboard and display settings support"
+	bool "Dashboard settings support"
 	depends on SETTINGS
 	default y
 

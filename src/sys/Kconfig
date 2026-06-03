@@ -9,8 +9,9 @@ if VCU_SYS
 
 config VCU_SHELL
 	bool "Shell support"
-	select SETTINGS_SHELL
 	select NTURT_SHELL
+
+if VCU_SHELL
 
 config RTC_SHELL
 	default y
@@ -26,5 +27,9 @@ config I2C_SHELL
 	default y
 config SPI_SHELL
 	default y
+config SETTINGS_SHELL
+	default y
+
+endif # VCU_SHELL
 
 endif # VCU_SYS
