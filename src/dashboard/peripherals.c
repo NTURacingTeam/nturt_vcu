@@ -16,8 +16,25 @@
 // project includes
 #include "vcu/ctrl/states.h"
 #include "vcu/dashboard.h"
+#include "zephyr/sys/util_macro.h"
 
 LOG_MODULE_REGISTER(vcu_peripherals);
+
+#ifdef VCU_HAS_BRAKE_LIGHT
+static void msg_cb(const struct zbus_channel *chan);
+
+static const struct gpio_dt_spec brake_light =
+    GPIO_DT_SPEC_GET(DT_CHOSEN(nturt_brake_light), gpios);
+
+ZBUS_LISTENER_DEFINE(peripherials_listener, msg_cb);
+ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, peripherials_listener, 0);
+
+static void msg_cb(const struct zbus_channel *chan) {
+  const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
+
+  gpio_pin_set_dt(&brake_light, msg->brake > 0);
+}
+#endif  // VCU_HAS_BRAKE_LIGHT
 
 /* type ----------------------------------------------------------------------*/
 struct peripherials_ctx {
@@ -29,7 +46,6 @@ struct peripherials_ctx {
 /* static function declaration -----------------------------------------------*/
 static int gpio_init();
 
-static void msg_cb(const struct zbus_channel *chan);
 static void input_cb(struct input_event *evt, void *user_data);
 static void states_cb(enum states_state state, bool is_entry, void *user_data);
 static void rtd_blink_work(struct k_work *work);
@@ -40,8 +56,6 @@ static const struct gpio_dt_spec buzzer =
     GPIO_DT_SPEC_GET(DT_CHOSEN(nturt_buzzer), gpios);
 static const struct gpio_dt_spec rtd_light =
     GPIO_DT_SPEC_GET(DT_CHOSEN(nturt_rtd_light), gpios);
-static const struct gpio_dt_spec brake_light =
-    GPIO_DT_SPEC_GET(DT_CHOSEN(nturt_brake_light), gpios);
 
 static struct peripherials_ctx g_ctx = {
     .rtd_sound_count = 0,
@@ -52,9 +66,6 @@ static struct peripherials_ctx g_ctx = {
 // use the same init priority as the LEDs since they are used in the same way
 SYS_INIT(gpio_init, POST_KERNEL, CONFIG_LED_INIT_PRIORITY);
 
-ZBUS_LISTENER_DEFINE(peripherials_listener, msg_cb);
-ZBUS_CHAN_ADD_OBS(msg_sensor_cockpit_chan, peripherials_listener, 0);
-
 INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
 
 STATES_CALLBACK_DEFINE(STATE_RTD_BLINK | STATE_RTD_STEADY | STATE_RTD_SOUND,
@@ -63,10 +74,7 @@ STATES_CALLBACK_DEFINE(STATE_RTD_BLINK | STATE_RTD_STEADY | STATE_RTD_SOUND,
 /* static function definition ------------------------------------------------*/
 static int gpio_init() {
   const struct gpio_dt_spec *gpios[] = {
-      &buzzer,
-      &rtd_light,
-      &brake_light,
-  };
+      &buzzer, &rtd_light, IF_ENABLED(VCU_HAS_BRAKE_LIGHT, &brake_light)};
 
   for (int i = 0; i < ARRAY_SIZE(gpios); i++) {
     if (!device_is_ready(gpios[i]->port)) {
@@ -86,12 +94,6 @@ static int gpio_init() {
   }
 
   return 0;
-}
-
-static void msg_cb(const struct zbus_channel *chan) {
-  const struct msg_sensor_cockpit *msg = zbus_chan_const_msg(chan);
-
-  gpio_pin_set_dt(&brake_light, msg->brake > 0);
 }
 
 static void input_cb(struct input_event *evt, void *user_data) {

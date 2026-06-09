@@ -1,40 +1,40 @@
-DT_CHOSEN_NTURT_IMU := nturt,imu
+DT_CHOSEN_NTURT_BRAKE_LIGHT := nturt,brake_light
+config VCU_HAS_BRAKE_LIGHT
+	bool
+	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_BRAKE_LIGHT))
+	default y
 
+DT_CHOSEN_NTURT_IMU := nturt,imu
 config VCU_HAS_IMU
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_IMU))
 	default y
 
 DT_CHOSEN_NTURT_GPS := nturt,gps
-
 config VCU_HAS_GPS
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_GPS))
 	default y
 
 DT_CHOSEN_NTURT_SUSP_FL := nturt,susp-fl
-
 config VCU_HAS_SUSP_FL
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_FL))
 	default y
 
 DT_CHOSEN_NTURT_SUSP_FR := nturt,susp-fr
-
 config VCU_HAS_SUSP_FR
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_FR))
 	default y
 
 DT_CHOSEN_NTURT_SUSP_RL := nturt,susp-rl
-
 config VCU_HAS_SUSP_RL
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_RL))
 	default y
 
 DT_CHOSEN_NTURT_SUSP_RR := nturt,susp-rr
-
 config VCU_HAS_SUSP_RR
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_SUSP_RR))
@@ -47,28 +47,24 @@ config VCU_HAS_SUSP
 	default y
 
 DT_CHOSEN_NTURT_POW_IN_VOLT := nturt,pow-in-volt
-
 config VCU_HAS_POW_IN_VOLT
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_IN_VOLT))
 	default y
 
 DT_CHOSEN_NTURT_POW_5V_CURR := nturt,pow-5v-curr
-
 config VCU_HAS_POW_5V_CURR
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_5V_CURR))
 	default y
 
 DT_CHOSEN_NTURT_POW_5V_RPI_CURR := nturt,pow-5v-rpi-curr
-
 config VCU_HAS_POW_5V_RPI_CURR
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_5V_RPI_CURR))
 	default y
 
 DT_CHOSEN_NTURT_POW_LOW := nturt,pow-low
-
 config VCU_HAS_POW_LOW
 	bool
 	depends on $(dt_chosen_enabled,$(DT_CHOSEN_NTURT_POW_LOW))
