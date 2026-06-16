@@ -18,32 +18,24 @@
 
 // clang-format off
 
-// CANOPEN_OD_TO_AGG_DEFINE(0x2210, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-//     OD_TO_AGG_DATA(0x1, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, speed.fl)
-// );
-
-// CANOPEN_OD_TO_AGG_DEFINE(0x2211, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-//     OD_TO_AGG_DATA(0x1, int16_t, ANGULAR_VELOCITY_CAN_TO_PHY, speed.fr)
-// );
-
 CANOPEN_OD_TO_AGG_DEFINE(0x2113, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_L, torque.fl),
-    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_L, speed.fl)
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_FL, torque.fl),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_FL, speed.fl)
 );
 
 CANOPEN_OD_TO_AGG_DEFINE(0x2123, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_L, torque.fr),
-    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_L, speed.fr)
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_FR, torque.fr),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_FR, speed.fr)
 );
 
 CANOPEN_OD_TO_AGG_DEFINE(0x2133, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_L, torque.rl),
-    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_L, speed.rl)
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_RL, torque.rl),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_RL, speed.rl)
 );
 
 CANOPEN_OD_TO_AGG_DEFINE(0x2143, &msg_sensor_wheel_agg, struct msg_sensor_wheel,
-    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_R, torque.rr),
-    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_R, speed.rr)
+    OD_TO_AGG_DATA(0x1, int16_t, INV_TORQUE_CAN_TO_WHEEL_PHY_RR, torque.rr),
+    OD_TO_AGG_DATA(0x2, int16_t, INV_SPEED_CAN_TO_WHEEL_PHY_RR, speed.rr)
 );
 
 CANOPEN_OD_TO_MSG_DEFINE(msg_ts_acc,

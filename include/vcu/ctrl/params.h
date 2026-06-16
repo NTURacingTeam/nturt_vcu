@@ -27,8 +27,10 @@
 
 /* macro ---------------------------------------------------------------------*/
 // constants
-#define PARAM_MOTOR_DIR_L -1.0
-#define PARAM_MOTOR_DIR_R 1.0
+#define PARAM_MOTOR_DIR_FL 1.0
+#define PARAM_MOTOR_DIR_FR -1.0
+#define PARAM_MOTOR_DIR_RL -1.0
+#define PARAM_MOTOR_DIR_RR 1.0
 #define PARAM_MOTOR_RATED_TORQUE 20.0
 #define PARAM_MOTOR_REDUCTION_RATIO 13.1
 
