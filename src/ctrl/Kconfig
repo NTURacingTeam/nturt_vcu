@@ -20,6 +20,18 @@ config VCU_CTRL_THREAD_PRIORITY
 	int "Control system thread priority"
 	default 0
 
+choice VCU_CTRL_ALGO
+	prompt "Vehicle control algorithm"
+	default VCU_CTRL_ALGO_SIMULINK
+
+config VCU_CTRL_ALGO_SIMULINK
+	bool "Control algorithm from Simulink model"
+
+config VCU_CTRL_ALGO_DUMB
+	bool "No algorithm"
+
+endchoice
+
 config VCU_CTRL_SHELL
 	bool "Control system shell support"
 	depends on VCU_SHELL

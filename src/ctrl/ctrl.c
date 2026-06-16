@@ -129,7 +129,8 @@ int ctrl_ctrl_change_gear() {
   //   return 0;
   // }
 
-  // if not in running state or brake is not pressed enough, do not allow gear change for safety
+  // if not in running state or brake is not pressed enough, do not allow gear
+  // change for safety
   if (g_ctx.state != CTRL_STATE_OK || g_ctx.cockpit.brake < 50.0) {
     k_mutex_unlock(&g_ctx.lock);
     return 0;
@@ -194,6 +195,9 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 #endif  // CONFIG_VCU_SOURCE_STATES_FUSION
 
     if (ctx->state != CTRL_STATE_IDLE) {
+      struct msg_ctrl_torque msg;
+
+#ifdef CONFIG_VCU_CTRL_ALGO_SIMULINK
       vehicle_control_U.tc_in = ctx->tc_in;
       vehicle_control_U.states = ctx->states;
       vehicle_control_U.cockpit = ctx->cockpit;
@@ -207,22 +211,29 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
       vehicle_control_step();
 
-      struct msg_ctrl_torque *msg = &vehicle_control_Y.torq;
+      msg.torque = vehicle_control_Y.torq.torque;
+#endif  // CONFIG_VCU_CTRL_ALGO_SIMULINK
+
+#ifdef CONFIG_VCU_CTRL_ALGO_DUMB
+      ARRAY_FOR_EACH_PTR(msg.torque.values, val) {
+        *val = PARAM_MOTOR_RATED_TORQUE * ctx->cockpit.accel;
+      }
+#endif  // CONFIG_VCU_CTRL_ALGO_DUMB
 
       // if in reverse gear, invert torque
       if (ctx->gear) {
-        ARRAY_FOR_EACH_PTR(msg->torque.values, val) { 
+        ARRAY_FOR_EACH_PTR(msg.torque.values, val) {
           *val = -*val;
           if (*val < -10.0) *val = -10.0;  // limit max torque in reverse
         }
       }
 
       if (ctx->state == CTRL_STATE_ERROR) {
-        ARRAY_FOR_EACH_PTR(msg->torque.values, val) { *val = 0.0; }
+        ARRAY_FOR_EACH_PTR(msg.torque.values, val) { *val = 0.0; }
       }
-      msg_header_init(&msg->header);
+      msg_header_init(&msg.header);
 
-      zbus_chan_pub(&msg_ctrl_torque_chan, msg, K_MSEC(5));
+      zbus_chan_pub(&msg_ctrl_torque_chan, &msg, K_MSEC(5));
 
       struct msg_ctrl_tc *msg_tc = &vehicle_control_Y.tc;
       msg_header_init(&msg_tc->header);
