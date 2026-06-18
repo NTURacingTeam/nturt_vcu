@@ -216,7 +216,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 
 #ifdef CONFIG_VCU_CTRL_ALGO_DUMB
       ARRAY_FOR_EACH_PTR(msg.torque.values, val) {
-        *val = PARAM_MOTOR_RATED_TORQUE * ctx->cockpit.accel;
+        *val = PARAM_MOTOR_RATED_TORQUE * ctx->cockpit.accel / 100.0;
       }
 #endif  // CONFIG_VCU_CTRL_ALGO_DUMB
 
