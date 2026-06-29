@@ -92,7 +92,8 @@
 
 /// @brief List of control parameters.
 #define CTRL_PARAM_LIST                                                   \
-  CTRL_PARAM(torq_lim, double, PARAM_TORQ_LIMIT),                         \
+  CTRL_PARAM(torq_lim_f, double, PARAM_TORQ_LIMIT),                       \
+      CTRL_PARAM(torq_lim, double, PARAM_TORQ_LIMIT),                     \
       CTRL_PARAM(ff_switch, double, PARAM_FF_SWITCH),                     \
       CTRL_PARAM(ff_gain, double, PARAM_FF_GAIN),                         \
       CTRL_PARAM(tc_switch, double, PARAM_TC_SWITCH),                     \

@@ -215,9 +215,14 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 #endif  // CONFIG_VCU_CTRL_ALGO_SIMULINK
 
 #ifdef CONFIG_VCU_CTRL_ALGO_DUMB
-      ARRAY_FOR_EACH_PTR(msg.torque.values, val) {
-        *val = PARAM_MOTOR_RATED_TORQUE * ctx->cockpit.accel / 100.0;
-      }
+      double accel = ctx->cockpit.accel / 100.0;
+      union msg_4wheel_data torq = {
+          .fl = accel * torq_lim_f,
+          .fr = accel * torq_lim_f,
+          .rl = accel * torq_lim,
+          .rr = accel * torq_lim,
+      };
+      msg.torque = torq;
 #endif  // CONFIG_VCU_CTRL_ALGO_DUMB
 
       // if in reverse gear, invert torque
