@@ -50,17 +50,17 @@ CANOPEN_TM_TO_TPDO_DEFINE(control,
     TPDO_DATA(yaw_rate_reference, 0x20A0, 0x4)
 );
 
-CANOPEN_TM_TO_TPDO_DEFINE(inv_fl,
-    K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
-    TPDO_DATA(inv_fl_ctrl_word, 0x2110, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
-    TPDO_DATA(inv_fl_target_torque, 0x2112, 0x0)
-);
+// CANOPEN_TM_TO_TPDO_DEFINE(inv_fl,
+//     K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
+//     TPDO_DATA(inv_fl_ctrl_word, 0x2110, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
+//     TPDO_DATA(inv_fl_target_torque, 0x2112, 0x0)
+// );
 
-CANOPEN_TM_TO_TPDO_DEFINE(inv_fr,
-    K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
-    TPDO_DATA(inv_fr_ctrl_word, 0x2120, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
-    TPDO_DATA(inv_fr_target_torque, 0x2122, 0x0)
-);
+// CANOPEN_TM_TO_TPDO_DEFINE(inv_fr,
+//     K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,
+//     TPDO_DATA(inv_fr_ctrl_word, 0x2120, 0x0, AGG_MEMBER_FLAG_OPTIONAL),
+//     TPDO_DATA(inv_fr_target_torque, 0x2122, 0x0)
+// );
 
 CANOPEN_TM_TO_TPDO_DEFINE(inv_rl,
     K_MSEC(10), K_MSEC(8), K_MSEC(1), AGG_FLAG_ALWAYS_PUBLISH,

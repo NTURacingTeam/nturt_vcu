@@ -85,7 +85,7 @@ ZBUS_CHAN_ADD_OBS(msg_ts_acc_chan, dashboard_normal_listener, 0);
 ERR_CALLBACK_DEFINE(err_cb, &g_ctx,
                     ERR_FILTER_CODE(ERR_CODE_ACCEL, ERR_CODE_BRAKE,
                                     ERR_CODE_PEDAL_PLAUS, ERR_CODE_HB_ACC,
-                                    ERR_CODE_HB_INV_FL, ERR_CODE_HB_INV_FR,
+                                    // ERR_CODE_HB_INV_FL, ERR_CODE_HB_INV_FR,
                                     ERR_CODE_HB_INV_RL, ERR_CODE_HB_INV_RR, 
                                     ERR_CODE_INV_FL, ERR_CODE_INV_FR, 
                                     ERR_CODE_INV_RL, ERR_CODE_INV_RR,
