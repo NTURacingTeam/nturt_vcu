@@ -7,9 +7,6 @@
 #include <string.h>
 
 // zephyr includes
-#include <zephyr/device.h>
-#include <zephyr/devicetree.h>
-#include <zephyr/drivers/auxdisplay.h>
 #include <zephyr/input/input.h>
 #include <zephyr/kernel.h>
 #include <zephyr/sys/util.h>
@@ -42,9 +39,6 @@ static void input_cb(struct input_event *evt, void *user_data);
 static void test_work(struct k_work *work);
 
 /* static variable -----------------------------------------------------------*/
-static const struct device *speed_display =
-    DEVICE_DT_GET(DT_NODELABEL(speed_display));
-
 static struct dashboard_test_ctx g_ctx = {
     .lock = Z_MUTEX_INITIALIZER(g_ctx.lock),
     .states = {0},
@@ -114,7 +108,7 @@ static void test_work(struct k_work *work) {
 
   ctx->counter = (ctx->counter + 1) % 100;
 
-  auxdisplay_brightness_set(speed_display, ctx->counter);
+  dashboard_brightness_set(ctx->counter);
   for (int j = 0; j < NUM_DASHBOARD_DISPLAY; j++) {
     dashboard_set_level(j, j % 2 == 0 ? ctx->counter : 100 - ctx->counter);
   }

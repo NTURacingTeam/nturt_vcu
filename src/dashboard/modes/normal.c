@@ -149,6 +149,7 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
 
       if (ctx->states[ERROR_HB_INV]) {
         dashboard_set_error(DASHBOARD_SPEED);
+        dashboard_set_error(DASHBOARD_LED_STRIP);
       }
       break;
 
@@ -267,6 +268,7 @@ static void msg_cb(const struct zbus_channel *chan) {
       int speed = round(M_S_TO_KM_H(sqrt(msg->velocity.x * msg->velocity.x +
                                          msg->velocity.y * msg->velocity.y)));
       dashboard_set_level(DASHBOARD_SPEED, speed);
+      dashboard_set_level(DASHBOARD_LED_STRIP, speed);
     }
 
   } else if (chan == &msg_ts_acc_chan) {

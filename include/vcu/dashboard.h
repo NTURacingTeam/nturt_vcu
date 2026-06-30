@@ -29,8 +29,14 @@
 /// @brief Number of LEDs in the dashboard.
 #define NUM_LED DT_CHILD_NUM_STATUS_OKAY(DT_CHOSEN(nturt_leds))
 
+/// @brief Length of the accel LED strip.
+#define ACCEL_DISPLAY_LEN DT_PROP(DT_CHOSEN(nturt_accel_display), chain_length)
+
+/// @brief Length of the brake LED strip.
+#define BRAKE_DISPLAY_LEN DT_PROP(DT_CHOSEN(nturt_brake_display), chain_length)
+
 /// @brief Length of the LED strips.
-#define LED_STRIP_LEN DT_PROP(DT_CHOSEN(nturt_accel_display), chain_length)
+#define LED_STRIP_LEN DT_PROP(DT_CHOSEN(nturt_led_strip), chain_length)
 
 /// @brief Period for a blinking LED to switch state.
 #define LED_BLINK_PERIOD K_MSEC(250)
@@ -47,6 +53,7 @@ enum dashboard_component {
   DASHBOARD_BATTERY,
   DASHBOARD_ACCEL,
   DASHBOARD_BRAKE,
+  DASHBOARD_LED_STRIP,
 
   NUM_DASHBOARD_DISPLAY,
 };
