@@ -69,7 +69,7 @@ static int dashboard_brightness_get_cmd_handler(const struct shell *sh,
   (void)argv;
   (void)data;
 
-  shell_print(sh, "Current brightness: %hu", dashboard_brightness_get());
+  shell_print(sh, "Current brightness: %i", dashboard_brightness_get());
 
   return 0;
 }

@@ -35,8 +35,9 @@ struct dashboard_ctx {
 
   struct k_mutex lock;
   uint8_t brightness;
-  struct led_rgb accel_rgb[LED_STRIP_LEN];
-  struct led_rgb brake_rgb[LED_STRIP_LEN];
+  struct led_rgb accel_rgb[ACCEL_DISPLAY_LEN];
+  struct led_rgb brake_rgb[BRAKE_DISPLAY_LEN];
+  struct led_rgb led_strip_rgb[LED_STRIP_LEN];
   enum dashboard_mode mode;
 };
 
@@ -50,6 +51,12 @@ static void rgb_set_level(struct led_rgb* rgb, int len, int level);
  */
 static void rgb_set_error(struct led_rgb* rgb, int len);
 static void rgb_apply_selected(struct led_rgb* rgb, int len);
+
+static void led_strip_set_level(struct led_rgb* rgb, int len, int level);
+
+static void led_strip_apply_birghtness(struct led_rgb* rgb, int len,
+                                       int brightness);
+
 static void dashboard_reset();
 
 static int init();
@@ -60,15 +67,18 @@ static void states_cb(enum states_state state, bool is_entry, void* user_data);
 /* static variable -----------------------------------------------------------*/
 static const struct device* leds = DEVICE_DT_GET(DT_CHOSEN(nturt_leds));
 
+static const struct device* led_strip =
+    DEVICE_DT_GET(DT_CHOSEN(nturt_led_strip));
+
 static const struct device* speed_display =
-    DEVICE_DT_GET(DT_NODELABEL(speed_display));
+    DEVICE_DT_GET(DT_CHOSEN(nturt_speed_display));
 static const struct device* battery_display =
-    DEVICE_DT_GET(DT_NODELABEL(battery_display));
+    DEVICE_DT_GET(DT_CHOSEN(nturt_battery_display));
 
 static const struct device* accel_display =
-    DEVICE_DT_GET(DT_NODELABEL(accel_display));
+    DEVICE_DT_GET(DT_CHOSEN(nturt_accel_display));
 static const struct device* brake_display =
-    DEVICE_DT_GET(DT_NODELABEL(brake_display));
+    DEVICE_DT_GET(DT_CHOSEN(nturt_brake_display));
 
 static struct dashboard_ctx g_ctx = {
     .mode_infos =
@@ -113,10 +123,15 @@ void dashboard_brightness_set(int brightness) {
   brightness = CLAMP(brightness, 0, 100);
 
   g_ctx.brightness = brightness;
+
   int ret = auxdisplay_brightness_set(speed_display, brightness);
   if (ret < 0) {
     LOG_ERR("auxdisplay_brightness_set failed: %s", strerror(-ret));
   }
+
+  led_strip_apply_birghtness(g_ctx.led_strip_rgb, LED_STRIP_LEN,
+                             g_ctx.brightness);
+  led_strip_update_rgb(led_strip, g_ctx.led_strip_rgb, LED_STRIP_LEN);
 }
 
 void dashboard_led_set(int led, bool set) {
@@ -141,6 +156,7 @@ void dashboard_clear(enum dashboard_component display) {
 
     case DASHBOARD_ACCEL:
     case DASHBOARD_BRAKE:
+    case DASHBOARD_LED_STRIP:
       dashboard_set_level(display, 0);
       break;
 
@@ -161,14 +177,22 @@ void dashboard_set_level(enum dashboard_component display, int level) {
       break;
 
     case DASHBOARD_ACCEL: {
-      rgb_set_level(g_ctx.accel_rgb, LED_STRIP_LEN, level);
-      led_strip_update_rgb(accel_display, g_ctx.accel_rgb, LED_STRIP_LEN);
+      rgb_set_level(g_ctx.accel_rgb, ACCEL_DISPLAY_LEN, level);
+      led_strip_update_rgb(accel_display, g_ctx.accel_rgb, ACCEL_DISPLAY_LEN);
       break;
     }
 
     case DASHBOARD_BRAKE: {
-      rgb_set_level(g_ctx.brake_rgb, LED_STRIP_LEN, level);
-      led_strip_update_rgb(brake_display, g_ctx.brake_rgb, LED_STRIP_LEN);
+      rgb_set_level(g_ctx.brake_rgb, BRAKE_DISPLAY_LEN, level);
+      led_strip_update_rgb(brake_display, g_ctx.brake_rgb, BRAKE_DISPLAY_LEN);
+      break;
+    }
+
+    case DASHBOARD_LED_STRIP: {
+      led_strip_set_level(g_ctx.led_strip_rgb, LED_STRIP_LEN, level);
+      led_strip_apply_birghtness(g_ctx.led_strip_rgb, LED_STRIP_LEN,
+                                 g_ctx.brightness);
+      led_strip_update_rgb(led_strip, g_ctx.led_strip_rgb, LED_STRIP_LEN);
       break;
     }
 
@@ -191,13 +215,17 @@ void dashboard_set_error(enum dashboard_component display) {
       break;
 
     case DASHBOARD_ACCEL:
-      rgb_set_error(g_ctx.accel_rgb, LED_STRIP_LEN);
-      led_strip_update_rgb(accel_display, g_ctx.accel_rgb, LED_STRIP_LEN);
+      rgb_set_error(g_ctx.accel_rgb, ACCEL_DISPLAY_LEN);
+      led_strip_update_rgb(accel_display, g_ctx.accel_rgb, ACCEL_DISPLAY_LEN);
       break;
 
     case DASHBOARD_BRAKE:
-      rgb_set_error(g_ctx.brake_rgb, LED_STRIP_LEN);
-      led_strip_update_rgb(brake_display, g_ctx.brake_rgb, LED_STRIP_LEN);
+      rgb_set_error(g_ctx.brake_rgb, BRAKE_DISPLAY_LEN);
+      led_strip_update_rgb(brake_display, g_ctx.brake_rgb, BRAKE_DISPLAY_LEN);
+      break;
+
+    case DASHBOARD_LED_STRIP:
+      dashboard_clear(DASHBOARD_LED_STRIP);
       break;
 
     default:
@@ -210,17 +238,18 @@ void dashboard_apply_selected(enum dashboard_component display) {
   switch (display) {
     case DASHBOARD_SPEED:
     case DASHBOARD_BATTERY:
+    case DASHBOARD_LED_STRIP:
       dashboard_clear(display);
       break;
 
     case DASHBOARD_ACCEL:
-      rgb_apply_selected(g_ctx.accel_rgb, LED_STRIP_LEN);
-      led_strip_update_rgb(accel_display, g_ctx.accel_rgb, LED_STRIP_LEN);
+      rgb_apply_selected(g_ctx.accel_rgb, ACCEL_DISPLAY_LEN);
+      led_strip_update_rgb(accel_display, g_ctx.accel_rgb, ACCEL_DISPLAY_LEN);
       break;
 
     case DASHBOARD_BRAKE:
-      rgb_apply_selected(g_ctx.brake_rgb, LED_STRIP_LEN);
-      led_strip_update_rgb(brake_display, g_ctx.brake_rgb, LED_STRIP_LEN);
+      rgb_apply_selected(g_ctx.brake_rgb, BRAKE_DISPLAY_LEN);
+      led_strip_update_rgb(brake_display, g_ctx.brake_rgb, BRAKE_DISPLAY_LEN);
       break;
 
     default:
@@ -303,6 +332,37 @@ static void rgb_set_error(struct led_rgb* rgb, int len) {
 static void rgb_apply_selected(struct led_rgb* rgb, int len) {
   rgb[0].r = !rgb[0].r;
   rgb[len - 1].r = !rgb[len - 1].r;
+}
+
+static void led_strip_set_level(struct led_rgb* rgb, int len, int level) {
+  static const struct led_rgb colors[] = {
+      {.r = 0, .g = 0, .b = 0}, {.r = 0, .g = 1, .b = 0},
+      {.r = 0, .g = 0, .b = 1}, {.r = 1, .g = 0, .b = 0},
+      {.r = 1, .g = 1, .b = 1},
+  };
+
+  level = CLAMP(level, 0, 80);
+  int zone = (level - 1) / 20;
+  int lit = DIV_ROUND_CLOSEST((level - zone * 20) * len, 20);
+
+  for (int i = 0; i < lit; i++) {
+    rgb[i] = colors[zone + 1];
+  }
+
+  for (int i = lit; i < len; i++) {
+    rgb[i] = colors[zone];
+  }
+}
+
+static void led_strip_apply_birghtness(struct led_rgb* rgb, int len,
+                                       int brightness) {
+  int level = DIV_ROUND_CLOSEST(brightness * 255, 100);
+
+  for (int i = 0; i < len; i++) {
+    rgb[i].r = rgb[i].r > 0 ? level : 0;
+    rgb[i].g = rgb[i].g > 0 ? level : 0;
+    rgb[i].b = rgb[i].b > 0 ? level : 0;
+  }
 }
 
 static void dashboard_reset() {
