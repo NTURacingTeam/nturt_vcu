@@ -7,9 +7,9 @@
  *
  * Code generation for model "vehicle_control".
  *
- * Model version              : 4.9
- * Simulink Coder version : 25.1 (R2025a) 21-Nov-2024
- * C source code generated on : Sun Apr  5 12:00:05 2026
+ * Model version              : 5.15
+ * Simulink Coder version : 25.2 (R2025b) 28-Jul-2025
+ * C source code generated on : Thu Jul  9 12:21:12 2026
  */
 #include <stdbool.h>
 #include <stdint.h>
@@ -36,12 +36,31 @@ const double rtCP_pooled_0doAzsqEh8nf[101] = { -3.1415926, -3.078760748,
   2.764601488, 2.82743334, 2.890265192, 2.953097044, 3.015928896, 3.078760748,
   3.1415926 } ;
 
+extern const double rtCP_pooled_8QUqjQztIgEy[24];
+const double rtCP_pooled_8QUqjQztIgEy[24] = { -121.0, -111.0, -100.0, -89.0,
+  -79.0, -69.0, -59.0, -51.0, -40.0, -31.0, -21.0, -10.0, 0.0, 9.0, 19.0, 29.0,
+  39.0, 51.0, 59.0, 70.0, 79.0, 90.0, 111.0, 118.0 } ;
+
 extern const double rtCP_pooled_BrF7RapXGBLM[9];
 const double rtCP_pooled_BrF7RapXGBLM[9] = { 0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0,
   0.0, 1.0 } ;
 
+extern const double rtCP_pooled_F2Efh38yzWKs[6];
+const double rtCP_pooled_F2Efh38yzWKs[6] = { 0.0, 12000.0, 14000.0, 16000.0,
+  18000.0, 20000.0 } ;
+
+extern const double rtCP_pooled_H9OEu2SpkouB[23];
+const double rtCP_pooled_H9OEu2SpkouB[23] = { -20.0, -17.0, -16.0, -14.0, -12.0,
+  -11.0, -9.0, -7.0, -5.0, -4.0, -2.0, 0.0, 1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0,
+  15.0, 17.0, 20.0, 24.0 } ;
+
 extern const double rtCP_pooled_H9ZWZ4ADDsDZ[3];
 const double rtCP_pooled_H9ZWZ4ADDsDZ[3] = { -1424.37, 0.0, 1424.37 } ;
+
+extern const double rtCP_pooled_PTMBB9DE4cTK[23];
+const double rtCP_pooled_PTMBB9DE4cTK[23] = { -110.0, -100.0, -90.0, -80.0,
+  -70.0, -60.0, -50.0, -40.0, -30.0, -20.0, -10.0, 0.0, 10.0, 20.0, 30.0, 40.0,
+  50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0 } ;
 
 extern const double rtCP_pooled_RXVSwQvYbp64[3];
 const double rtCP_pooled_RXVSwQvYbp64[3] = { -826.05, 0.0, 826.05 } ;
@@ -50,6 +69,10 @@ extern const double rtCP_pooled_UBMtqbU4Pmyk[23];
 const double rtCP_pooled_UBMtqbU4Pmyk[23] = { -24.0, -23.0, -19.0, -16.0, -13.0,
   -10.0, -7.0, -5.0, -2.0, 0.0, 2.0, 4.0, 7.0, 9.0, 11.0, 13.0, 15.0, 18.0, 20.0,
   23.0, 25.0, 27.0, 28.0 } ;
+
+extern const double rtCP_pooled_YP6SBkVgEhvQ[6];
+const double rtCP_pooled_YP6SBkVgEhvQ[6] = { 20.0, 20.0, 17.08, 13.33, 8.75,
+  1.67 } ;
 
 extern const double rtCP_pooled_a7eukLP6siL3[9];
 const double rtCP_pooled_a7eukLP6siL3[9] = { 0.2449489742783178, 0.0, 0.0, 0.0,
@@ -77,10 +100,20 @@ const double rtCP_pooled_jCKyeStS7uCu[101] = { -0.817958663, -0.792103181,
   0.582240956, 0.59633798, 0.61051494, 0.624775851, 0.639124377, 0.653564358,
   0.668099983 } ;
 
+extern const double rtCP_pooled_lG8YXGAtN2ma[23];
+const double rtCP_pooled_lG8YXGAtN2ma[23] = { -17.0, -16.0, -14.0, -13.0, -11.0,
+  -10.0, -9.0, -7.0, -5.0, -3.0, -2.0, 0.0, 1.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0,
+  14.0, 17.0, 19.0, 22.0 } ;
+
 extern const double rtCP_pooled_uGCq6zXFsU2Z[23];
 const double rtCP_pooled_uGCq6zXFsU2Z[23] = { -84.0, -80.0, -70.0, -60.0, -50.0,
   -40.0, -30.0, -20.0, -10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0,
   80.0, 90.0, 100.0, 110.0, 120.0, 124.0 } ;
+
+extern const double rtCP_pooled_uwHIxEvoWXdL[24];
+const double rtCP_pooled_uwHIxEvoWXdL[24] = { -21.0, -18.0, -16.0, -14.0, -12.0,
+  -10.0, -8.0, -7.0, -5.0, -4.0, -3.0, -1.0, 0.0, 0.0, 2.0, 4.0, 6.0, 8.0, 10.0,
+  12.0, 14.0, 16.0, 20.0, 21.0 } ;
 
 extern const double rtCP_pooled_xEgtjtEWFzHM[23];
 const double rtCP_pooled_xEgtjtEWFzHM[23] = { -24.0, -23.0, -19.0, -16.0, -12.0,
