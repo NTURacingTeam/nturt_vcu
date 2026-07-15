@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.17
+ * Model version                  : 5.19
  * Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
- * C/C++ source code generated on : Sun Jul 12 12:50:56 2026
+ * C/C++ source code generated on : Sun Jul 12 17:40:04 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -403,8 +403,8 @@ void vehicle_control_step(void)
   /* Sum: '<S3>/Add2' incorporates:
    *  MATLAB Function: '<S3>/System ID'
    */
-  rtb_Add2 = (rtb_FzFL * rtb_FzFL * 0.006 + 0.0 * rtb_FzFL) + (rtb_FzFR *
-    rtb_FzFR * 0.006 + 0.0 * rtb_FzFR);
+  rtb_Add2 = (rtb_FzFL * rtb_FzFL * 0.02 + 0.0 * rtb_FzFL) + (rtb_FzFR *
+    rtb_FzFR * 0.02 + 0.0 * rtb_FzFR);
 
   /* UnitConversion: '<S85>/Unit Conversion' incorporates:
    *  Gain: '<Root>/Gain9'
@@ -435,8 +435,8 @@ void vehicle_control_step(void)
   /* Sum: '<S3>/Add3' incorporates:
    *  MATLAB Function: '<S3>/System ID'
    */
-  rtb_Add3 = (rtb_FzRL * rtb_FzRL * 0.006 + 0.0 * rtb_FzRL) + (rtb_FzRR *
-    rtb_FzRR * 0.006 + 0.0 * rtb_FzRR);
+  rtb_Add3 = (rtb_FzRL * rtb_FzRL * 0.02 + 0.0 * rtb_FzRL) + (rtb_FzRR *
+    rtb_FzRR * 0.02 + 0.0 * rtb_FzRR);
 
   /* UnitDelay: '<S33>/Unit Delay' */
   rtb_F_aero = vehicle_control_DW_l.UnitDelay_DSTATE_h;
@@ -981,7 +981,12 @@ void vehicle_control_step(void)
   }
 
   if (gas_scale == 1.0) {
-    rtb_rate_lo_j *= rtb_Gain2;
+    rtb_Switch2_n0 = rtb_Gain2 / 0.15;
+    if (rtb_Switch2_n0 > 1.0) {
+      rtb_Switch2_n0 = 1.0;
+    }
+
+    rtb_rate_lo_j *= rtb_Switch2_n0;
   }
 
   Fz_f = rtb_rate_lo_j * Fz_f / Fz;
@@ -989,15 +994,15 @@ void vehicle_control_step(void)
   Fz_r = t_r_mtr * 13.1 / 0.254;
   p_idx_3 = t_f_mtr * 13.1 / 0.254 * 0.62;
   t_r_mtr = (p_idx_3 - Fz_f) / 1.24 * 0.254 / 13.1;
-  t_f_mtr = (p_idx_3 + Fz_f) / 1.24 * 0.254 / 13.1;
+  Fz_f = (p_idx_3 + Fz_f) / 1.24 * 0.254 / 13.1;
   Fz_r /= 2.0;
   rtb_rate_lo_j /= 1.24;
-  Fz_f = (Fz_r - rtb_rate_lo_j) * 0.254 / 13.1;
+  t_f_mtr = (Fz_r - rtb_rate_lo_j) * 0.254 / 13.1;
   rtb_rate_lo_j = (Fz_r + rtb_rate_lo_j) * 0.254 / 13.1;
   if ((TV_cut == 1.0) && (rtb_Gain2 <= 0.0)) {
     t_r_mtr = 0.0;
-    t_f_mtr = 0.0;
     Fz_f = 0.0;
+    t_f_mtr = 0.0;
     rtb_rate_lo_j = 0.0;
   }
 
@@ -1023,15 +1028,15 @@ void vehicle_control_step(void)
   /* Switch: '<S28>/Switch2' incorporates:
    *  RelationalOperator: '<S28>/LowerRelop1'
    */
-  if (!(t_f_mtr > rtb_tmax_fr)) {
+  if (!(Fz_f > rtb_tmax_fr)) {
     /* Gain: '<S3>/Gain34' */
     rtb_tmax_fr = -rtb_tmax_fr;
 
     /* Switch: '<S28>/Switch' incorporates:
      *  RelationalOperator: '<S28>/UpperRelop'
      */
-    if (!(t_f_mtr < rtb_tmax_fr)) {
-      rtb_tmax_fr = t_f_mtr;
+    if (!(Fz_f < rtb_tmax_fr)) {
+      rtb_tmax_fr = Fz_f;
     }
 
     /* End of Switch: '<S28>/Switch' */
@@ -1042,15 +1047,15 @@ void vehicle_control_step(void)
   /* Switch: '<S21>/Switch2' incorporates:
    *  RelationalOperator: '<S21>/LowerRelop1'
    */
-  if (!(Fz_f > rtb_tmax_rl)) {
+  if (!(t_f_mtr > rtb_tmax_rl)) {
     /* Gain: '<S3>/Gain35' */
     rtb_tmax_rl = -rtb_tmax_rl;
 
     /* Switch: '<S21>/Switch' incorporates:
      *  RelationalOperator: '<S21>/UpperRelop'
      */
-    if (!(Fz_f < rtb_tmax_rl)) {
-      rtb_tmax_rl = Fz_f;
+    if (!(t_f_mtr < rtb_tmax_rl)) {
+      rtb_tmax_rl = t_f_mtr;
     }
 
     /* End of Switch: '<S21>/Switch' */
@@ -1232,10 +1237,10 @@ void vehicle_control_step(void)
   /* MATLAB Function: '<S3>/MATLAB Function20' */
   rtb_count_m = rtb_count_m / 13.1 * 0.254;
   x[0] = rtb_count_m + Fz_f;
-  t_f_mtr = rtb_Abs6 / 13.1 * 0.254;
-  x[1] = t_f_mtr - Fz_f;
-  rtb_Switch2_n0 = rtb_Abs7 / 13.1 * 0.254;
-  x[2] = rtb_Switch2_n0 + Fz_f;
+  rtb_Switch2_n0 = rtb_Abs6 / 13.1 * 0.254;
+  x[1] = rtb_Switch2_n0 - Fz_f;
+  t_f_mtr = rtb_Abs7 / 13.1 * 0.254;
+  x[2] = t_f_mtr + Fz_f;
   t_r_mtr = rtb_FzRR / 13.1 * 0.254;
   x[3] = t_r_mtr - Fz_f;
   if (!rtIsNaN(x[0])) {
@@ -1269,9 +1274,9 @@ void vehicle_control_step(void)
   rtb_tmax_fl = Fz_f + rtb_rate_lo_j;
   rtb_rate_lo_j -= Fz_f;
   rtb_count_m = (rtb_count_m - rtb_rate_lo_j) / rtb_rate_lo_j;
-  t_f_mtr = (t_f_mtr - rtb_tmax_fl) / rtb_tmax_fl;
-  Fz = (rtb_Switch2_n0 - rtb_rate_lo_j) / rtb_rate_lo_j;
-  Fz_f = (t_r_mtr - rtb_tmax_fl) / rtb_tmax_fl;
+  Fz_f = (rtb_Switch2_n0 - rtb_tmax_fl) / rtb_tmax_fl;
+  Fz = (t_f_mtr - rtb_rate_lo_j) / rtb_rate_lo_j;
+  t_f_mtr = (t_r_mtr - rtb_tmax_fl) / rtb_tmax_fl;
 
   /* MATLAB Function: '<S35>/MATLAB Function' incorporates:
    *  Abs: '<S35>/Abs'
@@ -1441,12 +1446,12 @@ void vehicle_control_step(void)
    *  Constant: '<S3>/Constant16'
    *  Constant: '<S3>/Constant18'
    */
-  if ((t_f_mtr > 0.12) && (t_f_mtr <= 0.15)) {
+  if ((Fz_f > 0.12) && (Fz_f <= 0.15)) {
     rtb_Abs6 = 1.0;
-  } else if ((t_f_mtr > 0.15) && (t_f_mtr <= 0.18)) {
+  } else if ((Fz_f > 0.15) && (Fz_f <= 0.18)) {
     rtb_tmax_fr -= 0.2;
     rtb_Abs6 = 1.0;
-  } else if (t_f_mtr > 0.18) {
+  } else if (Fz_f > 0.18) {
     rtb_tmax_fr -= 0.5;
     rtb_Abs6 = 1.0;
   } else {
@@ -1513,12 +1518,12 @@ void vehicle_control_step(void)
    *
    *  Add in CPU
    */
-  t_f_mtr = rtb_tmax_fr - vehicle_control_DW_l.Delay_DSTATE_o;
+  Fz_f = rtb_tmax_fr - vehicle_control_DW_l.Delay_DSTATE_o;
 
   /* Switch: '<S67>/Switch2' incorporates:
    *  RelationalOperator: '<S67>/LowerRelop1'
    */
-  if (!(t_f_mtr > rtb_Switch2_n0)) {
+  if (!(Fz_f > rtb_Switch2_n0)) {
     /* Product: '<S65>/delta fall limit' incorporates:
      *  SampleTimeMath: '<S65>/sample time'
      *
@@ -1530,10 +1535,10 @@ void vehicle_control_step(void)
     /* Switch: '<S67>/Switch' incorporates:
      *  RelationalOperator: '<S67>/UpperRelop'
      */
-    if (t_f_mtr < Fz_r) {
+    if (Fz_f < Fz_r) {
       rtb_Switch2_n0 = Fz_r;
     } else {
-      rtb_Switch2_n0 = t_f_mtr;
+      rtb_Switch2_n0 = Fz_f;
     }
 
     /* End of Switch: '<S67>/Switch' */
@@ -1548,13 +1553,13 @@ void vehicle_control_step(void)
    *
    *  Add in CPU
    */
-  t_f_mtr = rtb_Switch2_n0 + vehicle_control_DW_l.Delay_DSTATE_o;
+  Fz_f = rtb_Switch2_n0 + vehicle_control_DW_l.Delay_DSTATE_o;
 
   /* Switch: '<S3>/Switch7' incorporates:
    *  Constant: '<S3>/TC_switch'
    */
   if (tc_switch > 0.0) {
-    p_idx_1 = t_f_mtr;
+    p_idx_1 = Fz_f;
   }
 
   /* Gain: '<Root>/Gain8' incorporates:
@@ -1764,12 +1769,12 @@ void vehicle_control_step(void)
    *  Constant: '<S3>/Constant16'
    *  Constant: '<S3>/Constant18'
    */
-  if ((Fz_f > 0.12) && (Fz_f <= 0.15)) {
+  if ((t_f_mtr > 0.12) && (t_f_mtr <= 0.15)) {
     rtb_FzRR = 1.0;
-  } else if ((Fz_f > 0.15) && (Fz_f <= 0.18)) {
+  } else if ((t_f_mtr > 0.15) && (t_f_mtr <= 0.18)) {
     rtb_Switch2_n0 -= 0.2;
     rtb_FzRR = 1.0;
-  } else if (Fz_f > 0.18) {
+  } else if (t_f_mtr > 0.18) {
     rtb_Switch2_n0 -= 0.5;
     rtb_FzRR = 1.0;
   } else {
@@ -1781,9 +1786,9 @@ void vehicle_control_step(void)
 
   /* Saturate: '<S38>/Saturation' */
   if (rtb_Switch2_n0 <= 0.0) {
-    Fz_f = 0.0;
+    t_f_mtr = 0.0;
   } else {
-    Fz_f = rtb_Switch2_n0;
+    t_f_mtr = rtb_Switch2_n0;
   }
 
   /* End of Saturate: '<S38>/Saturation' */
@@ -1791,15 +1796,15 @@ void vehicle_control_step(void)
   /* Switch: '<S78>/Switch2' incorporates:
    *  RelationalOperator: '<S78>/LowerRelop1'
    */
-  if (!(rtb_tmax_rr > Fz_f)) {
+  if (!(rtb_tmax_rr > t_f_mtr)) {
     /* Gain: '<S38>/Gain' */
-    Fz_f = -Fz_f;
+    t_f_mtr = -t_f_mtr;
 
     /* Switch: '<S78>/Switch' incorporates:
      *  RelationalOperator: '<S78>/UpperRelop'
      */
-    if (!(rtb_tmax_rr < Fz_f)) {
-      Fz_f = rtb_tmax_rr;
+    if (!(rtb_tmax_rr < t_f_mtr)) {
+      t_f_mtr = rtb_tmax_rr;
     }
 
     /* End of Switch: '<S78>/Switch' */
@@ -1809,7 +1814,7 @@ void vehicle_control_step(void)
 
   /* Delay: '<S77>/Delay' */
   if (vehicle_control_DW_l.icLoad_o) {
-    vehicle_control_DW_l.Delay_DSTATE_l = Fz_f;
+    vehicle_control_DW_l.Delay_DSTATE_l = t_f_mtr;
   }
 
   /* MATLAB Function: '<S38>/MATLAB Function1' incorporates:
@@ -1838,7 +1843,7 @@ void vehicle_control_step(void)
    *
    *  Add in CPU
    */
-  p_idx_1 = Fz_f - vehicle_control_DW_l.Delay_DSTATE_l;
+  p_idx_1 = t_f_mtr - vehicle_control_DW_l.Delay_DSTATE_l;
 
   /* Switch: '<S79>/Switch2' incorporates:
    *  RelationalOperator: '<S79>/LowerRelop1'
@@ -2138,7 +2143,7 @@ void vehicle_control_step(void)
 
   /* Update for Delay: '<S65>/Delay' */
   vehicle_control_DW_l.icLoad_f = false;
-  vehicle_control_DW_l.Delay_DSTATE_o = t_f_mtr;
+  vehicle_control_DW_l.Delay_DSTATE_o = Fz_f;
 
   /* Update for Memory: '<S36>/Memory2' */
   vehicle_control_DW_l.Memory2_PreviousInput_e = rtb_Abs6;
@@ -2160,7 +2165,7 @@ void vehicle_control_step(void)
   vehicle_control_DW_l.Memory3_PreviousInput_a = Fz_r;
 
   /* Update for Memory: '<S38>/Memory' */
-  vehicle_control_DW_l.Memory_PreviousInput_l = Fz_f;
+  vehicle_control_DW_l.Memory_PreviousInput_l = t_f_mtr;
 
   /* Update for Delay: '<S77>/Delay' */
   vehicle_control_DW_l.icLoad_o = false;

@@ -204,10 +204,13 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       vehicle_control_U.wheel = ctx->wheel;
       vehicle_control_U.imu = ctx->imu;
       vehicle_control_U.gps = ctx->gps;
-
+      vehicle_control_U.cockpit.accel = ctx->cockpit.accel/80.0;
+      if (vehicle_control_U.cockpit.accel > 1.0) vehicle_control_U.cockpit.accel = 1.0;
       if (ctx->state == CTRL_STATE_ERROR) {
         vehicle_control_U.cockpit.accel = 0.0;
       }
+
+      vehicle_control_initialize();
 
       vehicle_control_step();
 
@@ -215,13 +218,15 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 #endif  // CONFIG_VCU_CTRL_ALGO_SIMULINK
 
 #ifdef CONFIG_VCU_CTRL_ALGO_DUMB
-      double accel = ctx->cockpit.accel / 100.0;
+      double accel = ctx->cockpit.accel / 80.0;
+      if (accel > 1.0) accel = 1.0;
       union msg_4wheel_data torq = {
           .fl = accel * torq_lim_f,
           .fr = accel * torq_lim_f,
           .rl = accel * torq_lim,
           .rr = accel * torq_lim,
       };
+      
       msg.torque = torq;
 #endif  // CONFIG_VCU_CTRL_ALGO_DUMB
 
@@ -232,6 +237,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
           if (*val < -10.0) *val = -10.0;  // limit max torque in reverse
         }
       }
+    
 
       if (ctx->state == CTRL_STATE_ERROR) {
         ARRAY_FOR_EACH_PTR(msg.torque.values, val) { *val = 0.0; }
@@ -285,7 +291,7 @@ static void msg_cb(const struct zbus_channel *chan) {
 static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   struct ctrl_ctx *ctx = user_data;
 
-  k_mutex_lock(&ctx->lock, K_FOREVER);
+  // k_mutex_lock(&ctx->lock, K_FOREVER);
 
   switch (state) {
     case STATE_RUNNING:
@@ -321,5 +327,5 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
       break;
   }
 
-  k_mutex_unlock(&ctx->lock);
+  // k_mutex_unlock(&ctx->lock);
 }
