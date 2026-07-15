@@ -102,7 +102,7 @@
     double-tap {
         input = <&buttons>;
         compatible = "zephyr,input-double-tap";
-        input-codes = <INPUT_BTN_1>, <INPUT_BTN_RTD>;
+        input-codes = <INPUT_BTN_2>, <INPUT_BTN_RTD>;
         double-tap-codes = <INPUT_BTN_MODE>, <INPUT_BTN_DISABLE>;
         double-tap-delay-ms = <300>;
     };
