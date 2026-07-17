@@ -301,13 +301,13 @@ OD_ATTR_PERSIST_COMM OD_PERSIST_COMM_t OD_PERSIST_COMM = {
     },
     .x140E_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000185,
+        .COB_IDUsedByRPDO = 0x00000034,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },
     .x140F_RPDOCommunicationParameter = {
         .highestSub_indexSupported = 0x05,
-        .COB_IDUsedByRPDO = 0x00000285,
+        .COB_IDUsedByRPDO = 0x00000032,
         .transmissionType = 0xFE,
         .eventTimer = 0x0000
     },

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 4.8
- * Simulink Coder version         : 25.1 (R2025a) 21-Nov-2024
- * C/C++ source code generated on : Sun Apr  5 11:18:20 2026
+ * Model version                  : 5.0
+ * Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
+ * C/C++ source code generated on : Sat Mar 21 20:32:41 2026
  */
 
 #include "look1_binlx.h"

@@ -49,6 +49,16 @@
 #define PARAM_KI 0.0
 #define PARAM_KD 0.0
 
+#define PARAM_TMAX_FL 1.0
+#define PARAM_TMAX_FR 1.0
+#define PARAM_TMAX_RL 1.0
+#define PARAM_TMAX_RR 1.0
+#define PARAM_TARGET 70000.0
+#define PARAM_TV_GAIN 0.0
+#define PARAM_GAS_SCALE 1.0
+#define PARAM_TV_CUT 0.0
+
+
 /**
  * @brief Specify aa control parameter. Used in @ref CTRL_PARAM_DECLARE and
  * @ref CTRL_PARAM_EXTERN.
@@ -94,6 +104,14 @@
 #define CTRL_PARAM_LIST                                                   \
   CTRL_PARAM(torq_lim_f, double, PARAM_TORQ_LIMIT),                       \
       CTRL_PARAM(torq_lim, double, PARAM_TORQ_LIMIT),                     \
+      CTRL_PARAM(tmax_fl, double, PARAM_TMAX_FL),                         \
+      CTRL_PARAM(tmax_fr, double, PARAM_TMAX_FR),                         \
+      CTRL_PARAM(tmax_rl, double, PARAM_TMAX_RL),                         \
+      CTRL_PARAM(tmax_rr, double, PARAM_TMAX_RR),                         \
+      CTRL_PARAM(TARGET, double, PARAM_TARGET),                           \
+      CTRL_PARAM(TV_gain, double, PARAM_TV_GAIN),                         \
+      CTRL_PARAM(TV_cut, double, PARAM_TV_CUT),                           \
+      CTRL_PARAM(gas_scale, double, PARAM_GAS_SCALE),                     \
       CTRL_PARAM(ff_switch, double, PARAM_FF_SWITCH),                     \
       CTRL_PARAM(ff_gain, double, PARAM_FF_GAIN),                         \
       CTRL_PARAM(tc_switch, double, PARAM_TC_SWITCH),                     \

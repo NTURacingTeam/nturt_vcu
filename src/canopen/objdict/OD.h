@@ -11,12 +11,12 @@
 
     File info:
         File Names:   OD.h; OD.c
-        Project File: nturt_vcu.xdd
+        Project File: nturt_vcu0717.xdd
         File Version: 0
 
         Created:      2024/6/10 上午 09:31:00
         Created By:   National Taiwan University Racing Team
-        Modified:     2026/7/9 下午 03:09:49
+        Modified:     2026/7/17 下午 09:27:05
         Modified By:  National Taiwan University Racing Team
 
     Device Info:
