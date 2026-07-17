@@ -285,7 +285,7 @@ static void msg_cb(const struct zbus_channel *chan) {
 static void states_cb(enum states_state state, bool is_entry, void *user_data) {
   struct ctrl_ctx *ctx = user_data;
 
-  k_mutex_lock(&ctx->lock, K_FOREVER);
+  // k_mutex_lock(&ctx->lock, K_FOREVER);
 
   switch (state) {
     case STATE_RUNNING:
@@ -321,5 +321,5 @@ static void states_cb(enum states_state state, bool is_entry, void *user_data) {
       break;
   }
 
-  k_mutex_unlock(&ctx->lock);
+  // k_mutex_unlock(&ctx->lock);
 }
