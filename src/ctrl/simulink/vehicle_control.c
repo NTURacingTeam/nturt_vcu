@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'vehicle_control'.
  *
- * Model version                  : 5.27
+ * Model version                  : 5.29
  * Simulink Coder version         : 25.2 (R2025b) 28-Jul-2025
- * C/C++ source code generated on : Sat Jul 18 13:49:06 2026
+ * C/C++ source code generated on : Sun Jul 19 01:27:59 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex-M
@@ -766,7 +766,7 @@ void vehicle_control_step(void)
    *  Abs: '<S5>/Abs3'
    *  Lookup_n-D: '<S5>/1-D Lookup Table5'
    */
-  rtb_tmax_fl = tmax_fl * look1_binlca(rtb_count_m, rtCP_uDLookupTable5_bp01Data,
+  rtb_tmax_fl = tmax_f * look1_binlca(rtb_count_m, rtCP_uDLookupTable5_bp01Data,
     rtCP_uDLookupTable5_tableData, 5U);
 
   /* Gain: '<Root>/Gain2' incorporates:
@@ -925,7 +925,7 @@ void vehicle_control_step(void)
    *  Abs: '<S5>/Abs6'
    *  Lookup_n-D: '<S5>/1-D Lookup Table6'
    */
-  rtb_tmax_fr = tmax_fr * look1_binlca(rtb_Abs6, rtCP_uDLookupTable6_bp01Data,
+  rtb_tmax_fr = tmax_f * look1_binlca(rtb_Abs6, rtCP_uDLookupTable6_bp01Data,
     rtCP_uDLookupTable6_tableData, 5U);
 
   /* Gain: '<Root>/Gain' incorporates:
@@ -940,7 +940,7 @@ void vehicle_control_step(void)
    *  Abs: '<S5>/Abs7'
    *  Lookup_n-D: '<S5>/1-D Lookup Table7'
    */
-  rtb_tmax_rl = tmax_rl * look1_binlca(rtb_Abs7, rtCP_uDLookupTable7_bp01Data,
+  rtb_tmax_rl = tmax_r * look1_binlca(rtb_Abs7, rtCP_uDLookupTable7_bp01Data,
     rtCP_uDLookupTable7_tableData, 5U);
 
   /* Gain: '<Root>/Gain1' incorporates:
@@ -955,7 +955,7 @@ void vehicle_control_step(void)
    *  Abs: '<S5>/Abs9'
    *  Lookup_n-D: '<S5>/1-D Lookup Table8'
    */
-  rtb_tmax_rr = tmax_rr * look1_binlca(rtb_Abs9, rtCP_uDLookupTable8_bp01Data,
+  rtb_tmax_rr = tmax_r * look1_binlca(rtb_Abs9, rtCP_uDLookupTable8_bp01Data,
     rtCP_uDLookupTable8_tableData, 5U);
 
   /* MATLAB Function: '<S5>/torque_distribution' incorporates:

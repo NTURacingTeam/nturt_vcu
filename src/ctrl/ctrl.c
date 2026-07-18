@@ -210,7 +210,7 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       if (ctx->state == CTRL_STATE_ERROR) {
         vehicle_control_U.cockpit.accel = 0.0;
       }
-
+      
       vehicle_control_step();
 
       msg.torque = vehicle_control_Y.torq.torque;
