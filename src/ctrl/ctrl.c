@@ -205,6 +205,8 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       vehicle_control_U.imu = ctx->imu;
       vehicle_control_U.gps = ctx->gps;
 
+      vehicle_control_U.cockpit.accel = ctx->cockpit.accel/0.8;
+      if (vehicle_control_U.cockpit.accel > 100.0) vehicle_control_U.cockpit.accel = 100.0;
       if (ctx->state == CTRL_STATE_ERROR) {
         vehicle_control_U.cockpit.accel = 0.0;
       }
@@ -215,7 +217,8 @@ static void thread(void *arg1, void *arg2, void *arg3) {
 #endif  // CONFIG_VCU_CTRL_ALGO_SIMULINK
 
 #ifdef CONFIG_VCU_CTRL_ALGO_DUMB
-      double accel = ctx->cockpit.accel / 100.0;
+      double accel = ctx->cockpit.accel / 80.0;
+      if (accel > 1.0) accel = 1.0;
       union msg_4wheel_data torq = {
           .fl = accel * torq_lim_f,
           .fr = accel * torq_lim_f,
