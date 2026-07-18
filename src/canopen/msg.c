@@ -117,18 +117,19 @@ CANOPEN_OD_TO_MSG_DEFINE(msg_sensor_cockpit,
 
 // data from xsens IMU is in big-endian, need to swap bytes
 #define _IMU_EULER_CAN_TO_PHY(x) IMU_EULER_CAN_TO_PHY((int16_t)BSWAP_16((uint16_t)x))
-
+#define _IMU_GYRO_CAN_TO_PHY(x) IMU_GYRO_CAN_TO_PHY((int16_t)BSWAP_16((uint16_t)x))
+#define _IMU_ACCEL_CAN_TO_PHY(x) IMU_ACCEL_CAN_TO_PHY((int16_t)BSWAP_16((uint16_t)x))
 CANOPEN_OD_TO_MSG_DEFINE(msg_sensor_imu,
     AGG_DATA_INIT(0), K_MSEC(10), K_MSEC(8), K_MSEC(3), 0,
     OD_TO_MSG_ENTRY(0x2240,
-        OD_TO_MSG_DATA(0x1, int16_t, IMU_ACCEL_CAN_TO_PHY, AGG_MEMBER(accel.x)),
-        OD_TO_MSG_DATA(0x2, int16_t, IMU_ACCEL_CAN_TO_PHY, AGG_MEMBER(accel.y)),
-        OD_TO_MSG_DATA(0x3, int16_t, IMU_ACCEL_CAN_TO_PHY, AGG_MEMBER(accel.z))
+        OD_TO_MSG_DATA(0x1, int16_t, _IMU_ACCEL_CAN_TO_PHY, AGG_MEMBER(accel.x)),
+        OD_TO_MSG_DATA(0x2, int16_t, _IMU_ACCEL_CAN_TO_PHY, AGG_MEMBER(accel.y)),
+        OD_TO_MSG_DATA(0x3, int16_t, _IMU_ACCEL_CAN_TO_PHY, AGG_MEMBER(accel.z))
     ),
     OD_TO_MSG_ENTRY(0x2241,
-        OD_TO_MSG_DATA(0x1, int16_t, IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.x)),
-        OD_TO_MSG_DATA(0x2, int16_t, IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.y)),
-        OD_TO_MSG_DATA(0x3, int16_t, IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.z))
+        OD_TO_MSG_DATA(0x1, int16_t, _IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.x)),
+        OD_TO_MSG_DATA(0x2, int16_t, _IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.y)),
+        OD_TO_MSG_DATA(0x3, int16_t, _IMU_GYRO_CAN_TO_PHY, AGG_MEMBER(gyro.z))
     ),
     OD_TO_MSG_ENTRY(0x2243,
         OD_TO_MSG_DATA(0x1, int16_t, _IMU_EULER_CAN_TO_PHY, AGG_MEMBER(euler.x)),

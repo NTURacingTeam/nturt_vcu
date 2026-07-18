@@ -204,13 +204,11 @@ static void thread(void *arg1, void *arg2, void *arg3) {
       vehicle_control_U.wheel = ctx->wheel;
       vehicle_control_U.imu = ctx->imu;
       vehicle_control_U.gps = ctx->gps;
-      vehicle_control_U.cockpit.accel = ctx->cockpit.accel/80.0;
-      if (vehicle_control_U.cockpit.accel > 1.0) vehicle_control_U.cockpit.accel = 1.0;
+      vehicle_control_U.cockpit.accel = ctx->cockpit.accel/0.8;
+      if (vehicle_control_U.cockpit.accel > 100.0) vehicle_control_U.cockpit.accel = 100.0;
       if (ctx->state == CTRL_STATE_ERROR) {
         vehicle_control_U.cockpit.accel = 0.0;
       }
-
-      vehicle_control_initialize();
 
       vehicle_control_step();
 

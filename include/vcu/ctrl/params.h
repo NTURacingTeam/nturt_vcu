@@ -57,6 +57,8 @@
 #define PARAM_TV_GAIN 0.0
 #define PARAM_GAS_SCALE 1.0
 #define PARAM_TV_CUT 0.0
+#define PARAM_FIXED_DIST 0.0
+#define PARAM_RPM_DERATE 1.0
 
 /**
  * @brief Specify aa control parameter. Used in @ref CTRL_PARAM_DECLARE and
@@ -111,11 +113,10 @@
       CTRL_PARAM(TV_gain, double, PARAM_TV_GAIN),                         \
       CTRL_PARAM(TV_cut, double, PARAM_TV_CUT),                           \
       CTRL_PARAM(gas_scale, double, PARAM_GAS_SCALE),                     \
-      CTRL_PARAM(ff_switch, double, PARAM_FF_SWITCH),                     \
       CTRL_PARAM(ff_gain, double, PARAM_FF_GAIN),                         \
       CTRL_PARAM(tc_switch, double, PARAM_TC_SWITCH),                     \
-      CTRL_PARAM(tc_lim, double, PARAM_TC_LIM),                           \
-      CTRL_PARAM(scaling, double, PARAM_SCALING),                         \
+      CTRL_PARAM(fixed_dist, double, PARAM_FIXED_DIST),                   \
+      CTRL_PARAM(rpm_derate, double, PARAM_RPM_DERATE),                   \
       CTRL_PARAM(Kp, double, PARAM_KP), CTRL_PARAM(Ki, double, PARAM_KI), \
       CTRL_PARAM(Kd, double, PARAM_KD)
 
