@@ -22,8 +22,10 @@
 LOG_MODULE_REGISTER(vcu_peripherals);
 
 /* macro ---------------------------------------------------------------------*/
-#define BTN_A_TMAX_F 0.9
-#define BTN_A_TMAX_R 0.6
+#define BTN_UP_TMAX_F 0.8
+#define BTN_UP_TMAX_R 1.0
+#define BTN_DOWN_TMAX_F 0.6
+#define BTN_DOWN_TMAX_R 0.9
 
 #ifdef VCU_HAS_BRAKE_LIGHT
 static void msg_cb(const struct zbus_channel *chan);
@@ -102,7 +104,11 @@ static int gpio_init() {
 }
 
 static void input_cb(struct input_event *evt, void *user_data) {
-  if (evt->type == INPUT_EV_KEY && evt->value) {
+  if (evt->type != INPUT_EV_KEY) {
+    return;
+  }
+
+  if (evt->value) {
     switch (evt->code) {
       case INPUT_BTN_RTD:
         if (states_valid_transition(TRANS_CMD_RTD)) {
@@ -120,10 +126,20 @@ static void input_cb(struct input_event *evt, void *user_data) {
         sys_reset();
         break;
 
-      case INPUT_BTN_A:
-        ctrl_param_tmax_f_set(BTN_A_TMAX_F);
-        ctrl_param_tmax_r_set(BTN_A_TMAX_R);
-        ctrl_settings_save();
+      case INPUT_BTN_UP:
+        if (states_get() & STATE_RUNNING) {
+          ctrl_param_tmax_f_set(BTN_UP_TMAX_F);
+          ctrl_param_tmax_r_set(BTN_UP_TMAX_R);
+          ctrl_settings_save();
+        }
+        break;
+
+      case INPUT_BTN_DOWN:
+        if (states_get() & STATE_RUNNING) {
+          ctrl_param_tmax_f_set(BTN_DOWN_TMAX_F);
+          ctrl_param_tmax_r_set(BTN_DOWN_TMAX_R);
+          ctrl_settings_save();
+        }
         break;
     }
   }
