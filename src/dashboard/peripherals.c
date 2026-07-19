@@ -14,11 +14,16 @@
 #include <nturt/sys/sys.h>
 
 // project includes
+#include "vcu/ctrl/ctrl.h"
 #include "vcu/ctrl/states.h"
 #include "vcu/dashboard.h"
 #include "zephyr/sys/util_macro.h"
 
 LOG_MODULE_REGISTER(vcu_peripherals);
+
+/* macro ---------------------------------------------------------------------*/
+#define BTN_A_TMAX_F 0.9
+#define BTN_A_TMAX_R 0.6
 
 #ifdef VCU_HAS_BRAKE_LIGHT
 static void msg_cb(const struct zbus_channel *chan);
@@ -113,6 +118,12 @@ static void input_cb(struct input_event *evt, void *user_data) {
 
       case INPUT_BTN_RESET:
         sys_reset();
+        break;
+
+      case INPUT_BTN_A:
+        ctrl_param_tmax_f_set(BTN_A_TMAX_F);
+        ctrl_param_tmax_r_set(BTN_A_TMAX_R);
+        ctrl_settings_save();
         break;
     }
   }

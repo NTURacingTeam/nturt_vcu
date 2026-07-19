@@ -64,6 +64,7 @@
                 in-min = <(-60) 0>;
                 in-max = <60 0>;
                 range-tolerance = <10>; // 10%
+                status = "disabled"; // disable apps2 for now, as it is not used in the current design
             };
         };
 

@@ -177,6 +177,7 @@ static void dashboard_state_update(struct dashboard_normal_ctx *ctx, int state,
 
     case STAT_RUNNING:
       dashboard_led_set(LED_NUM_RUNNING, set);
+      dashboard_led_set(LED_NUM_RUNNING_SECONDARY, set);
       break;
 
     case STAT_ERROR:

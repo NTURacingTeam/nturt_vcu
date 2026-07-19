@@ -45,7 +45,7 @@ static const struct device* accel = DEVICE_DT_GET(DT_NODELABEL(accel));
 static const struct device* apps1 =
     DEVICE_DT_GET(DT_NODELABEL(apps1_sensor_axis));
 static const struct device* apps2 =
-    DEVICE_DT_GET(DT_NODELABEL(apps2_sensor_axis));
+    DEVICE_DT_GET(DT_NODELABEL(apps1_sensor_axis));
 
 static const struct device* brake = DEVICE_DT_GET(DT_NODELABEL(brake));
 static const struct device* bse1 =
